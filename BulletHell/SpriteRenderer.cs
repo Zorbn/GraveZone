@@ -9,50 +9,61 @@ public class SpriteRenderer
 {
     private VertexBuffer _vertexBuffer;
     private IndexBuffer _indexBuffer;
-    private List<VertexPositionColorTexture> _vertices;
-    private List<ushort> _indices;
+    private VertexPositionColorTexture[] _vertices;
+    private ushort[] _indices;
+    private int _vertexI;
+    private int _indexI;
     private int _primitives;
+    private readonly int _maxSprites;
 
-    public SpriteRenderer()
+    public SpriteRenderer(int maxSprites, GraphicsDevice graphicsDevice)
     {
-        _vertices = new List<VertexPositionColorTexture>();
-        _indices = new List<ushort>();
+        var maxVertices = maxSprites * 4;
+        var maxIndices = maxSprites * 6;
+        
+        _maxSprites = maxSprites;
+        _vertices = new VertexPositionColorTexture[maxVertices];
+        _indices = new ushort[maxIndices];
+        
+        _vertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColorTexture), maxVertices,
+            BufferUsage.WriteOnly);
+        _indexBuffer = new IndexBuffer(graphicsDevice, typeof(ushort), maxIndices, BufferUsage.WriteOnly);
     }
 
-    public void Mesh(GraphicsDevice graphicsDevice, Matrix rotationMatrix, Vector3 cameraPosition)
+    public void Add(float x, float z, Matrix rotationMatrix)
     {
-        if (_vertexBuffer is not null) _vertexBuffer.Dispose();
-        if (_indexBuffer is not null) _indexBuffer.Dispose();
-
-        _vertices.Clear();
-        _indices.Clear();
-
-        var sideIndices = CubeMesh.Indices[Direction.Forward];
-        var baseVertexCount = _vertices.Count;
-        foreach (var index in sideIndices)
+        var baseVertexCount = _vertexI;
+        foreach (var index in SpriteMesh.Indices)
         {
-            _indices.Add((ushort)(index + baseVertexCount));
+            _indices[_indexI] = (ushort)(index + baseVertexCount);
+            ++_indexI;
         }
 
-        var sideVertices = CubeMesh.Vertices[Direction.Forward];
-        foreach (var vertex in sideVertices)
+        foreach (var vertex in SpriteMesh.Vertices)
         {
             var newVertex = vertex;
             newVertex.Position = Vector3.Transform(vertex.Position, rotationMatrix);
-            newVertex.Position.X *= 0.8f;
+            newVertex.Position.X = newVertex.Position.X * 0.8f + x;
             newVertex.Position.Y *= 1.1f;
-            newVertex.Position.Z *= 0.8f;
-            _vertices.Add(newVertex);
+            newVertex.Position.Z = newVertex.Position.Z * 0.8f + z;
+            _vertices[_vertexI] = newVertex;
+            ++_vertexI;
         }
+        
+        _primitives += 2;
+    }
 
-        _vertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColorTexture), _vertices.Count,
-            BufferUsage.WriteOnly);
-        _indexBuffer = new IndexBuffer(graphicsDevice, typeof(ushort), _indices.Count, BufferUsage.WriteOnly);
+    public void Finish()
+    {
+        _vertexBuffer.SetData(_vertices, 0, _vertexI);
+        _indexBuffer.SetData(_indices, 0, _indexI);
+    }
 
-        _vertexBuffer.SetData(_vertices.ToArray());
-        _indexBuffer.SetData(_indices.ToArray());
-
-        _primitives = _indices.Count / 3;
+    public void Reset()
+    {
+        _vertexI = 0;
+        _indexI = 0;
+        _primitives = 0;
     }
     
     public void Draw(GraphicsDevice graphicsDevice)

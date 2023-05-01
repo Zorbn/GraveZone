@@ -67,7 +67,7 @@ public class BulletHell : Game
 
     protected override void Initialize()
     {
-        GraphicsDevice.RasterizerState = new RasterizerState { MultiSampleAntiAlias = true, CullMode = CullMode.None };
+        GraphicsDevice.RasterizerState = new RasterizerState { MultiSampleAntiAlias = true };
         GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
         
         _basicEffect = new BasicEffect(GraphicsDevice);
@@ -82,7 +82,7 @@ public class BulletHell : Game
         _map = new Map(16, GraphicsDevice);
         _map.Mesh(GraphicsDevice);
         
-        _spriteRenderer = new SpriteRenderer();
+        _spriteRenderer = new SpriteRenderer(500, GraphicsDevice);
         
         base.Initialize();
     }
@@ -151,6 +151,12 @@ public class BulletHell : Game
 
             _cameraPosition += movement * Speed * deltaTime;
         }
+        
+        _spriteRenderer.Reset();
+        _spriteRenderer.Add(0, 0, _cameraSpriteMatrix);
+        _spriteRenderer.Add(1, 0, _cameraSpriteMatrix);
+        _spriteRenderer.Add(0, 1, _cameraSpriteMatrix);
+        _spriteRenderer.Finish();
 
         base.Update(gameTime);
     }
@@ -160,10 +166,6 @@ public class BulletHell : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         _basicEffect.View = CalculateViewMatrix();
-
-        // TODO: Add your drawing code here
-        _spriteRenderer.Mesh(GraphicsDevice, _cameraSpriteMatrix, _cameraPosition);
-
         _basicEffect.World = Matrix.Identity;
         foreach (var currentPass in _basicEffect.CurrentTechnique.Passes)
         {
