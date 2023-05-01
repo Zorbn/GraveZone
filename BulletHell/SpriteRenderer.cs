@@ -19,17 +19,13 @@ public class SpriteRenderer
         _indices = new List<ushort>();
     }
 
-    public void Mesh(GraphicsDevice graphicsDevice, Matrix viewMatrix, Vector3 cameraPosition)
+    public void Mesh(GraphicsDevice graphicsDevice, Matrix rotationMatrix, Vector3 cameraPosition)
     {
         if (_vertexBuffer is not null) _vertexBuffer.Dispose();
         if (_indexBuffer is not null) _indexBuffer.Dispose();
 
         _vertices.Clear();
         _indices.Clear();
-
-        var angle = MathF.Atan2(cameraPosition.X - 0, cameraPosition.Y - 0);
-        var model = Matrix.CreateRotationY(MathHelper.WrapAngle(angle));
-        var modelMatrix = Matrix.Invert(viewMatrix);
 
         var sideIndices = CubeMesh.Indices[Direction.Forward];
         var baseVertexCount = _vertices.Count;
@@ -42,9 +38,9 @@ public class SpriteRenderer
         foreach (var vertex in sideVertices)
         {
             var newVertex = vertex;
-            newVertex.Position = Vector3.Transform(vertex.Position, modelMatrix);
+            newVertex.Position = Vector3.Transform(vertex.Position, rotationMatrix);
             newVertex.Position.X *= 0.8f;
-            newVertex.Position.Y *= 1.85f;
+            newVertex.Position.Y *= 1.1f;
             newVertex.Position.Z *= 0.8f;
             _vertices.Add(newVertex);
         }

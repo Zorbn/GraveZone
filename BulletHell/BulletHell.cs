@@ -21,7 +21,7 @@ public class BulletHell : Game
     private Vector3 _cameraPosition = Vector3.Zero;
     private Vector3 _cameraForward;
     private Vector3 _cameraRight;
-    private Matrix _groundCameraMatrix;
+    private Matrix _cameraSpriteMatrix;
     private float _cameraAngle;
     private static readonly Vector3 CameraLookOffset = new(1f, -3f, 1f);
 
@@ -59,12 +59,8 @@ public class BulletHell : Game
         _cameraForward = lookOffset;
         _cameraForward.Y = 0f;
         _cameraRight = Vector3.Transform(_cameraForward, Matrix.CreateRotationY(MathF.PI * -0.5f));
-
-        var groundCameraPosition = _cameraPosition;
-        var groundLookOffset = lookOffset;
-        groundCameraPosition.Y = 0f;
-        groundLookOffset.Y = 0f;
-        _groundCameraMatrix = Matrix.CreateLookAt(groundCameraPosition, groundCameraPosition + groundLookOffset, Vector3.Up);
+        
+        _cameraSpriteMatrix = Matrix.Invert(Matrix.CreateLookAt(Vector3.Zero, CameraLookOffset, Vector3.Up));
         
         return Matrix.CreateLookAt(_cameraPosition, _cameraPosition + lookOffset, Vector3.Up);
     }
@@ -166,7 +162,7 @@ public class BulletHell : Game
         _basicEffect.View = CalculateViewMatrix();
 
         // TODO: Add your drawing code here
-        _spriteRenderer.Mesh(GraphicsDevice, _groundCameraMatrix, _cameraPosition);
+        _spriteRenderer.Mesh(GraphicsDevice, _cameraSpriteMatrix, _cameraPosition);
 
         _basicEffect.World = Matrix.Identity;
         foreach (var currentPass in _basicEffect.CurrentTechnique.Passes)
