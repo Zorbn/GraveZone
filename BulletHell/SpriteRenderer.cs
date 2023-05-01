@@ -10,6 +10,7 @@ public class SpriteRenderer
     private VertexBuffer _vertexBuffer;
     private IndexBuffer _indexBuffer;
     private VertexPositionColorTexture[] _vertices;
+    private Matrix _rotationMatrix;
     private ushort[] _indices;
     private int _vertexI;
     private int _indexI;
@@ -30,7 +31,7 @@ public class SpriteRenderer
         _indexBuffer = new IndexBuffer(graphicsDevice, typeof(ushort), maxIndices, BufferUsage.WriteOnly);
     }
 
-    public void Add(float x, float z, Matrix rotationMatrix)
+    public void Add(float x, float z)
     {
         var baseVertexCount = _vertexI;
         foreach (var index in SpriteMesh.Indices)
@@ -42,9 +43,9 @@ public class SpriteRenderer
         foreach (var vertex in SpriteMesh.Vertices)
         {
             var newVertex = vertex;
-            newVertex.Position = Vector3.Transform(vertex.Position, rotationMatrix);
+            newVertex.Position = Vector3.Transform(vertex.Position, _rotationMatrix);
             newVertex.Position.X = newVertex.Position.X * 0.8f + x;
-            newVertex.Position.Y *= 1.1f;
+            newVertex.Position.Y *= 1.75f;
             newVertex.Position.Z = newVertex.Position.Z * 0.8f + z;
             _vertices[_vertexI] = newVertex;
             ++_vertexI;
@@ -53,17 +54,18 @@ public class SpriteRenderer
         _primitives += 2;
     }
 
-    public void Finish()
+    public void End()
     {
         _vertexBuffer.SetData(_vertices, 0, _vertexI);
         _indexBuffer.SetData(_indices, 0, _indexI);
     }
 
-    public void Reset()
+    public void Begin(Matrix rotationMatrix)
     {
         _vertexI = 0;
         _indexI = 0;
         _primitives = 0;
+        _rotationMatrix = rotationMatrix;
     }
     
     public void Draw(GraphicsDevice graphicsDevice)

@@ -8,7 +8,6 @@ namespace BulletHell;
 public class BulletHell : Game
 {
     private const float ViewScale = 15;
-    private const float Speed = 2f;
     
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
@@ -17,6 +16,7 @@ public class BulletHell : Game
 
     private Map _map;
     private SpriteRenderer _spriteRenderer;
+    private Player _player;
     
     private Vector3 _cameraPosition = Vector3.Zero;
     private Vector3 _cameraForward;
@@ -52,17 +52,19 @@ public class BulletHell : Game
         return Matrix.CreateOrthographic(GraphicsDevice.Viewport.Width / (float)GraphicsDevice.Viewport.Height * ViewScale, ViewScale, -20f, 20f);
     }
 
-    private Matrix CalculateViewMatrix()
+    private void UpdateViewMatrices()
     {
         var cameraRotation = Matrix.CreateRotationY(_cameraAngle);
         var lookOffset = Vector3.Transform(CameraLookOffset, cameraRotation);
         _cameraForward = lookOffset;
         _cameraForward.Y = 0f;
         _cameraRight = Vector3.Transform(_cameraForward, Matrix.CreateRotationY(MathF.PI * -0.5f));
+
+        var spriteLookOffset = lookOffset;
+        spriteLookOffset.Y = 0f;
+        _cameraSpriteMatrix = Matrix.Invert(Matrix.CreateLookAt(Vector3.Zero, spriteLookOffset, Vector3.Up));
         
-        _cameraSpriteMatrix = Matrix.Invert(Matrix.CreateLookAt(Vector3.Zero, CameraLookOffset, Vector3.Up));
-        
-        return Matrix.CreateLookAt(_cameraPosition, _cameraPosition + lookOffset, Vector3.Up);
+        _basicEffect.View = Matrix.CreateLookAt(_cameraPosition, _cameraPosition + lookOffset, Vector3.Up);
     }
 
     protected override void Initialize()
@@ -83,6 +85,8 @@ public class BulletHell : Game
         _map.Mesh(GraphicsDevice);
         
         _spriteRenderer = new SpriteRenderer(500, GraphicsDevice);
+
+        _player = new Player(0, 0);
         
         base.Initialize();
     }
@@ -98,66 +102,33 @@ public class BulletHell : Game
     {
         var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         
-        var keyState = Keyboard.GetState();
+        var keyboardState = Keyboard.GetState();
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-            keyState.IsKeyDown(Keys.Escape))
+            keyboardState.IsKeyDown(Keys.Escape))
             Exit();
 
         var cameraAngleMovement = 0f;
         
-        if (keyState.IsKeyDown(Keys.Q))
+        if (keyboardState.IsKeyDown(Keys.Q))
         {
             cameraAngleMovement -= 1f;
         }
         
-        if (keyState.IsKeyDown(Keys.E))
+        if (keyboardState.IsKeyDown(Keys.E))
         {
             cameraAngleMovement += 1f;
         }
         
         _cameraAngle += cameraAngleMovement * deltaTime;
         
-        if (keyState.IsKeyDown(Keys.Z))
+        if (keyboardState.IsKeyDown(Keys.Z))
         {
             _cameraAngle = 0f;
         }
-
-        var movement = Vector3.Zero;
-
-        if (keyState.IsKeyDown(Keys.W))
-        {
-            movement.Z += 1f;
-        }
         
-        if (keyState.IsKeyDown(Keys.S))
-        {
-            movement.Z -= 1f;
-        }
+        _player.Update(keyboardState, _map, _cameraForward, _cameraRight, deltaTime);
+        _cameraPosition = _player.Position;
         
-        if (keyState.IsKeyDown(Keys.A))
-        {
-            movement.X -= 1f;
-        }
-        
-        if (keyState.IsKeyDown(Keys.D))
-        {
-            movement.X += 1f;
-        }
-
-        if (movement.Length() != 0f)
-        {
-            movement = movement.Z * _cameraForward + movement.X * _cameraRight;
-            movement.Normalize();
-
-            _cameraPosition += movement * Speed * deltaTime;
-        }
-        
-        _spriteRenderer.Reset();
-        _spriteRenderer.Add(0, 0, _cameraSpriteMatrix);
-        _spriteRenderer.Add(1, 0, _cameraSpriteMatrix);
-        _spriteRenderer.Add(0, 1, _cameraSpriteMatrix);
-        _spriteRenderer.Finish();
-
         base.Update(gameTime);
     }
 
@@ -165,7 +136,15 @@ public class BulletHell : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        _basicEffect.View = CalculateViewMatrix();
+        UpdateViewMatrices();
+        
+        _spriteRenderer.Begin(_cameraSpriteMatrix);
+        _spriteRenderer.Add(0, 0);
+        _spriteRenderer.Add(1, 0);
+        _spriteRenderer.Add(0, 1);
+        _player.Draw(_spriteRenderer);
+        _spriteRenderer.End();
+
         _basicEffect.World = Matrix.Identity;
         foreach (var currentPass in _basicEffect.CurrentTechnique.Passes)
         {
