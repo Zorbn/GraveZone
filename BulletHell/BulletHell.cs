@@ -86,7 +86,7 @@ public class BulletHell : Game
         
         _spriteRenderer = new SpriteRenderer(500, GraphicsDevice);
 
-        _player = new Player(0, 0);
+        _player = new Player(-1, -1);
         
         base.Initialize();
     }

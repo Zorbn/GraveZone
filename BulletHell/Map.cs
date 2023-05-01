@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletHell;
@@ -55,11 +56,27 @@ public class Map
         return _floorTiles[x + z * _size];
     }
 
-    private Tile GetWallTile(int x, int z)
+    public Tile GetWallTile(int x, int z)
     {
         if (x < 0 || z < 0 || x >= _size || z >= _size) return Tile.Air;
 
         return _wallTiles[x + z * _size];
+    }
+    
+    public Tile GetWallTileF(float x, float z)
+    {
+        var ix = (int)MathF.Floor(x);
+        var iz = (int)MathF.Floor(z);
+
+        return GetWallTile(ix, iz);
+    }
+    
+    public bool IsCollidingWithBox(Vector3 at, Vector3 size)
+    {
+        return GetWallTileF(at.X - size.X * 0.5f, at.Z - size.Z * 0.5f) != Tile.Air ||
+               GetWallTileF(at.X + size.X * 0.5f, at.Z - size.Z * 0.5f) != Tile.Air ||
+               GetWallTileF(at.X - size.X * 0.5f, at.Z + size.Z * 0.5f) != Tile.Air ||
+               GetWallTileF(at.X + size.X * 0.5f, at.Z + size.Z * 0.5f) != Tile.Air;
     }
 
     public void Mesh(GraphicsDevice graphicsDevice)
