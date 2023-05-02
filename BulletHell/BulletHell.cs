@@ -13,7 +13,7 @@ public class BulletHell : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
-    private BasicEffect _basicEffect;
+    private AlphaTestEffect _alphaEffect;
 
     private Texture2D _mapTexture;
     private Texture2D _spriteTexture;
@@ -49,7 +49,7 @@ public class BulletHell : Game
 
     private void OnResize(object sender, EventArgs eventArgs)
     {
-        _basicEffect.Projection = CalculateProjectionMatrix();
+        _alphaEffect.Projection = CalculateProjectionMatrix();
     }
 
     private Matrix CalculateProjectionMatrix()
@@ -70,25 +70,21 @@ public class BulletHell : Game
         spriteLookOffset.Y = 0f;
         _cameraSpriteMatrix = Matrix.Invert(Matrix.CreateLookAt(Vector3.Zero, spriteLookOffset, Vector3.Up));
 
-        _basicEffect.View = Matrix.CreateLookAt(_cameraPosition, _cameraPosition + lookOffset, Vector3.Up);
+        _alphaEffect.View = Matrix.CreateLookAt(_cameraPosition, _cameraPosition + lookOffset, Vector3.Up);
     }
 
     protected override void Initialize()
     {
-        GraphicsDevice.RasterizerState = new RasterizerState { MultiSampleAntiAlias = true };
-        GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
-
         _mapTexture = Texture2D.FromFile(GraphicsDevice, "Content/tiles.png");
         _spriteTexture = Texture2D.FromFile(GraphicsDevice, "Content/sprites.png");
 
-        _basicEffect = new BasicEffect(GraphicsDevice);
+        _alphaEffect = new AlphaTestEffect(GraphicsDevice);
 
-        _basicEffect.World = Matrix.Identity;
-        _basicEffect.Projection = CalculateProjectionMatrix();
+        _alphaEffect.World = Matrix.Identity;
+        _alphaEffect.Projection = CalculateProjectionMatrix();
 
-        _basicEffect.Texture = _mapTexture;
-        _basicEffect.TextureEnabled = true;
-        _basicEffect.VertexColorEnabled = true;
+        _alphaEffect.Texture = _mapTexture;
+        _alphaEffect.VertexColorEnabled = true;
 
         _map = new Map(16, GraphicsDevice);
         _map.Mesh(GraphicsDevice);
@@ -138,7 +134,7 @@ public class BulletHell : Game
             _cameraAngle = 0f;
         }
 
-        _player.Update(keyboardState, mouseState, _map, _projectiles, _cameraForward, _cameraRight, _basicEffect,
+        _player.Update(keyboardState, mouseState, _map, _projectiles, _cameraForward, _cameraRight, _alphaEffect,
             GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, deltaTime);
         _cameraPosition = _player.Position;
         
@@ -158,6 +154,17 @@ public class BulletHell : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
+        
+        _spriteBatch.Begin();
+        _spriteBatch.Draw(_spriteTexture, new Vector2(0f, 0f), Color.White);
+        _spriteBatch.End();
+        
+        // Set graphics state to be suitable for 3D models.
+        // Using the sprite batch modifies these to different values.
+        GraphicsDevice.BlendState = BlendState.Opaque;
+        GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+        GraphicsDevice.RasterizerState = new RasterizerState { MultiSampleAntiAlias = true };
+        GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
 
         UpdateViewMatrices();
 
@@ -172,22 +179,22 @@ public class BulletHell : Game
         }
         _spriteRenderer.End();
 
-        _basicEffect.World = Matrix.Identity;
+        _alphaEffect.World = Matrix.Identity;
 
-        _basicEffect.Texture = _mapTexture;
-        foreach (var currentPass in _basicEffect.CurrentTechnique.Passes)
+        _alphaEffect.Texture = _mapTexture;
+        foreach (var currentPass in _alphaEffect.CurrentTechnique.Passes)
         {
             currentPass.Apply();
             _map.Draw(GraphicsDevice);
         }
 
-        _basicEffect.Texture = _spriteTexture;
-        foreach (var currentPass in _basicEffect.CurrentTechnique.Passes)
+        _alphaEffect.Texture = _spriteTexture;
+        foreach (var currentPass in _alphaEffect.CurrentTechnique.Passes)
         {
             currentPass.Apply();
             _spriteRenderer.Draw(GraphicsDevice);
         }
-
+        
         base.Draw(gameTime);
     }
 }

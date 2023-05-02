@@ -51,7 +51,7 @@ public class Player
 
     // TODO: Make camera its own class which stores the forward/right vectors, etc.
     public void Update(KeyboardState keyboardState, MouseState mouseState, Map map, List<Projectile> projectiles, Vector3 cameraForward,
-        Vector3 cameraRight, BasicEffect cameraEffect, float viewportWidth, float viewportHeight, float deltaTime)
+        Vector3 cameraRight, AlphaTestEffect cameraEffect, float viewportWidth, float viewportHeight, float deltaTime)
     {
         var movement = Vector3.Zero;
 
