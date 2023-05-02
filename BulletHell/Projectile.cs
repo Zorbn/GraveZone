@@ -1,18 +1,14 @@
-﻿using System;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework;
 
 namespace BulletHell;
 
 public class Projectile
 {
-    private const float Speed = 2f;
+    private const float Speed = 8f;
     private static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
 
     private Vector3 _direction;
     private Vector3 _position;
-    public Vector3 Position => _position;
 
     public Projectile(Vector3 direction, float x, float z)
     {

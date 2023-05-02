@@ -14,9 +14,12 @@ public class Player
     private Vector3 _position;
     public Vector3 Position => _position;
 
+    private Weapon _weapon;
+
     public Player(float x, float z)
     {
         _position = new Vector3(x, 0f, z);
+        _weapon = new Weapon(0.2f);
     }
 
     private void Move(Vector3 movement, Map map, Vector3 cameraForward, Vector3 cameraRight, float deltaTime)
@@ -87,10 +90,12 @@ public class Player
 
         var directionToMouse = new Vector3(mouseX - viewPosition.X, 0f, mouseY - viewPosition.Y);
         directionToMouse = -directionToMouse.Z * cameraForward + directionToMouse.X * cameraRight;
+        
+        _weapon.Update(deltaTime);
 
         if (mouseState.LeftButton == ButtonState.Pressed)
         {
-            projectiles.Add(new Projectile(directionToMouse, _position.X, _position.Z));
+            _weapon.Attack(directionToMouse, _position.X, _position.Z, projectiles);
         }
     }
 
