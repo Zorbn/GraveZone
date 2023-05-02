@@ -1,4 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace BulletHell;
@@ -16,32 +19,8 @@ public class Player
         _position = new Vector3(x, 0f, z);
     }
 
-    // TODO: Make camera its own class which stores the forward/right vectors.
-    public void Update(KeyboardState keyboardState, Map map, Vector3 cameraForward, Vector3 cameraRight,
-        float deltaTime)
+    private void Move(Vector3 movement, Map map, Vector3 cameraForward, Vector3 cameraRight, float deltaTime)
     {
-        var movement = Vector3.Zero;
-
-        if (keyboardState.IsKeyDown(Keys.W))
-        {
-            movement.Z += 1f;
-        }
-
-        if (keyboardState.IsKeyDown(Keys.S))
-        {
-            movement.Z -= 1f;
-        }
-
-        if (keyboardState.IsKeyDown(Keys.A))
-        {
-            movement.X -= 1f;
-        }
-
-        if (keyboardState.IsKeyDown(Keys.D))
-        {
-            movement.X += 1f;
-        }
-
         if (movement.Length() == 0f) return;
 
         movement = movement.Z * cameraForward + movement.X * cameraRight;
@@ -66,7 +45,55 @@ public class Player
 
         _position.Z = newPosition.Z;
     }
-    
+
+    // TODO: Make camera its own class which stores the forward/right vectors, etc.
+    public void Update(KeyboardState keyboardState, MouseState mouseState, Map map, List<Projectile> projectiles, Vector3 cameraForward,
+        Vector3 cameraRight, BasicEffect cameraEffect, float viewportWidth, float viewportHeight, float deltaTime)
+    {
+        var movement = Vector3.Zero;
+
+        if (keyboardState.IsKeyDown(Keys.W))
+        {
+            movement.Z += 1f;
+        }
+
+        if (keyboardState.IsKeyDown(Keys.S))
+        {
+            movement.Z -= 1f;
+        }
+
+        if (keyboardState.IsKeyDown(Keys.A))
+        {
+            movement.X -= 1f;
+        }
+
+        if (keyboardState.IsKeyDown(Keys.D))
+        {
+            movement.X += 1f;
+        }
+
+        Move(movement, map, cameraForward, cameraRight, deltaTime);
+
+        // Compute the player's position on the screen:
+        var viewPosition = new Vector4(_position, 1f);
+        var worldViewProjectionMatrix = cameraEffect.World * cameraEffect.View * cameraEffect.Projection;
+        viewPosition = Vector4.Transform(viewPosition, worldViewProjectionMatrix);
+        viewPosition /= viewPosition.W;
+        viewPosition.X = (viewPosition.X + 1) * viewportWidth * 0.5f;
+        viewPosition.Y = (viewPosition.Y + 1) * viewportHeight * 0.5f;
+        
+        var mouseX = mouseState.X;
+        var mouseY = mouseState.Y;
+
+        var directionToMouse = new Vector3(mouseX - viewPosition.X, 0f, mouseY - viewPosition.Y);
+        directionToMouse = -directionToMouse.Z * cameraForward + directionToMouse.X * cameraRight;
+
+        if (mouseState.LeftButton == ButtonState.Pressed)
+        {
+            projectiles.Add(new Projectile(directionToMouse, _position.X, _position.Z));
+        }
+    }
+
     public void Draw(SpriteRenderer spriteRenderer)
     {
         spriteRenderer.Add(_position.X, _position.Z);
