@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using Common;
+using LiteNetLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -17,6 +20,7 @@ public class BulletHell : Game
 
     private Texture2D _mapTexture;
     private Texture2D _spriteTexture;
+    private Texture2D _uiTexture;
 
     private Map _map;
     private SpriteRenderer _spriteRenderer;
@@ -29,6 +33,11 @@ public class BulletHell : Game
     private Matrix _cameraSpriteMatrix;
     private float _cameraAngle;
     private static readonly Vector3 CameraLookOffset = new(1f, -3f, 1f);
+    
+    private static readonly Matrix UiMatrix = Matrix.CreateScale(4f);
+
+    private EventBasedNetListener _listener;
+    private NetManager _client;
 
     public BulletHell()
     {
@@ -77,6 +86,7 @@ public class BulletHell : Game
     {
         _mapTexture = Texture2D.FromFile(GraphicsDevice, "Content/tiles.png");
         _spriteTexture = Texture2D.FromFile(GraphicsDevice, "Content/sprites.png");
+        _uiTexture = Texture2D.FromFile(GraphicsDevice, "Content/ui.png");
 
         _alphaEffect = new AlphaTestEffect(GraphicsDevice);
 
@@ -94,6 +104,18 @@ public class BulletHell : Game
         _player = new Player(-1, -1);
 
         _projectiles = new List<Projectile>();
+        
+        // TODO: Make a menu for joining a server before the game starts.
+        _listener = new EventBasedNetListener();
+        _client = new NetManager(_listener);
+        _client.Start();
+        _client.Connect("localhost", Networking.Port, "");
+
+        _listener.NetworkReceiveEvent += (fromPeer, dataReader, channel, deliveryMethod) =>
+        {
+            Console.WriteLine($"Received: {dataReader.GetString(100)}");
+            dataReader.Recycle();
+        };
 
         base.Initialize();
     }
@@ -107,6 +129,8 @@ public class BulletHell : Game
 
     protected override void Update(GameTime gameTime)
     {
+        _client.PollEvents();
+        
         var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         var keyboardState = Keyboard.GetState();
@@ -155,17 +179,13 @@ public class BulletHell : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
         
-        _spriteBatch.Begin();
-        _spriteBatch.Draw(_spriteTexture, new Vector2(0f, 0f), Color.White);
-        _spriteBatch.End();
-        
         // Set graphics state to be suitable for 3D models.
         // Using the sprite batch modifies these to different values.
         GraphicsDevice.BlendState = BlendState.Opaque;
         GraphicsDevice.DepthStencilState = DepthStencilState.Default;
         GraphicsDevice.RasterizerState = new RasterizerState { MultiSampleAntiAlias = true };
         GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
-
+        
         UpdateViewMatrices();
 
         _spriteRenderer.Begin(_cameraSpriteMatrix);
@@ -194,6 +214,10 @@ public class BulletHell : Game
             currentPass.Apply();
             _spriteRenderer.Draw(GraphicsDevice);
         }
+        
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: UiMatrix);
+        _spriteBatch.Draw(_uiTexture, new Vector2(0f, 0f), Color.White);
+        _spriteBatch.End();
         
         base.Draw(gameTime);
     }
