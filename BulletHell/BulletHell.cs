@@ -143,12 +143,12 @@ public class BulletHell : Game
 
         if (keyboardState.IsKeyDown(Keys.Q))
         {
-            cameraAngleMovement -= 1f;
+            cameraAngleMovement += 1f;
         }
 
         if (keyboardState.IsKeyDown(Keys.E))
         {
-            cameraAngleMovement += 1f;
+            cameraAngleMovement -= 1f;
         }
 
         _cameraAngle += cameraAngleMovement * deltaTime;
