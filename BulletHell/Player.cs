@@ -62,9 +62,10 @@ public class Player
     }
 
     // TODO: Make camera its own class which stores the forward/right vectors, etc.
+    // TODO: Create class to send packets and store network info.
     private void UpdateLocal(KeyboardState keyboardState, MouseState mouseState, Map map, List<Projectile> projectiles,
-        Vector3 cameraForward,
-        Vector3 cameraRight, AlphaTestEffect cameraEffect, float viewportWidth, float viewportHeight, float deltaTime)
+        NetPacketProcessor netPacketProcessor, NetDataWriter writer, NetManager client,
+        Vector3 cameraForward, Vector3 cameraRight, AlphaTestEffect cameraEffect, float viewportWidth, float viewportHeight, float deltaTime)
     {
         var movement = Vector3.Zero;
 
@@ -108,16 +109,19 @@ public class Player
 
         if (mouseState.LeftButton == ButtonState.Pressed)
         {
-            _weapon.Attack(directionToMouse, _position.X, _position.Z, projectiles);
+            _weapon.Attack(directionToMouse, _position.X, _position.Z, projectiles, netPacketProcessor, writer, client);
         }
     }
     
-    public void Update(bool isLocal, KeyboardState keyboardState, MouseState mouseState, Map map, List<Projectile> projectiles, Vector3 cameraForward,
-        Vector3 cameraRight, AlphaTestEffect cameraEffect, float viewportWidth, float viewportHeight, float deltaTime)
+    public void Update(bool isLocal, KeyboardState keyboardState, MouseState mouseState, Map map, List<Projectile> projectiles,
+        NetPacketProcessor netPacketProcessor, NetDataWriter writer, NetManager client,
+        Vector3 cameraForward, Vector3 cameraRight, AlphaTestEffect cameraEffect, float viewportWidth, float viewportHeight, float deltaTime)
     {
         if (isLocal)
         {
-            UpdateLocal(keyboardState, mouseState, map, projectiles, cameraForward, cameraRight, cameraEffect,
+            UpdateLocal(keyboardState, mouseState, map, projectiles,
+                netPacketProcessor, writer, client,
+                cameraForward, cameraRight, cameraEffect,
                 viewportWidth, viewportHeight, deltaTime);
             return;
         }

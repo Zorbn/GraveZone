@@ -115,10 +115,12 @@ public class BulletHell : Game
         
         // TODO: Make a menu for joining a server before the game starts.
         _netPacketProcessor = new NetPacketProcessor();
+        _netPacketProcessor.RegisterNestedType<NetVector3>();
         _netPacketProcessor.SubscribeReusable<SetLocalId, NetPeer>(OnSetLocalId);
         _netPacketProcessor.SubscribeReusable<PlayerSpawn, NetPeer>(OnPlayerSpawn);
         _netPacketProcessor.SubscribeReusable<PlayerDespawn, NetPeer>(OnPlayerDespawn);
         _netPacketProcessor.SubscribeReusable<PlayerMove, NetPeer>(OnPlayerMove);
+        _netPacketProcessor.SubscribeReusable<ProjectileSpawn, NetPeer>(OnProjectileSpawn);
         _listener = new EventBasedNetListener();
         _client = new NetManager(_listener);
         // TODO: Close client with UI and when game is closed.
@@ -182,7 +184,8 @@ public class BulletHell : Game
 
         foreach (var (playerId, player) in _players)
         {
-            player.Update(playerId == _localId, keyboardState, mouseState, _map, _projectiles, _cameraForward,
+            player.Update(playerId == _localId, keyboardState, mouseState, _map, _projectiles, _netPacketProcessor,
+                _writer, _client, _cameraForward,
                 _cameraRight, _cameraEffect, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, deltaTime);
         }
 
@@ -294,5 +297,13 @@ public class BulletHell : Game
     {
         Console.WriteLine($"Updating local ID: {setLocalId.Id}");
         _localId = setLocalId.Id;
+    }
+
+    private void OnProjectileSpawn(ProjectileSpawn projectileSpawn, NetPeer netPeer)
+    {
+        // TODO: Make sure for-each-ing over projectiles won't break things.
+        var direction = new Vector3(projectileSpawn.Direction.X, projectileSpawn.Direction.Y,
+            projectileSpawn.Direction.Z);
+        _projectiles.Add(new Projectile(direction, projectileSpawn.X, projectileSpawn.Z));
     }
 }

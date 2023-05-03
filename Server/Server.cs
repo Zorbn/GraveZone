@@ -16,7 +16,9 @@ public class Server
     public Server()
     {
         _netPacketProcessor = new NetPacketProcessor();
+        _netPacketProcessor.RegisterNestedType<NetVector3>();
         _netPacketProcessor.SubscribeReusable<PlayerMove, NetPeer>(OnPlayerMove);
+        _netPacketProcessor.SubscribeReusable<PlayerAttack, NetPeer>(OnPlayerAttack);
         _listener = new EventBasedNetListener();
         _server = new NetManager(_listener);
         _writer = new NetDataWriter();
@@ -96,5 +98,17 @@ public class Server
         _writer.Reset();
         _netPacketProcessor.Write(_writer, new PlayerMove { Id = peer.Id, X = playerMove.X, Z = playerMove.Z });
         _server.SendToAll(_writer, DeliveryMethod.Unreliable);
+    }
+    
+    private void OnPlayerAttack(PlayerAttack playerAttack, NetPeer peer)
+    {
+        if (!_players.TryGetValue(peer.Id, out var player)) return;
+
+        _writer.Reset();
+        _netPacketProcessor.Write(_writer,
+            new ProjectileSpawn { Direction = playerAttack.Direction, X = playerAttack.X, Z = playerAttack.Z });
+        // Send the new projectile to all players except the player who created the projectile.
+        // That player will have already spawned its own local copy.
+        _server.SendToAll(_writer, DeliveryMethod.ReliableUnordered, peer);
     }
 }
