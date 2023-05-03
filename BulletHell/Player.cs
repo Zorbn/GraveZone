@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Common;
+using LiteNetLib;
+using LiteNetLib.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -96,6 +100,21 @@ public class Player
         {
             _weapon.Attack(directionToMouse, _position.X, _position.Z, projectiles);
         }
+    }
+
+    public void Tick(bool isLocal, int localId, NetPacketProcessor netPacketProcessor, NetDataWriter writer, NetManager client, float deltaTime)
+    {
+        if (isLocal)
+        {
+            writer.Reset();
+            netPacketProcessor.Write(writer, new PlayerMove { Id = localId, X = _position.X, Z = _position.Z });
+            client.FirstPeer.Send(writer, DeliveryMethod.ReliableOrdered);
+        }
+    }
+
+    public void SetInterpolationTarget(Vector3 target)
+    {
+        _position = target;
     }
 
     public void Draw(SpriteRenderer spriteRenderer)

@@ -56,6 +56,8 @@ public class SpriteRenderer
 
     public void End()
     {
+        if (_vertexI < 1 || _indexI < 1) return;
+        
         _vertexBuffer.SetData(_vertices, 0, _vertexI);
         _indexBuffer.SetData(_indices, 0, _indexI);
     }

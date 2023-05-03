@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using Common;
 using LiteNetLib;
+using LiteNetLib.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -12,6 +13,7 @@ namespace BulletHell;
 public class BulletHell : Game
 {
     private const float ViewScale = 15;
+    private const float TickTime = 0.05f;
 
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
@@ -24,8 +26,10 @@ public class BulletHell : Game
 
     private Map _map;
     private SpriteRenderer _spriteRenderer;
-    private Player _player;
+    private Dictionary<int, Player> _players;
+    private int _localId = -1;
     private List<Projectile> _projectiles;
+    private float _tickTimer;
 
     private Vector3 _cameraPosition = Vector3.Zero;
     private Vector3 _cameraForward;
@@ -36,8 +40,10 @@ public class BulletHell : Game
     
     private static readonly Matrix UiMatrix = Matrix.CreateScale(4f);
 
+    private NetPacketProcessor _netPacketProcessor;
     private EventBasedNetListener _listener;
     private NetManager _client;
+    private NetDataWriter _writer;
 
     public BulletHell()
     {
@@ -101,22 +107,31 @@ public class BulletHell : Game
 
         _spriteRenderer = new SpriteRenderer(500, GraphicsDevice);
 
-        _player = new Player(-1, -1);
+        _players = new Dictionary<int, Player>();
 
         _projectiles = new List<Projectile>();
         
+        _writer = new NetDataWriter();
+        
         // TODO: Make a menu for joining a server before the game starts.
+        _netPacketProcessor = new NetPacketProcessor();
+        _netPacketProcessor.SubscribeReusable<SetLocalId, NetPeer>(OnSetLocalId);
+        _netPacketProcessor.SubscribeReusable<PlayerSpawn, NetPeer>(OnPlayerSpawn);
+        _netPacketProcessor.SubscribeReusable<PlayerDespawn, NetPeer>(OnPlayerDespawn);
+        _netPacketProcessor.SubscribeReusable<PlayerMove, NetPeer>(OnPlayerMove);
         _listener = new EventBasedNetListener();
         _client = new NetManager(_listener);
+        // TODO: Close client with UI and when game is closed.
         _client.Start();
         _client.Connect("localhost", Networking.Port, "");
-
+        
+        Console.WriteLine($"Starting client...");
+        
         _listener.NetworkReceiveEvent += (fromPeer, dataReader, channel, deliveryMethod) =>
         {
-            Console.WriteLine($"Received: {dataReader.GetString(100)}");
-            dataReader.Recycle();
+            _netPacketProcessor.ReadAllPackets(dataReader, fromPeer);
         };
-
+        
         base.Initialize();
     }
 
@@ -127,6 +142,13 @@ public class BulletHell : Game
         // TODO: use this.Content to load your game content here
     }
 
+    private void UpdateLocal(Player localPlayer, KeyboardState keyboardState, MouseState mouseState, float deltaTime)
+    {
+        localPlayer.Update(keyboardState, mouseState, _map, _projectiles, _cameraForward, _cameraRight, _alphaEffect,
+            GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, deltaTime);
+        _cameraPosition = localPlayer.Position;
+    }
+
     protected override void Update(GameTime gameTime)
     {
         _client.PollEvents();
@@ -134,7 +156,9 @@ public class BulletHell : Game
         var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         var keyboardState = Keyboard.GetState();
-        var mouseState = Mouse.GetState();
+        // Don't allow mouse inputs when the window isn't focused.
+        var mouseState = IsActive ? Mouse.GetState() : new MouseState();
+        
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             keyboardState.IsKeyDown(Keys.Escape))
             Exit();
@@ -158,9 +182,10 @@ public class BulletHell : Game
             _cameraAngle = 0f;
         }
 
-        _player.Update(keyboardState, mouseState, _map, _projectiles, _cameraForward, _cameraRight, _alphaEffect,
-            GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, deltaTime);
-        _cameraPosition = _player.Position;
+        if (_localId != -1 && _players.TryGetValue(_localId, out var localPlayer))
+        {
+            UpdateLocal(localPlayer, keyboardState, mouseState, deltaTime);
+        }
         
         for (var i = _projectiles.Count - 1; i >= 0; i--)
         {
@@ -171,8 +196,24 @@ public class BulletHell : Game
                 _projectiles.RemoveAt(i);
             }
         }
-
+        
+        Tick(deltaTime);
+        
         base.Update(gameTime);
+    }
+
+    private void Tick(float deltaTime)
+    {
+        _tickTimer -= deltaTime;
+
+        if (_tickTimer > 0f) return;
+
+        _tickTimer = TickTime;
+        
+        foreach (var (playerId, player) in _players)
+        {
+            player.Tick(playerId == _localId, _localId, _netPacketProcessor, _writer, _client, TickTime);
+        }
     }
 
     protected override void Draw(GameTime gameTime)
@@ -189,10 +230,10 @@ public class BulletHell : Game
         UpdateViewMatrices();
 
         _spriteRenderer.Begin(_cameraSpriteMatrix);
-        _spriteRenderer.Add(0, 0);
-        _spriteRenderer.Add(1, 0);
-        _spriteRenderer.Add(0, 1);
-        _player.Draw(_spriteRenderer);
+        foreach (var pair in _players)
+        {
+            pair.Value.Draw(_spriteRenderer);
+        }
         foreach (var projectile in _projectiles)
         {
             projectile.Draw(_spriteRenderer);
@@ -220,5 +261,35 @@ public class BulletHell : Game
         _spriteBatch.End();
         
         base.Draw(gameTime);
+    }
+
+    private void OnPlayerSpawn(PlayerSpawn playerSpawn, NetPeer peer)
+    {
+        Console.WriteLine($"Player spawned with id: {playerSpawn.Id}");
+        _players.Add(playerSpawn.Id, new Player(playerSpawn.X, playerSpawn.Z));
+    }
+    
+    private void OnPlayerDespawn(PlayerDespawn playerDespawn, NetPeer peer)
+    {
+        Console.WriteLine($"Player de-spawned with id: {playerDespawn.Id}");
+        _players.Remove(playerDespawn.Id);
+    }
+    
+    private void OnPlayerMove(PlayerMove playerMove, NetPeer peer)
+    {
+        if (playerMove.Id == _localId) return;
+        if (!_players.TryGetValue(playerMove.Id, out var player)) return;
+        
+        // TODO: Apply interpolation here.
+        var newPosition = player.Position;
+        newPosition.X = playerMove.X;
+        newPosition.Z = playerMove.Z;
+        player.SetInterpolationTarget(newPosition);        
+    }
+    
+    private void OnSetLocalId(SetLocalId setLocalId, NetPeer peer)
+    {
+        Console.WriteLine($"Updating local ID: {setLocalId.Id}");
+        _localId = setLocalId.Id;
     }
 }
