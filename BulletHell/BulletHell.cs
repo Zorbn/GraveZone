@@ -18,8 +18,6 @@ public class BulletHell : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
-    private AlphaTestEffect _alphaEffect;
-
     private Texture2D _mapTexture;
     private Texture2D _spriteTexture;
     private Texture2D _uiTexture;
@@ -31,6 +29,7 @@ public class BulletHell : Game
     private List<Projectile> _projectiles;
     private float _tickTimer;
 
+    private AlphaTestEffect _cameraEffect;
     private Vector3 _cameraPosition = Vector3.Zero;
     private Vector3 _cameraForward;
     private Vector3 _cameraRight;
@@ -52,6 +51,7 @@ public class BulletHell : Game
         _graphics.GraphicsProfile = GraphicsProfile.HiDef;
         _graphics.PreparingDeviceSettings += OnPreparingDeviceSettings;
         Content.RootDirectory = "Content";
+        InactiveSleepTime = TimeSpan.Zero;
         IsMouseVisible = true;
         Window.AllowUserResizing = true;
         Window.ClientSizeChanged += OnResize;
@@ -64,7 +64,7 @@ public class BulletHell : Game
 
     private void OnResize(object sender, EventArgs eventArgs)
     {
-        _alphaEffect.Projection = CalculateProjectionMatrix();
+        _cameraEffect.Projection = CalculateProjectionMatrix();
     }
 
     private Matrix CalculateProjectionMatrix()
@@ -85,7 +85,7 @@ public class BulletHell : Game
         spriteLookOffset.Y = 0f;
         _cameraSpriteMatrix = Matrix.Invert(Matrix.CreateLookAt(Vector3.Zero, spriteLookOffset, Vector3.Up));
 
-        _alphaEffect.View = Matrix.CreateLookAt(_cameraPosition, _cameraPosition + lookOffset, Vector3.Up);
+        _cameraEffect.View = Matrix.CreateLookAt(_cameraPosition, _cameraPosition + lookOffset, Vector3.Up);
     }
 
     protected override void Initialize()
@@ -94,13 +94,13 @@ public class BulletHell : Game
         _spriteTexture = Texture2D.FromFile(GraphicsDevice, "Content/sprites.png");
         _uiTexture = Texture2D.FromFile(GraphicsDevice, "Content/ui.png");
 
-        _alphaEffect = new AlphaTestEffect(GraphicsDevice);
+        _cameraEffect = new AlphaTestEffect(GraphicsDevice);
 
-        _alphaEffect.World = Matrix.Identity;
-        _alphaEffect.Projection = CalculateProjectionMatrix();
+        _cameraEffect.World = Matrix.Identity;
+        _cameraEffect.Projection = CalculateProjectionMatrix();
 
-        _alphaEffect.Texture = _mapTexture;
-        _alphaEffect.VertexColorEnabled = true;
+        _cameraEffect.Texture = _mapTexture;
+        _cameraEffect.VertexColorEnabled = true;
 
         _map = new Map(16, GraphicsDevice);
         _map.Mesh(GraphicsDevice);
@@ -142,10 +142,8 @@ public class BulletHell : Game
         // TODO: use this.Content to load your game content here
     }
 
-    private void UpdateLocal(Player localPlayer, KeyboardState keyboardState, MouseState mouseState, float deltaTime)
+    private void UpdateLocal(Player localPlayer)
     {
-        localPlayer.Update(keyboardState, mouseState, _map, _projectiles, _cameraForward, _cameraRight, _alphaEffect,
-            GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, deltaTime);
         _cameraPosition = localPlayer.Position;
     }
 
@@ -182,9 +180,15 @@ public class BulletHell : Game
             _cameraAngle = 0f;
         }
 
-        if (_localId != -1 && _players.TryGetValue(_localId, out var localPlayer))
+        foreach (var (playerId, player) in _players)
         {
-            UpdateLocal(localPlayer, keyboardState, mouseState, deltaTime);
+            player.Update(playerId == _localId, keyboardState, mouseState, _map, _projectiles, _cameraForward,
+                _cameraRight, _cameraEffect, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, deltaTime);
+        }
+
+        if (_players.TryGetValue(_localId, out var localPlayer))
+        {
+            UpdateLocal(localPlayer);
         }
         
         for (var i = _projectiles.Count - 1; i >= 0; i--)
@@ -240,17 +244,17 @@ public class BulletHell : Game
         }
         _spriteRenderer.End();
 
-        _alphaEffect.World = Matrix.Identity;
+        _cameraEffect.World = Matrix.Identity;
 
-        _alphaEffect.Texture = _mapTexture;
-        foreach (var currentPass in _alphaEffect.CurrentTechnique.Passes)
+        _cameraEffect.Texture = _mapTexture;
+        foreach (var currentPass in _cameraEffect.CurrentTechnique.Passes)
         {
             currentPass.Apply();
             _map.Draw(GraphicsDevice);
         }
 
-        _alphaEffect.Texture = _spriteTexture;
-        foreach (var currentPass in _alphaEffect.CurrentTechnique.Passes)
+        _cameraEffect.Texture = _spriteTexture;
+        foreach (var currentPass in _cameraEffect.CurrentTechnique.Passes)
         {
             currentPass.Apply();
             _spriteRenderer.Draw(GraphicsDevice);
@@ -280,11 +284,10 @@ public class BulletHell : Game
         if (playerMove.Id == _localId) return;
         if (!_players.TryGetValue(playerMove.Id, out var player)) return;
         
-        // TODO: Apply interpolation here.
         var newPosition = player.Position;
         newPosition.X = playerMove.X;
         newPosition.Z = playerMove.Z;
-        player.SetInterpolationTarget(newPosition);        
+        player.Position = newPosition;        
     }
     
     private void OnSetLocalId(SetLocalId setLocalId, NetPeer peer)

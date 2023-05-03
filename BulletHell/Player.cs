@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Common;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -12,16 +11,24 @@ namespace BulletHell;
 public class Player
 {
     private const float Speed = 2f;
+    private const float SpriteLerp = 10f;
     private static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
 
     private Vector3 _position;
-    public Vector3 Position => _position;
+    private Vector3 _spritePosition;
+
+    public Vector3 Position
+    {
+        get => _position;
+        set => _position = value;
+    }
 
     private Weapon _weapon;
 
     public Player(float x, float z)
     {
         _position = new Vector3(x, 0f, z);
+        _spritePosition = _position;
         _weapon = new Weapon(0.2f);
     }
 
@@ -50,10 +57,13 @@ public class Player
         }
 
         _position.Z = newPosition.Z;
+
+        _spritePosition = _position;
     }
 
     // TODO: Make camera its own class which stores the forward/right vectors, etc.
-    public void Update(KeyboardState keyboardState, MouseState mouseState, Map map, List<Projectile> projectiles, Vector3 cameraForward,
+    private void UpdateLocal(KeyboardState keyboardState, MouseState mouseState, Map map, List<Projectile> projectiles,
+        Vector3 cameraForward,
         Vector3 cameraRight, AlphaTestEffect cameraEffect, float viewportWidth, float viewportHeight, float deltaTime)
     {
         var movement = Vector3.Zero;
@@ -101,6 +111,19 @@ public class Player
             _weapon.Attack(directionToMouse, _position.X, _position.Z, projectiles);
         }
     }
+    
+    public void Update(bool isLocal, KeyboardState keyboardState, MouseState mouseState, Map map, List<Projectile> projectiles, Vector3 cameraForward,
+        Vector3 cameraRight, AlphaTestEffect cameraEffect, float viewportWidth, float viewportHeight, float deltaTime)
+    {
+        if (isLocal)
+        {
+            UpdateLocal(keyboardState, mouseState, map, projectiles, cameraForward, cameraRight, cameraEffect,
+                viewportWidth, viewportHeight, deltaTime);
+            return;
+        }
+        
+        _spritePosition = Vector3.Lerp(_spritePosition, _position, SpriteLerp * deltaTime);
+    }
 
     public void Tick(bool isLocal, int localId, NetPacketProcessor netPacketProcessor, NetDataWriter writer, NetManager client, float deltaTime)
     {
@@ -108,17 +131,12 @@ public class Player
         {
             writer.Reset();
             netPacketProcessor.Write(writer, new PlayerMove { Id = localId, X = _position.X, Z = _position.Z });
-            client.FirstPeer.Send(writer, DeliveryMethod.ReliableOrdered);
+            client.FirstPeer.Send(writer, DeliveryMethod.Unreliable);
         }
-    }
-
-    public void SetInterpolationTarget(Vector3 target)
-    {
-        _position = target;
     }
 
     public void Draw(SpriteRenderer spriteRenderer)
     {
-        spriteRenderer.Add(_position.X, _position.Z);
+        spriteRenderer.Add(_spritePosition.X, _spritePosition.Z);
     }
 }
