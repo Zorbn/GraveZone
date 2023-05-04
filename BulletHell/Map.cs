@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletHell;
 
+// TODO: Sync map, destroy projectiles that go outside the map.
 public class Map
 {
     private const float TileScale = 1f;

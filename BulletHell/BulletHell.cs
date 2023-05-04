@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using Common;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -12,7 +10,6 @@ namespace BulletHell;
 
 public class BulletHell : Game
 {
-    private const float ViewScale = 15;
     private const float TickTime = 0.05f;
 
     private GraphicsDeviceManager _graphics;
@@ -25,25 +22,14 @@ public class BulletHell : Game
     private Map _map;
     private SpriteRenderer _spriteRenderer;
     private Dictionary<int, Player> _players;
-    private int _localId = -1;
     private List<Projectile> _projectiles;
     private float _tickTimer;
-
-    private AlphaTestEffect _cameraEffect;
-    private Vector3 _cameraPosition = Vector3.Zero;
-    private Vector3 _cameraForward;
-    private Vector3 _cameraRight;
-    private Matrix _cameraSpriteMatrix;
-    private float _cameraAngle;
-    private static readonly Vector3 CameraLookOffset = new(1f, -3f, 1f);
+    private Camera _camera;
+    
+    private Client _client;
     
     private static readonly Matrix UiMatrix = Matrix.CreateScale(4f);
-
-    private NetPacketProcessor _netPacketProcessor;
-    private EventBasedNetListener _listener;
-    private NetManager _client;
-    private NetDataWriter _writer;
-
+    
     public BulletHell()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -64,43 +50,16 @@ public class BulletHell : Game
 
     private void OnResize(object sender, EventArgs eventArgs)
     {
-        _cameraEffect.Projection = CalculateProjectionMatrix();
+        _camera.Resize(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
     }
-
-    private Matrix CalculateProjectionMatrix()
-    {
-        return Matrix.CreateOrthographic(
-            GraphicsDevice.Viewport.Width / (float)GraphicsDevice.Viewport.Height * ViewScale, ViewScale, -20f, 20f);
-    }
-
-    private void UpdateViewMatrices()
-    {
-        var cameraRotation = Matrix.CreateRotationY(_cameraAngle);
-        var lookOffset = Vector3.Transform(CameraLookOffset, cameraRotation);
-        _cameraForward = lookOffset;
-        _cameraForward.Y = 0f;
-        _cameraRight = Vector3.Transform(_cameraForward, Matrix.CreateRotationY(MathF.PI * -0.5f));
-
-        var spriteLookOffset = lookOffset;
-        spriteLookOffset.Y = 0f;
-        _cameraSpriteMatrix = Matrix.Invert(Matrix.CreateLookAt(Vector3.Zero, spriteLookOffset, Vector3.Up));
-
-        _cameraEffect.View = Matrix.CreateLookAt(_cameraPosition, _cameraPosition + lookOffset, Vector3.Up);
-    }
-
+    
     protected override void Initialize()
     {
         _mapTexture = Texture2D.FromFile(GraphicsDevice, "Content/tiles.png");
         _spriteTexture = Texture2D.FromFile(GraphicsDevice, "Content/sprites.png");
         _uiTexture = Texture2D.FromFile(GraphicsDevice, "Content/ui.png");
 
-        _cameraEffect = new AlphaTestEffect(GraphicsDevice);
-
-        _cameraEffect.World = Matrix.Identity;
-        _cameraEffect.Projection = CalculateProjectionMatrix();
-
-        _cameraEffect.Texture = _mapTexture;
-        _cameraEffect.VertexColorEnabled = true;
+        _camera = new Camera(GraphicsDevice);
 
         _map = new Map(16, GraphicsDevice);
         _map.Mesh(GraphicsDevice);
@@ -110,29 +69,21 @@ public class BulletHell : Game
         _players = new Dictionary<int, Player>();
 
         _projectiles = new List<Projectile>();
-        
-        _writer = new NetDataWriter();
+
+        _client = new Client();
         
         // TODO: Make a menu for joining a server before the game starts.
-        _netPacketProcessor = new NetPacketProcessor();
-        _netPacketProcessor.RegisterNestedType<NetVector3>();
-        _netPacketProcessor.SubscribeReusable<SetLocalId, NetPeer>(OnSetLocalId);
-        _netPacketProcessor.SubscribeReusable<PlayerSpawn, NetPeer>(OnPlayerSpawn);
-        _netPacketProcessor.SubscribeReusable<PlayerDespawn, NetPeer>(OnPlayerDespawn);
-        _netPacketProcessor.SubscribeReusable<PlayerMove, NetPeer>(OnPlayerMove);
-        _netPacketProcessor.SubscribeReusable<ProjectileSpawn, NetPeer>(OnProjectileSpawn);
-        _listener = new EventBasedNetListener();
-        _client = new NetManager(_listener);
+        _client.NetPacketProcessor.RegisterNestedType<NetVector3>();
+        _client.NetPacketProcessor.SubscribeReusable<SetLocalId, NetPeer>(OnSetLocalId);
+        _client.NetPacketProcessor.SubscribeReusable<PlayerSpawn, NetPeer>(OnPlayerSpawn);
+        _client.NetPacketProcessor.SubscribeReusable<PlayerDespawn, NetPeer>(OnPlayerDespawn);
+        _client.NetPacketProcessor.SubscribeReusable<PlayerMove, NetPeer>(OnPlayerMove);
+        _client.NetPacketProcessor.SubscribeReusable<ProjectileSpawn, NetPeer>(OnProjectileSpawn);
+        
         // TODO: Close client with UI and when game is closed.
-        _client.Start();
-        _client.Connect("localhost", Networking.Port, "");
+        _client.Connect("localhost");
         
         Console.WriteLine($"Starting client...");
-        
-        _listener.NetworkReceiveEvent += (fromPeer, dataReader, channel, deliveryMethod) =>
-        {
-            _netPacketProcessor.ReadAllPackets(dataReader, fromPeer);
-        };
         
         base.Initialize();
     }
@@ -146,7 +97,7 @@ public class BulletHell : Game
 
     private void UpdateLocal(Player localPlayer)
     {
-        _cameraPosition = localPlayer.Position;
+        _camera.SetPosition(localPlayer.Position);
     }
 
     protected override void Update(GameTime gameTime)
@@ -175,21 +126,19 @@ public class BulletHell : Game
             cameraAngleMovement -= 1f;
         }
 
-        _cameraAngle += cameraAngleMovement * deltaTime;
+        _camera.Rotate(cameraAngleMovement * deltaTime);
 
         if (keyboardState.IsKeyDown(Keys.Z))
         {
-            _cameraAngle = 0f;
+            _camera.ResetAngle();
         }
 
-        foreach (var (playerId, player) in _players)
+        foreach (var (_, player) in _players)
         {
-            player.Update(playerId == _localId, keyboardState, mouseState, _map, _projectiles, _netPacketProcessor,
-                _writer, _client, _cameraForward,
-                _cameraRight, _cameraEffect, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, deltaTime);
+            player.Update(keyboardState, mouseState, _map, _projectiles, _client, _camera, deltaTime);
         }
 
-        if (_players.TryGetValue(_localId, out var localPlayer))
+        if (_players.TryGetValue(_client.LocalId, out var localPlayer))
         {
             UpdateLocal(localPlayer);
         }
@@ -217,9 +166,9 @@ public class BulletHell : Game
 
         _tickTimer = TickTime;
         
-        foreach (var (playerId, player) in _players)
+        foreach (var (_, player) in _players)
         {
-            player.Tick(playerId == _localId, _localId, _netPacketProcessor, _writer, _client, TickTime);
+            player.Tick(_client, TickTime);
         }
     }
 
@@ -234,9 +183,9 @@ public class BulletHell : Game
         GraphicsDevice.RasterizerState = new RasterizerState { MultiSampleAntiAlias = true };
         GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
         
-        UpdateViewMatrices();
+        _camera.UpdateViewMatrices();
 
-        _spriteRenderer.Begin(_cameraSpriteMatrix);
+        _spriteRenderer.Begin(_camera.SpriteMatrix);
         foreach (var pair in _players)
         {
             pair.Value.Draw(_spriteRenderer);
@@ -247,17 +196,15 @@ public class BulletHell : Game
         }
         _spriteRenderer.End();
 
-        _cameraEffect.World = Matrix.Identity;
-
-        _cameraEffect.Texture = _mapTexture;
-        foreach (var currentPass in _cameraEffect.CurrentTechnique.Passes)
+        _camera.SetTexture(_mapTexture);
+        foreach (var currentPass in _camera.Passes)
         {
             currentPass.Apply();
             _map.Draw(GraphicsDevice);
         }
 
-        _cameraEffect.Texture = _spriteTexture;
-        foreach (var currentPass in _cameraEffect.CurrentTechnique.Passes)
+        _camera.SetTexture(_spriteTexture);
+        foreach (var currentPass in _camera.Passes)
         {
             currentPass.Apply();
             _spriteRenderer.Draw(GraphicsDevice);
@@ -273,7 +220,7 @@ public class BulletHell : Game
     private void OnPlayerSpawn(PlayerSpawn playerSpawn, NetPeer peer)
     {
         Console.WriteLine($"Player spawned with id: {playerSpawn.Id}");
-        _players.Add(playerSpawn.Id, new Player(playerSpawn.X, playerSpawn.Z));
+        _players.Add(playerSpawn.Id, new Player(playerSpawn.Id, playerSpawn.X, playerSpawn.Z));
     }
     
     private void OnPlayerDespawn(PlayerDespawn playerDespawn, NetPeer peer)
@@ -284,7 +231,7 @@ public class BulletHell : Game
     
     private void OnPlayerMove(PlayerMove playerMove, NetPeer peer)
     {
-        if (playerMove.Id == _localId) return;
+        if (_client.IsLocal(playerMove.Id)) return;
         if (!_players.TryGetValue(playerMove.Id, out var player)) return;
         
         var newPosition = player.Position;
@@ -296,12 +243,11 @@ public class BulletHell : Game
     private void OnSetLocalId(SetLocalId setLocalId, NetPeer peer)
     {
         Console.WriteLine($"Updating local ID: {setLocalId.Id}");
-        _localId = setLocalId.Id;
+        _client.LocalId = setLocalId.Id;
     }
 
     private void OnProjectileSpawn(ProjectileSpawn projectileSpawn, NetPeer netPeer)
     {
-        // TODO: Make sure for-each-ing over projectiles won't break things.
         var direction = new Vector3(projectileSpawn.Direction.X, projectileSpawn.Direction.Y,
             projectileSpawn.Direction.Z);
         _projectiles.Add(new Projectile(direction, projectileSpawn.X, projectileSpawn.Z));

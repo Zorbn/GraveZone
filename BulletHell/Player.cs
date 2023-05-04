@@ -23,10 +23,14 @@ public class Player
         set => _position = value;
     }
 
+    public readonly int Id;
+
     private Weapon _weapon;
 
-    public Player(float x, float z)
+    public Player(int id, float x, float z)
     {
+        Id = id;
+
         _position = new Vector3(x, 0f, z);
         _spritePosition = _position;
         _weapon = new Weapon(0.2f);
@@ -61,11 +65,9 @@ public class Player
         _spritePosition = _position;
     }
 
-    // TODO: Make camera its own class which stores the forward/right vectors, etc.
     // TODO: Create class to send packets and store network info.
     private void UpdateLocal(KeyboardState keyboardState, MouseState mouseState, Map map, List<Projectile> projectiles,
-        NetPacketProcessor netPacketProcessor, NetDataWriter writer, NetManager client,
-        Vector3 cameraForward, Vector3 cameraRight, AlphaTestEffect cameraEffect, float viewportWidth, float viewportHeight, float deltaTime)
+        Client client, Camera camera, float deltaTime)
     {
         var movement = Vector3.Zero;
 
@@ -89,53 +91,49 @@ public class Player
             movement.X += 1f;
         }
 
-        Move(movement, map, cameraForward, cameraRight, deltaTime);
+        Move(movement, map, camera.Forward, camera.Right, deltaTime);
 
         // Compute the player's position on the screen:
         var viewPosition = new Vector4(_position, 1f);
-        var worldViewProjectionMatrix = cameraEffect.World * cameraEffect.View * cameraEffect.Projection;
+        var worldViewProjectionMatrix = camera.WorldMatrix * camera.ViewMatrix * camera.ProjectionMatrix;
         viewPosition = Vector4.Transform(viewPosition, worldViewProjectionMatrix);
         viewPosition /= viewPosition.W;
-        viewPosition.X = (viewPosition.X + 1) * viewportWidth * 0.5f;
-        viewPosition.Y = (viewPosition.Y + 1) * viewportHeight * 0.5f;
-        
+        viewPosition.X = (viewPosition.X + 1) * camera.Width * 0.5f;
+        viewPosition.Y = (viewPosition.Y + 1) * camera.Height * 0.5f;
+
         var mouseX = mouseState.X;
         var mouseY = mouseState.Y;
 
         var directionToMouse = new Vector3(mouseX - viewPosition.X, 0f, mouseY - viewPosition.Y);
-        directionToMouse = -directionToMouse.Z * cameraForward + directionToMouse.X * cameraRight;
-        
+        directionToMouse = -directionToMouse.Z * camera.Forward + directionToMouse.X * camera.Right;
+
         _weapon.Update(deltaTime);
 
         if (mouseState.LeftButton == ButtonState.Pressed)
         {
-            _weapon.Attack(directionToMouse, _position.X, _position.Z, projectiles, netPacketProcessor, writer, client);
+            _weapon.Attack(directionToMouse, _position.X, _position.Z, projectiles, client);
         }
     }
-    
-    public void Update(bool isLocal, KeyboardState keyboardState, MouseState mouseState, Map map, List<Projectile> projectiles,
-        NetPacketProcessor netPacketProcessor, NetDataWriter writer, NetManager client,
-        Vector3 cameraForward, Vector3 cameraRight, AlphaTestEffect cameraEffect, float viewportWidth, float viewportHeight, float deltaTime)
+
+    public void Update(KeyboardState keyboardState, MouseState mouseState, Map map, List<Projectile> projectiles,
+        Client client,
+        Camera camera, float deltaTime)
     {
-        if (isLocal)
+        if (client.IsLocal(Id))
         {
-            UpdateLocal(keyboardState, mouseState, map, projectiles,
-                netPacketProcessor, writer, client,
-                cameraForward, cameraRight, cameraEffect,
-                viewportWidth, viewportHeight, deltaTime);
+            UpdateLocal(keyboardState, mouseState, map, projectiles, client, camera, deltaTime);
             return;
         }
-        
+
         _spritePosition = Vector3.Lerp(_spritePosition, _position, SpriteLerp * deltaTime);
     }
 
-    public void Tick(bool isLocal, int localId, NetPacketProcessor netPacketProcessor, NetDataWriter writer, NetManager client, float deltaTime)
+    public void Tick(Client client, float deltaTime)
     {
-        if (isLocal)
+        if (client.IsLocal(Id))
         {
-            writer.Reset();
-            netPacketProcessor.Write(writer, new PlayerMove { Id = localId, X = _position.X, Z = _position.Z });
-            client.FirstPeer.Send(writer, DeliveryMethod.Unreliable);
+            client.SendToServer(new PlayerMove { Id = Id, X = _position.X, Z = _position.Z },
+                DeliveryMethod.Unreliable);
         }
     }
 
