@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -7,8 +9,13 @@ namespace BulletHell;
 public static class CubeMesh
 {
     public const int TileSize = 8;
-    public const float UnitX = 1f; // 1f / TileSize;
-    public const float UnitY = 1f; // 1f / TileSize;
+    public const int TextureWidthTiles = 32;
+    public const int TextureHeightTiles = 32;
+    public const float UnitX = 1f / TextureWidthTiles;
+    public const float UnitY = 1f / TextureHeightTiles;
+    // Used to prevent texture bleeding, where bits of nearby textures
+    // are rendered alongside the desired one.
+    public static readonly float Padding = Math.Min(UnitX, UnitY) * 0.025f;
 
     public static readonly Dictionary<Direction, VertexPositionColorTexture[]> Vertices = new()
     {
@@ -16,21 +23,21 @@ public static class CubeMesh
             Direction.Forward,
             new[]
             {
-                new VertexPositionColorTexture(new Vector3(0, 0, 0), GameColors.Lighting5, new Vector2(UnitX, UnitY)),
-                new VertexPositionColorTexture(new Vector3(0, 1, 0), GameColors.Lighting5, new Vector2(UnitX, 0)),
-                new VertexPositionColorTexture(new Vector3(1, 1, 0), GameColors.Lighting5, new Vector2(0, 0)),
-                new VertexPositionColorTexture(new Vector3(1, 0, 0), GameColors.Lighting5, new Vector2(0, UnitY))
+                new VertexPositionColorTexture(new Vector3(0, 0, 0), GameColors.Lighting5, new Vector2(UnitX - Padding, UnitY - Padding)),
+                new VertexPositionColorTexture(new Vector3(0, 1, 0), GameColors.Lighting5, new Vector2(UnitX - Padding, Padding)),
+                new VertexPositionColorTexture(new Vector3(1, 1, 0), GameColors.Lighting5, new Vector2(Padding, Padding)),
+                new VertexPositionColorTexture(new Vector3(1, 0, 0), GameColors.Lighting5, new Vector2(Padding, UnitY - Padding))
             }
         },
         {
             Direction.Backward,
             new[]
             {
-                new VertexPositionColorTexture(new Vector3(0, 0, 1), GameColors.Lighting2, new Vector2(0, UnitY)),
-                new VertexPositionColorTexture(new Vector3(0, 1, 1), GameColors.Lighting2, new Vector2(0, 0)),
-                new VertexPositionColorTexture(new Vector3(1, 1, 1), GameColors.Lighting2, new Vector2(UnitX, 0)),
+                new VertexPositionColorTexture(new Vector3(0, 0, 1), GameColors.Lighting2, new Vector2(Padding, UnitY - Padding)),
+                new VertexPositionColorTexture(new Vector3(0, 1, 1), GameColors.Lighting2, new Vector2(Padding, Padding)),
+                new VertexPositionColorTexture(new Vector3(1, 1, 1), GameColors.Lighting2, new Vector2(UnitX - Padding, Padding)),
                 new VertexPositionColorTexture(new Vector3(1, 0, 1), GameColors.Lighting2,
-                    new Vector2(UnitX, UnitY))
+                    new Vector2(UnitX - Padding, UnitY - Padding))
             }
         },
         {
@@ -38,13 +45,13 @@ public static class CubeMesh
             new[]
             {
                 new VertexPositionColorTexture(new Vector3(1, 0, 0), GameColors.Lighting4,
-                    new Vector2(UnitX, UnitY)),
+                    new Vector2(UnitX - Padding, UnitY - Padding)),
                 new VertexPositionColorTexture(new Vector3(1, 0, 1), GameColors.Lighting4,
-                    new Vector2(0, UnitY)),
+                    new Vector2(Padding, UnitY - Padding)),
                 new VertexPositionColorTexture(new Vector3(1, 1, 1), GameColors.Lighting4,
-                    new Vector2(0, 0)),
+                    new Vector2(Padding, Padding)),
                 new VertexPositionColorTexture(new Vector3(1, 1, 0), GameColors.Lighting4,
-                    new Vector2(UnitX, 0))
+                    new Vector2(UnitX - Padding, Padding))
             }
         },
         {
@@ -52,22 +59,22 @@ public static class CubeMesh
             new[]
             {
                 new VertexPositionColorTexture(new Vector3(0, 0, 0), GameColors.Lighting3,
-                    new Vector2(0, UnitY)),
+                    new Vector2(Padding, UnitY - Padding)),
                 new VertexPositionColorTexture(new Vector3(0, 0, 1), GameColors.Lighting3,
-                    new Vector2(UnitX, UnitY)),
-                new VertexPositionColorTexture(new Vector3(0, 1, 1), GameColors.Lighting3, new Vector2(UnitX, 0)),
-                new VertexPositionColorTexture(new Vector3(0, 1, 0), GameColors.Lighting3, new Vector2(0, 0))
+                    new Vector2(UnitX - Padding, UnitY - Padding)),
+                new VertexPositionColorTexture(new Vector3(0, 1, 1), GameColors.Lighting3, new Vector2(UnitX - Padding, Padding)),
+                new VertexPositionColorTexture(new Vector3(0, 1, 0), GameColors.Lighting3, new Vector2(Padding, Padding))
             }
         },
         {
             Direction.Up,
             new[]
             {
-                new VertexPositionColorTexture(new Vector3(0, 1, 0), GameColors.Lighting6, new Vector2(0, UnitY)),
-                new VertexPositionColorTexture(new Vector3(0, 1, 1), GameColors.Lighting6, new Vector2(0, 0)),
-                new VertexPositionColorTexture(new Vector3(1, 1, 1), GameColors.Lighting6, new Vector2(UnitX, 0)),
+                new VertexPositionColorTexture(new Vector3(0, 1, 0), GameColors.Lighting6, new Vector2(Padding, UnitY - Padding)),
+                new VertexPositionColorTexture(new Vector3(0, 1, 1), GameColors.Lighting6, new Vector2(Padding, Padding)),
+                new VertexPositionColorTexture(new Vector3(1, 1, 1), GameColors.Lighting6, new Vector2(UnitX - Padding, Padding)),
                 new VertexPositionColorTexture(new Vector3(1, 1, 0), GameColors.Lighting6,
-                    new Vector2(UnitX, UnitY))
+                    new Vector2(UnitX - Padding, UnitY - Padding))
             }
         },
         {
@@ -75,12 +82,12 @@ public static class CubeMesh
             new[]
             {
                 new VertexPositionColorTexture(new Vector3(0, 0, 0), GameColors.Lighting1,
-                    new Vector2(0, UnitY)),
-                new VertexPositionColorTexture(new Vector3(0, 0, 1), GameColors.Lighting1, new Vector2(0, 0)),
+                    new Vector2(Padding, UnitY - Padding)),
+                new VertexPositionColorTexture(new Vector3(0, 0, 1), GameColors.Lighting1, new Vector2(Padding, Padding)),
                 new VertexPositionColorTexture(new Vector3(1, 0, 1), GameColors.Lighting1,
-                    new Vector2(UnitX, 0)),
+                    new Vector2(UnitX - Padding, Padding)),
                 new VertexPositionColorTexture(new Vector3(1, 0, 0), GameColors.Lighting1,
-                    new Vector2(UnitX, UnitY))
+                    new Vector2(UnitX - Padding, UnitY - Padding))
             }
         }
     };
@@ -113,9 +120,12 @@ public static class CubeMesh
         }
     };
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector2 GetTexCoord(Tile tile)
     {
-        var i = (int)tile * 4;
-        return new Vector2(UnitX * (i % TileSize), UnitY * (i / TileSize * 2));
+        var i = (int)tile;
+        var x = i % TextureWidthTiles;
+        var y = i / TextureHeightTiles;
+        return new Vector2(UnitX * x, UnitY * y);
     }
 }

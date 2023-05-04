@@ -49,7 +49,7 @@ public class Map
             {
                 if (_random.NextSingle() > 0.3f) continue;
 
-                _wallTiles[x + z * _size] = Tile.Marble;
+                _wallTiles[x + z * _size] = Tile.Grass;
             }
         }
     }
@@ -122,6 +122,9 @@ public class Map
                         newVertex.Color.R = (byte)(vertex.Color.R * WallShade);
                         newVertex.Color.G = (byte)(vertex.Color.G * WallShade);
                         newVertex.Color.B = (byte)(vertex.Color.B * WallShade);
+                        var texCoord = CubeMesh.GetTexCoord(tile);
+                        newVertex.TextureCoordinate.X += texCoord.X;
+                        newVertex.TextureCoordinate.Y += texCoord.Y;
                         _vertices.Add(newVertex);
                     }
                 }
@@ -154,6 +157,9 @@ public class Map
                     newVertex.Color.R = (byte)(vertex.Color.R * FloorShade);
                     newVertex.Color.G = (byte)(vertex.Color.G * FloorShade);
                     newVertex.Color.B = (byte)(vertex.Color.B * FloorShade);
+                    var texCoord = CubeMesh.GetTexCoord(tile);
+                    newVertex.TextureCoordinate.X += texCoord.X;
+                    newVertex.TextureCoordinate.Y += texCoord.Y;
                     _vertices.Add(newVertex);
                 }
             }

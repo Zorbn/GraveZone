@@ -4,4 +4,5 @@ public enum Tile
 {
     Air,
     Marble,
+    Grass,
 }
