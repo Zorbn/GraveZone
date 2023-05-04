@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletHell;
 
-// TODO: Sync map, destroy projectiles that go outside the map.
+// TODO: Count outside map as solid, spawn player on an empty tile inside the map.
 public class Map
 {
     private const float TileScale = 1f;
@@ -26,28 +26,32 @@ public class Map
 
     private Random _random;
 
-    public Map(int size, GraphicsDevice graphicsDevice)
+    public Map(int size)
     {
         _size = size;
-        _random = new Random();
 
         _floorTiles = new Tile[size * size];
         _wallTiles = new Tile[size * size];
         
+        _vertices = new List<VertexPositionColorTexture>();
+        _indices = new List<ushort>();
+    }
+
+    public void Generate(int seed)
+    {
+        _random = new Random(seed);
+        
         Array.Fill(_floorTiles, Tile.Marble);
 
-        for (var z = 0; z < size; ++z)
+        for (var z = 0; z < _size; ++z)
         {
-            for (var x = 0; x < size; ++x)
+            for (var x = 0; x < _size; ++x)
             {
                 if (_random.NextSingle() > 0.3f) continue;
 
-                _wallTiles[x + z * size] = Tile.Marble;
+                _wallTiles[x + z * _size] = Tile.Marble;
             }
         }
-
-        _vertices = new List<VertexPositionColorTexture>();
-        _indices = new List<ushort>();
     }
 
     private Tile GetFloorTile(int x, int z)
@@ -159,9 +163,11 @@ public class Map
             BufferUsage.WriteOnly);
         _indexBuffer = new IndexBuffer(graphicsDevice, typeof(ushort), _indices.Count, BufferUsage.WriteOnly);
 
+        if (_vertices.Count == 0 || _indices.Count == 0) return;
+        
         _vertexBuffer.SetData(_vertices.ToArray());
         _indexBuffer.SetData(_indices.ToArray());
-
+        
         _primitives = _indices.Count / 3;
     }
 

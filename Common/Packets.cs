@@ -39,3 +39,8 @@ public class ProjectileSpawn
     public float X { get; set; }
     public float Z { get; set; }
 }
+
+public class MapGenerate
+{
+    public int Seed { get; set; }
+}

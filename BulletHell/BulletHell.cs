@@ -61,8 +61,7 @@ public class BulletHell : Game
 
         _camera = new Camera(GraphicsDevice);
 
-        _map = new Map(16, GraphicsDevice);
-        _map.Mesh(GraphicsDevice);
+        _map = new Map(Common.Map.Size);
 
         _spriteRenderer = new SpriteRenderer(500, GraphicsDevice);
 
@@ -72,18 +71,19 @@ public class BulletHell : Game
 
         _client = new Client();
         
-        // TODO: Make a menu for joining a server before the game starts.
         _client.NetPacketProcessor.RegisterNestedType<NetVector3>();
         _client.NetPacketProcessor.SubscribeReusable<SetLocalId, NetPeer>(OnSetLocalId);
         _client.NetPacketProcessor.SubscribeReusable<PlayerSpawn, NetPeer>(OnPlayerSpawn);
         _client.NetPacketProcessor.SubscribeReusable<PlayerDespawn, NetPeer>(OnPlayerDespawn);
         _client.NetPacketProcessor.SubscribeReusable<PlayerMove, NetPeer>(OnPlayerMove);
         _client.NetPacketProcessor.SubscribeReusable<ProjectileSpawn, NetPeer>(OnProjectileSpawn);
+        _client.NetPacketProcessor.SubscribeReusable<MapGenerate>(OnMapGenerate);
         
+        // TODO: Make a menu for joining a server before the game starts.
         // TODO: Close client with UI and when game is closed.
         _client.Connect("localhost");
         
-        Console.WriteLine($"Starting client...");
+        Console.WriteLine("Starting client...");
         
         base.Initialize();
     }
@@ -251,5 +251,11 @@ public class BulletHell : Game
         var direction = new Vector3(projectileSpawn.Direction.X, projectileSpawn.Direction.Y,
             projectileSpawn.Direction.Z);
         _projectiles.Add(new Projectile(direction, projectileSpawn.X, projectileSpawn.Z));
+    }
+    
+    private void OnMapGenerate(MapGenerate mapGenerate)
+    {
+        _map.Generate(mapGenerate.Seed);
+        _map.Mesh(GraphicsDevice);
     }
 }
