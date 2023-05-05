@@ -8,10 +8,16 @@ namespace BulletHell;
 
 public class BulletHell : Game
 {
+    public const int UiWidth = 480;
+    public const int UiHeight = 270;
+    public Matrix UiMatrix { get; private set; }
+    
     public Resources Resources { get; private set; }
     
     private GraphicsDeviceManager _graphics;
     public SpriteBatch SpriteBatch { get; private set; }
+
+    private Input _input;
 
     private IScene _scene;
     
@@ -35,12 +41,33 @@ public class BulletHell : Game
 
     private void OnResize(object sender, EventArgs eventArgs)
     {
-        _scene.Resize(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+        var width = GraphicsDevice.Viewport.Width;
+        var height = GraphicsDevice.Viewport.Height;
+        UpdateUiScale(width, height);
+        _scene.Resize(width, height);
+    }
+
+    private void UpdateUiScale(int width, int height)
+    {
+        var uiScale = MathF.Min(width / (float)UiWidth, height / (float)UiHeight);
+        var offsetX = (width - UiWidth * uiScale) / 2;
+        var offsetY = (height - UiHeight * uiScale) / 2;
+        UiMatrix = Matrix.CreateScale(uiScale) * Matrix.CreateTranslation(offsetX, offsetY, 0f);
+    }
+
+    public Vector2 GetMouseUiPosition()
+    {
+        var mousePosition = new Vector3(_input.MouseX, _input.MouseY, 0f);
+        mousePosition = Vector3.Transform(mousePosition, Matrix.Invert(UiMatrix));
+        return new Vector2(mousePosition.X, mousePosition.Y);
     }
     
     protected override void Initialize()
     {
+        UpdateUiScale(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+        
         Resources = new Resources(GraphicsDevice);
+        _input = new Input();
 
         _scene = new MainMenuScene(this);
         
@@ -58,11 +85,8 @@ public class BulletHell : Game
     {
         var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         
-        var keyboardState = Keyboard.GetState();
-        // Don't allow mouse inputs when the window isn't focused.
-        var mouseState = IsActive ? Mouse.GetState() : new MouseState();
-        
-        _scene.Update(keyboardState, mouseState, deltaTime);
+        _input.Update(IsActive);
+        _scene.Update(_input, deltaTime);
         
         base.Update(gameTime);
     }

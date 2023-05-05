@@ -66,27 +66,26 @@ public class Player
     }
 
     // TODO: Create class to send packets and store network info.
-    private void UpdateLocal(KeyboardState keyboardState, MouseState mouseState, Map map, List<Projectile> projectiles,
-        Client client, Camera camera, float deltaTime)
+    private void UpdateLocal(Input input, Map map, List<Projectile> projectiles, Client client, Camera camera, float deltaTime)
     {
         var movement = Vector3.Zero;
 
-        if (keyboardState.IsKeyDown(Keys.W))
+        if (input.IsKeyDown(Keys.W))
         {
             movement.Z += 1f;
         }
 
-        if (keyboardState.IsKeyDown(Keys.S))
+        if (input.IsKeyDown(Keys.S))
         {
             movement.Z -= 1f;
         }
 
-        if (keyboardState.IsKeyDown(Keys.A))
+        if (input.IsKeyDown(Keys.A))
         {
             movement.X -= 1f;
         }
 
-        if (keyboardState.IsKeyDown(Keys.D))
+        if (input.IsKeyDown(Keys.D))
         {
             movement.X += 1f;
         }
@@ -101,27 +100,22 @@ public class Player
         viewPosition.X = (viewPosition.X + 1) * camera.Width * 0.5f;
         viewPosition.Y = (viewPosition.Y + 1) * camera.Height * 0.5f;
 
-        var mouseX = mouseState.X;
-        var mouseY = mouseState.Y;
-
-        var directionToMouse = new Vector3(mouseX - viewPosition.X, 0f, mouseY - viewPosition.Y);
+        var directionToMouse = new Vector3(input.MouseX - viewPosition.X, 0f, input.MouseY - viewPosition.Y);
         directionToMouse = -directionToMouse.Z * camera.Forward + directionToMouse.X * camera.Right;
 
         _weapon.Update(deltaTime);
 
-        if (mouseState.LeftButton == ButtonState.Pressed)
+        if (input.IsMouseButtonDown(MouseButton.Left))
         {
             _weapon.Attack(directionToMouse, _position.X, _position.Z, projectiles, client);
         }
     }
 
-    public void Update(KeyboardState keyboardState, MouseState mouseState, Map map, List<Projectile> projectiles,
-        Client client,
-        Camera camera, float deltaTime)
+    public void Update(Input input, Map map, List<Projectile> projectiles, Client client, Camera camera, float deltaTime)
     {
         if (client.IsLocal(Id))
         {
-            UpdateLocal(keyboardState, mouseState, map, projectiles, client, camera, deltaTime);
+            UpdateLocal(input, map, projectiles, client, camera, deltaTime);
             return;
         }
 

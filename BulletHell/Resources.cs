@@ -4,6 +4,8 @@ namespace BulletHell;
 
 public class Resources
 { 
+    public const int TileSize = 8;
+    
     public readonly Texture2D MapTexture;
     public readonly Texture2D SpriteTexture;
     public readonly Texture2D UiTexture;

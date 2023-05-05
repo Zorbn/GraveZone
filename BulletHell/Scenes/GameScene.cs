@@ -11,18 +11,18 @@ namespace BulletHell.Scenes;
 public class GameScene : IScene
 {
     private const float TickTime = 0.05f;
-    private static readonly Matrix UiMatrix = Matrix.CreateScale(4f);
 
-    private BulletHell _game;
+    private readonly BulletHell _game;
     
-    private Map _map;
-    private SpriteRenderer _spriteRenderer;
-    private Dictionary<int, Player> _players;
-    private List<Projectile> _projectiles;
+    private readonly Map _map;
+    private readonly SpriteRenderer _spriteRenderer;
+    private readonly Dictionary<int, Player> _players;
+    private readonly List<Projectile> _projectiles;
+    private readonly Camera _camera;
+    
+    private readonly Client _client;
+    
     private float _tickTimer;
-    private Camera _camera;
-    
-    private Client _client;
     
     public GameScene(BulletHell game)
     {
@@ -60,36 +60,36 @@ public class GameScene : IScene
         
     }
     
-    public void Update(KeyboardState keyboardState, MouseState mouseState, float deltaTime)
+    public void Update(Input input, float deltaTime)
     {
         _client.PollEvents();
 
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-            keyboardState.IsKeyDown(Keys.Escape))
+            input.IsKeyDown(Keys.Escape))
             _game.Exit();
 
         var cameraAngleMovement = 0f;
 
-        if (keyboardState.IsKeyDown(Keys.Q))
+        if (input.IsKeyDown(Keys.Q))
         {
             cameraAngleMovement += 1f;
         }
 
-        if (keyboardState.IsKeyDown(Keys.E))
+        if (input.IsKeyDown(Keys.E))
         {
             cameraAngleMovement -= 1f;
         }
 
         _camera.Rotate(cameraAngleMovement * deltaTime);
 
-        if (keyboardState.IsKeyDown(Keys.Z))
+        if (input.IsKeyDown(Keys.Z))
         {
             _camera.ResetAngle();
         }
 
         foreach (var (_, player) in _players)
         {
-            player.Update(keyboardState, mouseState, _map, _projectiles, _client, _camera, deltaTime);
+            player.Update(input, _map, _projectiles, _client, _camera, deltaTime);
         }
 
         if (_players.TryGetValue(_client.LocalId, out var localPlayer))
@@ -148,7 +148,7 @@ public class GameScene : IScene
             _spriteRenderer.Draw(_game.GraphicsDevice);
         }
         
-        _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: UiMatrix);
+        _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
         _game.SpriteBatch.Draw(_game.Resources.UiTexture, new Vector2(0f, 0f), Color.White);
         _game.SpriteBatch.End();
     }

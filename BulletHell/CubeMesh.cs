@@ -8,7 +8,6 @@ namespace BulletHell;
 
 public static class CubeMesh
 {
-    public const int TileSize = 8;
     public const int TextureWidthTiles = 32;
     public const int TextureHeightTiles = 32;
     public const float UnitX = 1f / TextureWidthTiles;
