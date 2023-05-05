@@ -5,11 +5,14 @@ namespace BulletHell.Scenes;
 
 public class ConnectingScene : IScene
 {
+    private const float TimeoutTime = 30f;
+    
     private BulletHell _game;
     private readonly GameScene _gameScene;
     private bool _hasConnected;
     private bool _transitioningToGame;
-    private Button _backButton;
+    private TextButton _backButton;
+    private float _timeoutTimer;
     
     public ConnectingScene(BulletHell game, string ip)
     {
@@ -18,7 +21,7 @@ public class ConnectingScene : IScene
         _gameScene.Client.ConnectedEvent += () => _hasConnected = true;
         _gameScene.Client.Connect(ip);
         
-        _backButton = new Button(BulletHell.UiCenterX, BulletHell.UiCenterY + Resources.TileSize * 3, "back", true);
+        _backButton = new TextButton(BulletHell.UiCenterX, BulletHell.UiCenterY + Resources.TileSize * 3, "back", true);
     }
 
     public void Exit()
@@ -30,8 +33,14 @@ public class ConnectingScene : IScene
 
     public void Update(Input input, float deltaTime)
     {
-        // TODO: Timeout after 30 seconds.
         _gameScene.Client.PollEvents();
+
+        if (_timeoutTimer > TimeoutTime)
+        {
+            _game.SetScene(new MainMenuScene(_game));
+        }
+        
+        _timeoutTimer += deltaTime;
         
         if (input.WasMouseButtonPressed(MouseButton.Left))
         {

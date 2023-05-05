@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletHell;
 
-public class Button
+public class TextButton
 {
     // TODO: Consolidate similar fields, drawing code between text input and button.
     private const int Height = Resources.TileSize * 2;
@@ -18,7 +18,7 @@ public class Button
     private readonly string _text;
     private Rectangle _rectangle;
     
-    public Button(int x, int y, string text, bool centered)
+    public TextButton(int x, int y, string text, bool centered)
     {
         _text = text;
         

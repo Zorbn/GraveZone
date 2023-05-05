@@ -7,14 +7,14 @@ public class MainMenuScene : IScene
 {
     private readonly BulletHell _game;
     private readonly TextInput _ipInput;
-    private readonly Button _playButton;
+    private readonly TextButton _playButton;
     
     public MainMenuScene(BulletHell game)
     {
         _game = game;
         const int ipInputWidth = 18;
         _ipInput = new TextInput(BulletHell.UiCenterX, BulletHell.UiCenterY, ipInputWidth, true, "localhost");
-        _playButton = new Button(BulletHell.UiCenterX, BulletHell.UiCenterY + Resources.TileSize * 3, "play", true);
+        _playButton = new TextButton(BulletHell.UiCenterX, BulletHell.UiCenterY + Resources.TileSize * 3, "play", true);
     }
 
     public void Update(Input input, float deltaTime)

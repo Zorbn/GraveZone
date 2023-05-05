@@ -21,6 +21,8 @@ public class GameScene : IScene
     private readonly Dictionary<int, Player> _players;
     private readonly List<Projectile> _projectiles;
     private readonly Camera _camera;
+
+    private readonly ImageButton _quitButton;
     
     private float _tickTimer;
     
@@ -29,14 +31,13 @@ public class GameScene : IScene
         _game = game;
         
         _camera = new Camera(game.GraphicsDevice);
-
         _map = new Map(Common.Map.Size);
-
         _spriteRenderer = new SpriteRenderer(500, game.GraphicsDevice);
-
         _players = new Dictionary<int, Player>();
-
         _projectiles = new List<Projectile>();
+
+        _quitButton = new ImageButton(BulletHell.UiCenterX - Resources.TileSize / 2, 0,
+            new Rectangle(0, 3 * Resources.TileSize + 1, Resources.TileSize, Resources.TileSize));
 
         Client = new Client();
         
@@ -48,14 +49,12 @@ public class GameScene : IScene
         Client.NetPacketProcessor.SubscribeReusable<ProjectileSpawn, NetPeer>(OnProjectileSpawn);
         Client.NetPacketProcessor.SubscribeReusable<MapGenerate>(OnMapGenerate);
         
-        // TODO: Close client with UI
-
         Console.WriteLine("Starting client...");
     }
 
     public void Exit()
     {
-        Console.WriteLine($"Disconnecting...");
+        Console.WriteLine("Disconnecting...");
         Client.Stop();
     }
     
@@ -93,7 +92,7 @@ public class GameScene : IScene
 
         if (_players.TryGetValue(Client.LocalId, out var localPlayer))
         {
-            UpdateLocal(localPlayer);
+            UpdateLocal(input, localPlayer);
         }
         
         for (var i = _projectiles.Count - 1; i >= 0; i--)
@@ -149,6 +148,7 @@ public class GameScene : IScene
         
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
         // _game.SpriteBatch.Draw(_game.Resources.UiTexture, new Vector2(0f, 0f), Color.White);
+        _quitButton.Draw(_game.SpriteBatch, _game.Resources);
         _game.SpriteBatch.End();
     }
 
@@ -157,8 +157,19 @@ public class GameScene : IScene
         _camera.Resize(width, height);
     }
     
-    private void UpdateLocal(Player localPlayer)
+    private void UpdateLocal(Input input, Player localPlayer)
     {
+        if (input.WasMouseButtonPressed(MouseButton.Left))
+        {
+            var mousePosition = _game.GetMouseUiPosition();
+            var mouseX = (int)mousePosition.X;
+            var mouseY = (int)mousePosition.Y;
+            if (_quitButton.Contains(mouseX, mouseY))
+            {
+                _game.SetScene(new MainMenuScene(_game));
+            }
+        }
+        
         _camera.SetPosition(localPlayer.Position);
     }
     

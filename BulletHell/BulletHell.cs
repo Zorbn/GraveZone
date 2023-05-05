@@ -21,6 +21,7 @@ public class BulletHell : Game
     private Input _input;
 
     private IScene _scene;
+    private IScene _nextScene;
     
     public BulletHell()
     {
@@ -86,6 +87,13 @@ public class BulletHell : Game
         
         _input.Update(IsActive);
         _scene.Update(_input, deltaTime);
+
+        if (_nextScene is not null)
+        {
+            _scene.Exit();
+            _scene = _nextScene;
+            _nextScene = null;
+        }
         
         base.Update(gameTime);
     }
@@ -97,10 +105,11 @@ public class BulletHell : Game
         base.Draw(gameTime);
     }
 
-    public void SetScene(IScene scene)
+    public void SetScene(IScene nextScene)
     {
-        _scene.Exit();
-        _scene = scene;
+        if (_nextScene is not null) return;
+        
+        _nextScene = nextScene;
     }
 
     protected override void OnExiting(object sender, EventArgs args)
