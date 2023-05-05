@@ -9,9 +9,9 @@ public class Client
     public NetPacketProcessor NetPacketProcessor { get; private set; }
     public int LocalId { get; set; } = -1;
     
-    private EventBasedNetListener _listener;
-    private NetManager _manager;
-    private NetDataWriter _writer;
+    private readonly EventBasedNetListener _listener;
+    private readonly NetManager _manager;
+    private readonly NetDataWriter _writer;
 
     public Client()
     {
@@ -30,6 +30,11 @@ public class Client
     public void Connect(string ip)
     {
         _manager.Connect(ip, Networking.Port, "");
+    }
+
+    public void Disconnect()
+    {
+        _manager.DisconnectAll();
     }
 
     public void PollEvents()

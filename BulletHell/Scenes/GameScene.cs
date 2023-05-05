@@ -24,7 +24,7 @@ public class GameScene : IScene
     
     private float _tickTimer;
     
-    public GameScene(BulletHell game)
+    public GameScene(BulletHell game, string ip)
     {
         _game = game;
         
@@ -48,16 +48,18 @@ public class GameScene : IScene
         _client.NetPacketProcessor.SubscribeReusable<ProjectileSpawn, NetPeer>(OnProjectileSpawn);
         _client.NetPacketProcessor.SubscribeReusable<MapGenerate>(OnMapGenerate);
         
-        // TODO: Make a menu for joining a server before the game starts.
+        // TODO: Make an intermediate state for joining, before the game starts that allows
+        // players to cancel joining. Make sure to handle when the client can't connect.
         // TODO: Close client with UI and when game is closed.
-        _client.Connect("localhost");
+        _client.Connect(ip);
         
         Console.WriteLine("Starting client...");
     }
 
-    ~GameScene()
+    public void Exit()
     {
-        
+        Console.WriteLine($"Disconnecting...");
+        _client.Disconnect();
     }
     
     public void Update(Input input, float deltaTime)
@@ -149,7 +151,7 @@ public class GameScene : IScene
         }
         
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
-        _game.SpriteBatch.Draw(_game.Resources.UiTexture, new Vector2(0f, 0f), Color.White);
+        // _game.SpriteBatch.Draw(_game.Resources.UiTexture, new Vector2(0f, 0f), Color.White);
         _game.SpriteBatch.End();
     }
 

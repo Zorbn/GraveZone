@@ -2,7 +2,6 @@
 using BulletHell.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace BulletHell;
 
@@ -100,6 +99,14 @@ public class BulletHell : Game
 
     public void SetScene(IScene scene)
     {
+        _scene.Exit();
         _scene = scene;
+    }
+
+    protected override void OnExiting(object sender, EventArgs args)
+    {
+        _scene.Exit();
+        
+        base.OnExiting(sender, args);
     }
 }

@@ -8,7 +8,7 @@ namespace BulletHell;
 
 public class TextInput
 {
-    private const int Height = Resources.TileSize * 2;
+    public const int Height = Resources.TileSize * 2;
     private const int TextPadding = Resources.TileSize / 2;
     
     private static readonly Rectangle LeftTexture = new(2 * Resources.TileSize, 0, Resources.TileSize, Height);
@@ -23,7 +23,7 @@ public class TextInput
 
     private bool _isFocused;
 
-    public TextInput(int x, int y, int widthInTiles)
+    public TextInput(int x, int y, int widthInTiles, bool centered)
     {
         _isFocused = false;
         
@@ -35,6 +35,12 @@ public class TextInput
         if (_widthInTiles < 3)
         {
             throw new ArgumentOutOfRangeException(nameof(widthInTiles));
+        }
+        
+        if (centered)
+        {
+            x -= _widthInTiles * Resources.TileSize / 2;
+            y -= Height / 2;
         }
         
         _rectangle = new Rectangle(x, y, widthInTiles * Resources.TileSize, Height);
@@ -84,7 +90,7 @@ public class TextInput
             var keyIsValid = keyIsLetter || keyIsNumber || keyIsPeriod;
             if (!keyIsValid) continue;
 
-            var keyString = heldKey.ToString();
+            var keyString = heldKey.ToString().ToLower();
             var keyChar = keyIsPeriod ? '.' : keyString[^1];
             _text.Append(keyChar);
         }
@@ -94,8 +100,7 @@ public class TextInput
 
     public void Draw(SpriteBatch spriteBatch, Resources resources)
     {
-        var offsetRectangle = new Rectangle(_rectangle.X, _rectangle.Y, Resources.TileSize,
-            Height);
+        var offsetRectangle = new Rectangle(_rectangle.X, _rectangle.Y, Resources.TileSize, Height);
         spriteBatch.Draw(resources.UiTexture, offsetRectangle, LeftTexture, Color.White);
         
         for (var i = 0; i < _widthInTiles - 2; i++)
@@ -119,5 +124,10 @@ public class TextInput
         {
             UpdateDrawableText();
         }
+    }
+
+    public string GetTextString()
+    {
+        return _text.ToString();
     }
 }

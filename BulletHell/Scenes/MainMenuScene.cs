@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace BulletHell.Scenes;
 
@@ -8,26 +7,31 @@ public class MainMenuScene : IScene
 {
     private readonly BulletHell _game;
     private readonly TextInput _ipInput;
+    private readonly Button _playButton;
     
     public MainMenuScene(BulletHell game)
     {
         _game = game;
         const int ipInputWidth = 18;
-        _ipInput = new TextInput(BulletHell.UiWidth / 2 - ipInputWidth * Resources.TileSize / 2,
-            BulletHell.UiHeight / 2, ipInputWidth);
+        const int centerX = BulletHell.UiWidth / 2;
+        const int centerY = BulletHell.UiHeight / 2;
+        _ipInput = new TextInput(centerX, centerY, ipInputWidth, true);
+        _playButton = new Button(centerX, centerY + Resources.TileSize * 3, "play", true);
     }
-    
+
     public void Update(Input input, float deltaTime)
     {
-        // if (input.IsKeyDown(Keys.Space))
-        // {
-        //     _game.SetScene(new GameScene(_game));
-        // }
-
         if (input.IsMouseButtonDown(MouseButton.Left))
         {
             var mousePosition = _game.GetMouseUiPosition();
-            _ipInput.UpdateFocusWithClick((int)mousePosition.X, (int)mousePosition.Y);
+            var mouseX = (int)mousePosition.X;
+            var mouseY = (int)mousePosition.Y;
+            _ipInput.UpdateFocusWithClick(mouseX, mouseY);
+
+            if (_playButton.Contains(mouseX, mouseY))
+            {
+                _game.SetScene(new GameScene(_game, _ipInput.GetTextString()));
+            }
         }
         
         _ipInput.Update(input);
@@ -39,10 +43,7 @@ public class MainMenuScene : IScene
         
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
         _ipInput.Draw(_game.SpriteBatch, _game.Resources);
+        _playButton.Draw(_game.SpriteBatch, _game.Resources);
         _game.SpriteBatch.End();
-    }
-
-    public void Resize(int width, int height)
-    {
     }
 }
