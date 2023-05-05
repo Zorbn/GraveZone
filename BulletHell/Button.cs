@@ -51,8 +51,9 @@ public class Button
         
         offsetRectangle.X += Resources.TileSize;
         spriteBatch.Draw(resources.UiTexture, offsetRectangle, RightTexture, Color.White);
-        
-        TextRenderer.Draw(_text, _rectangle.X + TextPadding, _rectangle.Y + TextPadding, resources, spriteBatch, false);
+
+        TextRenderer.Draw(_text, _rectangle.X + TextPadding, _rectangle.Y + TextPadding, resources, spriteBatch,
+            Color.White, false);
     }
 
     public bool Contains(int x, int y)

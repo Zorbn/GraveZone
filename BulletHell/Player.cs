@@ -65,7 +65,6 @@ public class Player
         _spritePosition = _position;
     }
 
-    // TODO: Create class to send packets and store network info.
     private void UpdateLocal(Input input, Map map, List<Projectile> projectiles, Client client, Camera camera, float deltaTime)
     {
         var movement = Vector3.Zero;

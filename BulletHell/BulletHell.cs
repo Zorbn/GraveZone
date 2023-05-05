@@ -9,6 +9,8 @@ public class BulletHell : Game
 {
     public const int UiWidth = 480;
     public const int UiHeight = 270;
+    public const int UiCenterX = UiWidth / 2;
+    public const int UiCenterY = UiHeight / 2;
     public Matrix UiMatrix { get; private set; }
     
     public Resources Resources { get; private set; }
@@ -66,7 +68,7 @@ public class BulletHell : Game
         UpdateUiScale(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
         
         Resources = new Resources(GraphicsDevice);
-        _input = new Input();
+        _input = new Input(IsActive);
 
         _scene = new MainMenuScene(this);
         
@@ -76,8 +78,6 @@ public class BulletHell : Game
     protected override void LoadContent()
     {
         SpriteBatch = new SpriteBatch(GraphicsDevice);
-
-        // TODO: use this.Content to load your game content here
     }
     
     protected override void Update(GameTime gameTime)

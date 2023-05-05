@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using System;
+using Common;
 using LiteNetLib;
 using LiteNetLib.Utils;
 
@@ -6,8 +7,11 @@ namespace BulletHell;
 
 public class Client
 {
-    public NetPacketProcessor NetPacketProcessor { get; private set; }
+    public readonly NetPacketProcessor NetPacketProcessor;
     public int LocalId { get; set; } = -1;
+
+    public delegate void OnConnection();
+    public event OnConnection ConnectedEvent;
     
     private readonly EventBasedNetListener _listener;
     private readonly NetManager _manager;
@@ -25,6 +29,11 @@ public class Client
         {
             NetPacketProcessor.ReadAllPackets(dataReader, fromPeer);
         };
+        
+        _listener.PeerConnectedEvent += _ =>
+        {
+            ConnectedEvent?.Invoke();
+        };
     }
 
     public void Connect(string ip)
@@ -35,6 +44,11 @@ public class Client
     public void Disconnect()
     {
         _manager.DisconnectAll();
+    }
+
+    public void Stop()
+    {
+        _manager.Stop();
     }
 
     public void PollEvents()

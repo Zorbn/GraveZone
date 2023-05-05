@@ -15,11 +15,11 @@ public class TextRenderer
         TextureYStart * Resources.TileSize - 1, Resources.TileSize - 1, Resources.TileSize);
     private static readonly Rectangle TextBackgroundRectangle = new(0, 2 * Resources.TileSize, Resources.TileSize, Resources.TileSize);
 
-    public static void Draw(string text, int x, int y, Resources resources, SpriteBatch spriteBatch, bool withBackground = true, int scale = 1, bool centered = false)
+    public static void Draw(string text, int x, int y, Resources resources, SpriteBatch spriteBatch, Color color, bool withBackground = true, int scale = 1, bool centered = false)
     {
         var sizeX = (text.Length + 1) * scale;
         var sizeY = scale * 2;
-        var textOffsetX = centered ? (sizeX * 0.5f - scale) * -Resources.TileSize : 0f;
+        var textOffsetX = centered ? (sizeX / 2 - scale) * -Resources.TileSize : 0;
 
         text = text.ToUpper();
 
@@ -40,13 +40,13 @@ public class TextRenderer
                 var index = Characters.IndexOf(c);
                 var texX = index % TextureCharsPerLine;
                 var texY = index / TextureCharsPerLine;
-                var destination = new Rectangle((int)(x + textOffsetX + Resources.TileSize * scale * i) + 1, y, Resources.TileSize - 1,
+                var destination = new Rectangle(x + textOffsetX + Resources.TileSize * scale * i + 1, y, Resources.TileSize - 1,
                     Resources.TileSize);
                 var source = CharRectangle;
                 source.X += texX * Resources.TileSize;
                 source.Y += texY * (Resources.TileSize + 1);
 
-                spriteBatch.Draw(resources.UiTexture, destination, source, Color.White);
+                spriteBatch.Draw(resources.UiTexture, destination, source, color);
             }
 
             i++;

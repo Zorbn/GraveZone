@@ -13,15 +13,13 @@ public class MainMenuScene : IScene
     {
         _game = game;
         const int ipInputWidth = 18;
-        const int centerX = BulletHell.UiWidth / 2;
-        const int centerY = BulletHell.UiHeight / 2;
-        _ipInput = new TextInput(centerX, centerY, ipInputWidth, true);
-        _playButton = new Button(centerX, centerY + Resources.TileSize * 3, "play", true);
+        _ipInput = new TextInput(BulletHell.UiCenterX, BulletHell.UiCenterY, ipInputWidth, true, "localhost");
+        _playButton = new Button(BulletHell.UiCenterX, BulletHell.UiCenterY + Resources.TileSize * 3, "play", true);
     }
 
     public void Update(Input input, float deltaTime)
     {
-        if (input.IsMouseButtonDown(MouseButton.Left))
+        if (input.WasMouseButtonPressed(MouseButton.Left))
         {
             var mousePosition = _game.GetMouseUiPosition();
             var mouseX = (int)mousePosition.X;
@@ -30,7 +28,7 @@ public class MainMenuScene : IScene
 
             if (_playButton.Contains(mouseX, mouseY))
             {
-                _game.SetScene(new GameScene(_game, _ipInput.GetTextString()));
+                _game.SetScene(new ConnectingScene(_game, _ipInput.GetTextString()));
             }
         }
         

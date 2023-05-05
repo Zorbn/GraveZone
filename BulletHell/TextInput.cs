@@ -20,14 +20,16 @@ public class TextInput
     private readonly int _widthInTiles;
     private readonly int _maxVisibleChars;
     private Rectangle _rectangle;
+    private readonly string _defaultText;
 
     private bool _isFocused;
 
-    public TextInput(int x, int y, int widthInTiles, bool centered)
+    public TextInput(int x, int y, int widthInTiles, bool centered, string defaultText)
     {
         _isFocused = false;
         
         _text = new StringBuilder();
+        _defaultText = defaultText;
         _drawableText = "";
         _widthInTiles = widthInTiles;
         _maxVisibleChars = widthInTiles - 1;
@@ -44,17 +46,14 @@ public class TextInput
         }
         
         _rectangle = new Rectangle(x, y, widthInTiles * Resources.TileSize, Height);
+        
+        UpdateDrawableText();
     }
 
     private void UpdateDrawableText()
     {
-        _drawableText = _text.ToString();
+        _drawableText = _text.Length == 0 ? _defaultText : _text.ToString();
         
-        if (_isFocused)
-        {
-            _drawableText += "|";
-        }
-
         if (_drawableText.Length > _maxVisibleChars)
         {
             _drawableText = _drawableText[^_maxVisibleChars..];
@@ -100,6 +99,9 @@ public class TextInput
 
     public void Draw(SpriteBatch spriteBatch, Resources resources)
     {
+        var usingDefaultText = _text.Length == 0;
+        var color = usingDefaultText ? Color.Gray : Color.White;
+        
         var offsetRectangle = new Rectangle(_rectangle.X, _rectangle.Y, Resources.TileSize, Height);
         spriteBatch.Draw(resources.UiTexture, offsetRectangle, LeftTexture, Color.White);
         
@@ -111,23 +113,25 @@ public class TextInput
         
         offsetRectangle.X += Resources.TileSize;
         spriteBatch.Draw(resources.UiTexture, offsetRectangle, RightTexture, Color.White);
-        
-        TextRenderer.Draw(_drawableText, _rectangle.X + TextPadding, _rectangle.Y + TextPadding, resources, spriteBatch, false);
+
+        TextRenderer.Draw(_drawableText, _rectangle.X + TextPadding, _rectangle.Y + TextPadding, resources, spriteBatch,
+            color, false);
+
+        if (_isFocused)
+        {
+            var textLength = Resources.TileSize * _drawableText.Length;
+            TextRenderer.Draw("|", _rectangle.X + TextPadding + textLength, _rectangle.Y + TextPadding, resources, spriteBatch,
+                Color.White, false);
+        }
     }
 
     public void UpdateFocusWithClick(int x, int y)
     {
-        var wasFocused = _isFocused;
         _isFocused = _rectangle.Contains(x, y);
-
-        if (wasFocused != _isFocused)
-        {
-            UpdateDrawableText();
-        }
     }
 
     public string GetTextString()
     {
-        return _text.ToString();
+        return _text.Length == 0 ? _defaultText : _text.ToString();
     }
 }

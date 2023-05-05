@@ -12,6 +12,8 @@ public class GameScene : IScene
 {
     private const float TickTime = 0.05f;
 
+    public readonly Client Client;
+    
     private readonly BulletHell _game;
     
     private readonly Map _map;
@@ -20,11 +22,9 @@ public class GameScene : IScene
     private readonly List<Projectile> _projectiles;
     private readonly Camera _camera;
     
-    private readonly Client _client;
-    
     private float _tickTimer;
     
-    public GameScene(BulletHell game, string ip)
+    public GameScene(BulletHell game)
     {
         _game = game;
         
@@ -38,33 +38,30 @@ public class GameScene : IScene
 
         _projectiles = new List<Projectile>();
 
-        _client = new Client();
+        Client = new Client();
         
-        _client.NetPacketProcessor.RegisterNestedType<NetVector3>();
-        _client.NetPacketProcessor.SubscribeReusable<SetLocalId, NetPeer>(OnSetLocalId);
-        _client.NetPacketProcessor.SubscribeReusable<PlayerSpawn, NetPeer>(OnPlayerSpawn);
-        _client.NetPacketProcessor.SubscribeReusable<PlayerDespawn, NetPeer>(OnPlayerDespawn);
-        _client.NetPacketProcessor.SubscribeReusable<PlayerMove, NetPeer>(OnPlayerMove);
-        _client.NetPacketProcessor.SubscribeReusable<ProjectileSpawn, NetPeer>(OnProjectileSpawn);
-        _client.NetPacketProcessor.SubscribeReusable<MapGenerate>(OnMapGenerate);
+        Client.NetPacketProcessor.RegisterNestedType<NetVector3>();
+        Client.NetPacketProcessor.SubscribeReusable<SetLocalId, NetPeer>(OnSetLocalId);
+        Client.NetPacketProcessor.SubscribeReusable<PlayerSpawn, NetPeer>(OnPlayerSpawn);
+        Client.NetPacketProcessor.SubscribeReusable<PlayerDespawn, NetPeer>(OnPlayerDespawn);
+        Client.NetPacketProcessor.SubscribeReusable<PlayerMove, NetPeer>(OnPlayerMove);
+        Client.NetPacketProcessor.SubscribeReusable<ProjectileSpawn, NetPeer>(OnProjectileSpawn);
+        Client.NetPacketProcessor.SubscribeReusable<MapGenerate>(OnMapGenerate);
         
-        // TODO: Make an intermediate state for joining, before the game starts that allows
-        // players to cancel joining. Make sure to handle when the client can't connect.
-        // TODO: Close client with UI and when game is closed.
-        _client.Connect(ip);
-        
+        // TODO: Close client with UI
+
         Console.WriteLine("Starting client...");
     }
 
     public void Exit()
     {
         Console.WriteLine($"Disconnecting...");
-        _client.Disconnect();
+        Client.Stop();
     }
     
     public void Update(Input input, float deltaTime)
     {
-        _client.PollEvents();
+        Client.PollEvents();
 
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             input.IsKeyDown(Keys.Escape))
@@ -91,10 +88,10 @@ public class GameScene : IScene
 
         foreach (var (_, player) in _players)
         {
-            player.Update(input, _map, _projectiles, _client, _camera, deltaTime);
+            player.Update(input, _map, _projectiles, Client, _camera, deltaTime);
         }
 
-        if (_players.TryGetValue(_client.LocalId, out var localPlayer))
+        if (_players.TryGetValue(Client.LocalId, out var localPlayer))
         {
             UpdateLocal(localPlayer);
         }
@@ -175,7 +172,7 @@ public class GameScene : IScene
         
         foreach (var (_, player) in _players)
         {
-            player.Tick(_client, TickTime);
+            player.Tick(Client, TickTime);
         }
     }
     
@@ -193,7 +190,7 @@ public class GameScene : IScene
     
     private void OnPlayerMove(PlayerMove playerMove, NetPeer peer)
     {
-        if (_client.IsLocal(playerMove.Id)) return;
+        if (Client.IsLocal(playerMove.Id)) return;
         if (!_players.TryGetValue(playerMove.Id, out var player)) return;
         
         var newPosition = player.Position;
@@ -205,7 +202,7 @@ public class GameScene : IScene
     private void OnSetLocalId(SetLocalId setLocalId, NetPeer peer)
     {
         Console.WriteLine($"Updating local ID: {setLocalId.Id}");
-        _client.LocalId = setLocalId.Id;
+        Client.LocalId = setLocalId.Id;
     }
 
     private void OnProjectileSpawn(ProjectileSpawn projectileSpawn, NetPeer netPeer)
