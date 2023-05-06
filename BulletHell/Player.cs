@@ -11,6 +11,7 @@ public class Player
     private const float Speed = 2f;
     private const float SpriteLerp = 10f;
     private static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
+    private static readonly Point PlayerSpriteCoords = new(0, 0);
 
     private Vector3 _position;
     private Vector3 _spritePosition;
@@ -87,10 +88,17 @@ public class Player
             movement.X += 1f;
         }
 
-        // TODO: Remove this.
-        if (input.WasKeyPressed(Keys.F))
+        foreach (var nearbyDroppedWeapon in map.GetNearbyDroppedWeapons(_position.X, _position.Z))
         {
-            Inventory.AddWeapon(Weapon.Dagger);
+            var isColliding = Collision.HasCollision(_position, Size, nearbyDroppedWeapon.Position, DroppedWeapon.Size);
+
+            if (!isColliding) continue;
+            
+            // TODO: Network this:
+            if (Inventory.AddWeapon(nearbyDroppedWeapon.Weapon))
+            {
+                map.PickupWeapon(nearbyDroppedWeapon);
+            }
         }
 
         Move(movement, map, camera.Forward, camera.Right, deltaTime);
@@ -136,6 +144,6 @@ public class Player
 
     public void Draw(SpriteRenderer spriteRenderer)
     {
-        spriteRenderer.Add(_spritePosition.X, _spritePosition.Z);
+        spriteRenderer.Add(_spritePosition.X, _spritePosition.Z, PlayerSpriteCoords);
     }
 }

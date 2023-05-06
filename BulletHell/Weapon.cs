@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Common;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using Microsoft.Xna.Framework;
 
 namespace BulletHell;
@@ -9,14 +8,14 @@ namespace BulletHell;
 public class Weapon
 {
     public static readonly Weapon Dagger = new(0.2f,
-        new Rectangle(1, 28 * Resources.TileSize + 4, Resources.TileSize, Resources.TileSize));
+        new Rectangle(1, 31 * Resources.TileSize, Resources.TileSize, Resources.TileSize));
     
     public readonly Rectangle SourceRectangle;
     
     private readonly float _attackCooldown;
     private float _attackTimer;
 
-    public Weapon(float attackCooldown, Rectangle sourceRectangle)
+    private Weapon(float attackCooldown, Rectangle sourceRectangle)
     {
         _attackCooldown = attackCooldown;
         SourceRectangle = sourceRectangle;

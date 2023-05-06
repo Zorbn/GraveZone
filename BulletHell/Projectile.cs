@@ -6,6 +6,7 @@ public class Projectile
 {
     private const float Speed = 8f;
     private static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
+    private static readonly Point ProjectileSpriteCoords = new(8, 0);
 
     private Vector3 _direction;
     private Vector3 _position;
@@ -56,6 +57,6 @@ public class Projectile
 
     public void Draw(SpriteRenderer spriteRenderer)
     {
-        spriteRenderer.Add(_position.X, _position.Z);
+        spriteRenderer.Add(_position.X, _position.Z, ProjectileSpriteCoords);
     }
 }

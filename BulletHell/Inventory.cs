@@ -135,7 +135,7 @@ public class Inventory
                     var itemPosition = slotPosition;
                     itemPosition.X += ItemSpriteOffset;
                     itemPosition.Y += ItemSpriteOffset;
-                    spriteBatch.Draw(resources.UiTexture, itemPosition, weapon.SourceRectangle, Color.White);
+                    spriteBatch.Draw(resources.SpriteTexture, itemPosition, weapon.SourceRectangle, Color.White);
                 }
             }
         }
@@ -148,12 +148,12 @@ public class Inventory
             var equippedItemPosition = equippedSlotPosition;
             equippedItemPosition.X += ItemSpriteOffset;
             equippedItemPosition.Y += ItemSpriteOffset;
-            spriteBatch.Draw(resources.UiTexture, equippedItemPosition, EquippedWeapon.SourceRectangle, Color.White);
+            spriteBatch.Draw(resources.SpriteTexture, equippedItemPosition, EquippedWeapon.SourceRectangle, Color.White);
         }
 
         if (_grabbedWeapon is not null)
         {
-            spriteBatch.Draw(resources.UiTexture, _mousePosition, _grabbedWeapon.SourceRectangle, Color.White, 0f,
+            spriteBatch.Draw(resources.SpriteTexture, _mousePosition, _grabbedWeapon.SourceRectangle, Color.White, 0f,
                 Vector2.Zero, GrabbedItemScale, SpriteEffects.None, 0f);
         }
     }

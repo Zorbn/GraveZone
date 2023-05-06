@@ -13,8 +13,13 @@ public class Map
     private const float FloorShade = 1.0f;
     private const float WallShade = 0.8f;
 
+    // TODO: Make this private when possible.
+    public readonly List<DroppedWeapon> DroppedWeapons;
+    
     private Tile[] _floorTiles;
     private Tile[] _wallTiles;
+    private List<DroppedWeapon>[] _droppedWeaponsInTiles;
+    private HashSet<DroppedWeapon> _droppedWeaponQueryResults;
 
     private int _size;
 
@@ -30,8 +35,21 @@ public class Map
     {
         _size = size;
 
-        _floorTiles = new Tile[size * size];
-        _wallTiles = new Tile[size * size];
+        var tileCount = size * size;
+        _floorTiles = new Tile[tileCount];
+        _wallTiles = new Tile[tileCount];
+        
+        _droppedWeaponsInTiles = new List<DroppedWeapon>[tileCount];
+        for (var i = 0; i < tileCount; i++)
+        {
+            _droppedWeaponsInTiles[i] = new List<DroppedWeapon>();
+        }
+        
+        _droppedWeaponQueryResults = new HashSet<DroppedWeapon>();
+        
+        DroppedWeapons = new List<DroppedWeapon>();
+        
+        DropWeapon(Weapon.Dagger, 1.5f, 1.5f); // TODO <-
         
         _vertices = new List<VertexPositionColorTexture>();
         _indices = new List<ushort>();
@@ -177,6 +195,60 @@ public class Map
         _primitives = _indices.Count / 3;
     }
 
+    public void DropWeapon(Weapon weapon, float x, float z)
+    {
+        var droppedWeapon = new DroppedWeapon(weapon, x, z);
+        var tileX = (int)droppedWeapon.Position.X;
+        var tileZ = (int)droppedWeapon.Position.Z;
+
+        if (tileX < 0 || tileX >= _size || tileZ < 0 || tileZ >= _size) return;
+        
+        DroppedWeapons.Add(droppedWeapon);
+        _droppedWeaponsInTiles[tileX + tileZ * _size].Add(droppedWeapon);
+    }
+
+    public void PickupWeapon(DroppedWeapon droppedWeapon)
+    {
+        var x = (int)droppedWeapon.Position.X;
+        var z = (int)droppedWeapon.Position.Z;
+
+        if (x < 0 || x >= _size || z < 0 || z >= _size) return;
+
+        DroppedWeapons.Remove(droppedWeapon);
+        _droppedWeaponsInTiles[x + z * _size].Remove(droppedWeapon);
+    }
+
+    public IEnumerable<DroppedWeapon> GetNearbyDroppedWeapons(float x, float z)
+    {
+        _droppedWeaponQueryResults.Clear();
+        
+        var tileX = (int)x;
+        var tileZ = (int)z;
+
+        for (var zi = -1; zi <= 1; zi++)
+        {
+            var targetZ = tileZ + zi;
+            
+            for (var xi = -1; xi <= 1; xi++)
+            {
+                var targetX = tileX + xi;
+                
+                if (targetX < 0 || targetX >= _size || targetZ < 0 || targetZ >= _size) continue;
+
+                var droppedWeaponsInTile = _droppedWeaponsInTiles[targetX + targetZ * _size];
+                foreach (var droppedWeapon in droppedWeaponsInTile)
+                {
+                    _droppedWeaponQueryResults.Add(droppedWeapon);
+                }
+            }
+        }
+
+        foreach (var droppedWeapon in _droppedWeaponQueryResults)
+        {
+            yield return droppedWeapon;
+        }
+    }
+    
     public void Draw(GraphicsDevice graphicsDevice)
     {
         if (_primitives == 0 || _vertexBuffer is null || _indexBuffer is null) return;

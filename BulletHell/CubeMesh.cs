@@ -8,15 +8,14 @@ namespace BulletHell;
 
 public static class CubeMesh
 {
-    public const int TextureWidthTiles = 32;
-    public const int TextureHeightTiles = 32;
-    public const float UnitX = 1f / TextureWidthTiles;
-
-    public const float UnitY = 1f / TextureHeightTiles;
+    private const int TextureWidthTiles = 32;
+    private const int TextureHeightTiles = 32;
+    private const float UnitX = 1f / TextureWidthTiles;
+    private const float UnitY = 1f / TextureHeightTiles;
 
     // Used to prevent texture bleeding, where bits of nearby textures
     // are rendered alongside the desired one.
-    public static readonly float Padding = Math.Min(UnitX, UnitY) * 0.025f;
+    private static readonly float Padding = Math.Min(UnitX, UnitY) * 0.025f;
 
     public static readonly Dictionary<Direction, VertexPositionColorTexture[]> Vertices = new()
     {
