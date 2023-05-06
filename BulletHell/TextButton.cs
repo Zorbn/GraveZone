@@ -10,9 +10,9 @@ public class TextButton
     private const int Height = Resources.TileSize * 2;
     private const int TextPadding = Resources.TileSize / 2;
     
-    private static readonly Rectangle LeftTexture = new(2 * Resources.TileSize, 0, Resources.TileSize, Height);
-    private static readonly Rectangle MiddleTexture = new(3 * Resources.TileSize, 0, Resources.TileSize, Height);
-    private static readonly Rectangle RightTexture = new(4 * Resources.TileSize, 0, Resources.TileSize, Height);
+    private static readonly Rectangle LeftTexture = new(2 * Resources.TileSize + 3, 1, Resources.TileSize, Height);
+    private static readonly Rectangle MiddleTexture = new(3 * Resources.TileSize + 5, 1, Resources.TileSize, Height);
+    private static readonly Rectangle RightTexture = new(4 * Resources.TileSize + 7, 1, Resources.TileSize, Height);
     
     private readonly int _widthInTiles;
     private readonly string _text;

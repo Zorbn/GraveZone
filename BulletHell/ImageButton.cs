@@ -5,6 +5,9 @@ namespace BulletHell;
 
 public class ImageButton
 {
+    public static readonly Rectangle QuitRectangle =
+        new(1, 3 * Resources.TileSize + 5, Resources.TileSize, Resources.TileSize);
+    
     private Rectangle _destination;
     private Rectangle _source;
     

@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using Common;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace BulletHell;
@@ -16,6 +14,8 @@ public class Player
 
     private Vector3 _position;
     private Vector3 _spritePosition;
+
+    public readonly Inventory Inventory;
 
     public Vector3 Position
     {
@@ -33,7 +33,8 @@ public class Player
 
         _position = new Vector3(x, 0f, z);
         _spritePosition = _position;
-        _weapon = new Weapon(0.2f);
+        _weapon = Weapon.Dagger;
+        Inventory = new Inventory();
     }
 
     private void Move(Vector3 movement, Map map, Vector3 cameraForward, Vector3 cameraRight, float deltaTime)
@@ -87,6 +88,12 @@ public class Player
         if (input.IsKeyDown(Keys.D))
         {
             movement.X += 1f;
+        }
+
+        // TODO: Remove this.
+        if (input.WasKeyPressed(Keys.F))
+        {
+            Inventory.AddWeapon(Weapon.Dagger);
         }
 
         Move(movement, map, camera.Forward, camera.Right, deltaTime);

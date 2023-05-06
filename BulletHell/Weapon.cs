@@ -8,12 +8,18 @@ namespace BulletHell;
 
 public class Weapon
 {
+    public static readonly Weapon Dagger = new(0.2f,
+        new Rectangle(1, 28 * Resources.TileSize + 4, Resources.TileSize, Resources.TileSize));
+    
+    public readonly Rectangle SourceRectangle;
+    
     private readonly float _attackCooldown;
     private float _attackTimer;
-    
-    public Weapon(float attackCooldown)
+
+    public Weapon(float attackCooldown, Rectangle sourceRectangle)
     {
         _attackCooldown = attackCooldown;
+        SourceRectangle = sourceRectangle;
     }
 
     public void Update(float deltaTime)
