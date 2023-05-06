@@ -85,16 +85,24 @@ public class GameScene : IScene
             _camera.ResetAngle();
         }
 
+        if (_players.TryGetValue(Client.LocalId, out var localPlayer))
+        {
+            var uiCapturedMouse = UpdateLocal(input, localPlayer);
+            
+            // If the mouse was interacting with the ui that needs to be recorded so that mouse
+            // clicks don't have side effects anywhere else (ie: player clicks on the inventory
+            // and accidentally attacks at the same time).
+            if (uiCapturedMouse)
+            {
+                input.UiCapturedMouse();
+            }
+        }
+
         foreach (var (_, player) in _players)
         {
             player.Update(input, _map, _projectiles, Client, _camera, deltaTime);
         }
-
-        if (_players.TryGetValue(Client.LocalId, out var localPlayer))
-        {
-            UpdateLocal(input, localPlayer);
-        }
-
+        
         for (var i = _projectiles.Count - 1; i >= 0; i--)
         {
             var hadCollision = _projectiles[i].Update(_map, deltaTime);
@@ -149,13 +157,14 @@ public class GameScene : IScene
         }
 
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
+        
+        _quitButton.Draw(_game.SpriteBatch, _game.Resources);
 
         if (_players.TryGetValue(Client.LocalId, out var localPlayer))
         {
             DrawLocal(localPlayer);
         }
 
-        _quitButton.Draw(_game.SpriteBatch, _game.Resources);
         _game.SpriteBatch.End();
     }
 
@@ -164,20 +173,25 @@ public class GameScene : IScene
         _camera.Resize(width, height);
     }
 
-    private void UpdateLocal(Input input, Player localPlayer)
+    private bool UpdateLocal(Input input, Player localPlayer)
     {
+        var mousePosition = _game.GetMouseUiPosition();
+        var mouseX = (int)mousePosition.X;
+        var mouseY = (int)mousePosition.Y;
+            
         if (input.WasMouseButtonPressed(MouseButton.Left))
         {
-            var mousePosition = _game.GetMouseUiPosition();
-            var mouseX = (int)mousePosition.X;
-            var mouseY = (int)mousePosition.Y;
             if (_quitButton.Contains(mouseX, mouseY))
             {
                 _game.SetScene(new MainMenuScene(_game));
             }
         }
+        
+        var inventoryCapturedMouse = localPlayer.Inventory.Update(input, mousePosition);
 
         _camera.SetPosition(localPlayer.Position);
+
+        return inventoryCapturedMouse;
     }
 
     private void DrawLocal(Player localPlayer)

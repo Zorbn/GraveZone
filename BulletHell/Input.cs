@@ -13,18 +13,15 @@ public class Input
     public int MouseX => CurrentMouseState.X;
     public int MouseY => CurrentMouseState.Y;
 
-    public Input(bool isActive)
+    private bool _ignoreLeftButton;
+
+    public Input()
     {
         CurrentKeyboardState = Keyboard.GetState();
         PreviousKeyboardState = CurrentKeyboardState;
         
-        GetMouseState(isActive);
+        CurrentMouseState = Mouse.GetState();
         PreviousMouseState = CurrentMouseState;
-    }
-
-    private void GetMouseState(bool isActive)
-    {
-        CurrentMouseState = isActive ? Mouse.GetState() : new MouseState();
     }
 
     public void Update(bool isActive)
@@ -33,7 +30,17 @@ public class Input
         CurrentKeyboardState = Keyboard.GetState();
 
         PreviousMouseState = CurrentMouseState;
-        GetMouseState(isActive);
+        CurrentMouseState = Mouse.GetState();
+
+        if (CurrentMouseState.LeftButton == ButtonState.Released)
+        {
+            _ignoreLeftButton = false;
+        }
+
+        if (!isActive)
+        {
+            _ignoreLeftButton = true;
+        }
     }
 
     public bool IsKeyDown(Keys key)
@@ -43,6 +50,8 @@ public class Input
     
     public bool IsMouseButtonDown(MouseButton mouseButton)
     {
+        if (_ignoreLeftButton) return false;
+        
         var buttonState = mouseButton switch
         {
             MouseButton.Left => CurrentMouseState.LeftButton,
@@ -61,6 +70,8 @@ public class Input
     
     public bool WasMouseButtonPressed(MouseButton mouseButton)
     {
+        if (_ignoreLeftButton) return false;
+        
         var currentButtonState = mouseButton switch
         {
             MouseButton.Left => CurrentMouseState.LeftButton,
@@ -78,5 +89,10 @@ public class Input
         };
 
         return currentButtonState == ButtonState.Pressed && previousButtonState != ButtonState.Pressed;
+    }
+
+    public void UiCapturedMouse()
+    {
+        _ignoreLeftButton = true;
     }
 }

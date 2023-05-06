@@ -69,7 +69,7 @@ public class BulletHell : Game
         UpdateUiScale(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
         
         Resources = new Resources(GraphicsDevice);
-        _input = new Input(IsActive);
+        _input = new Input();
 
         _scene = new MainMenuScene(this);
         
