@@ -25,15 +25,12 @@ public class Player
 
     public readonly int Id;
 
-    private Weapon _weapon;
-
     public Player(int id, float x, float z)
     {
         Id = id;
 
         _position = new Vector3(x, 0f, z);
         _spritePosition = _position;
-        _weapon = Weapon.Dagger;
         Inventory = new Inventory();
     }
 
@@ -109,11 +106,11 @@ public class Player
         var directionToMouse = new Vector3(input.MouseX - viewPosition.X, 0f, input.MouseY - viewPosition.Y);
         directionToMouse = -directionToMouse.Z * camera.Forward + directionToMouse.X * camera.Right;
 
-        _weapon.Update(deltaTime);
+        Inventory.EquippedWeapon?.Update(deltaTime);
 
         if (input.IsMouseButtonDown(MouseButton.Left))
         {
-            _weapon.Attack(directionToMouse, _position.X, _position.Z, projectiles, client);
+            Inventory.EquippedWeapon?.Attack(directionToMouse, _position.X, _position.Z, projectiles, client);
         }
     }
 

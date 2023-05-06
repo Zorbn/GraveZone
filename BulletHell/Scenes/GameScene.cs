@@ -85,9 +85,10 @@ public class GameScene : IScene
             _camera.ResetAngle();
         }
 
-        if (_players.TryGetValue(Client.LocalId, out var localPlayer))
+        var hasLocalPlayer = _players.TryGetValue(Client.LocalId, out var localPlayer);
+        if (hasLocalPlayer)
         {
-            var uiCapturedMouse = UpdateLocal(input, localPlayer);
+            var uiCapturedMouse = PreUpdateLocal(input, localPlayer);
             
             // If the mouse was interacting with the ui that needs to be recorded so that mouse
             // clicks don't have side effects anywhere else (ie: player clicks on the inventory
@@ -102,7 +103,12 @@ public class GameScene : IScene
         {
             player.Update(input, _map, _projectiles, Client, _camera, deltaTime);
         }
-        
+
+        if (hasLocalPlayer)
+        {
+            PostUpdateLocal(localPlayer);
+        }
+
         for (var i = _projectiles.Count - 1; i >= 0; i--)
         {
             var hadCollision = _projectiles[i].Update(_map, deltaTime);
@@ -173,7 +179,7 @@ public class GameScene : IScene
         _camera.Resize(width, height);
     }
 
-    private bool UpdateLocal(Input input, Player localPlayer)
+    private bool PreUpdateLocal(Input input, Player localPlayer)
     {
         var mousePosition = _game.GetMouseUiPosition();
         var mouseX = (int)mousePosition.X;
@@ -189,9 +195,12 @@ public class GameScene : IScene
         
         var inventoryCapturedMouse = localPlayer.Inventory.Update(input, mousePosition);
 
-        _camera.SetPosition(localPlayer.Position);
-
         return inventoryCapturedMouse;
+    }
+    
+    private void PostUpdateLocal(Player localPlayer)
+    {
+        _camera.SetPosition(localPlayer.Position);
     }
 
     private void DrawLocal(Player localPlayer)

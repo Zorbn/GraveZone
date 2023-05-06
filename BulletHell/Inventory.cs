@@ -19,9 +19,10 @@ public class Inventory
 
     private static readonly Rectangle SlotRectangle = new(1, 1, SlotSize, SlotSize);
     private static readonly Rectangle EquippedSlotRectangle = new(9 * Resources.TileSize + 7, 1, SlotSize, SlotSize);
+    
+    public Weapon EquippedWeapon { get; private set; }
 
     private Weapon[] _weapons = new Weapon[Width * Height];
-    private Weapon _equippedWeapon;
     private Weapon _grabbedWeapon;
     private Vector2 _mousePosition;
 
@@ -80,12 +81,12 @@ public class Inventory
     {
         if (_grabbedWeapon is null)
         {
-            _grabbedWeapon = _equippedWeapon;
-            _equippedWeapon = null;
+            _grabbedWeapon = EquippedWeapon;
+            EquippedWeapon = null;
             return;
         }
         
-        (_equippedWeapon, _grabbedWeapon) = (_grabbedWeapon, _equippedWeapon);
+        (EquippedWeapon, _grabbedWeapon) = (_grabbedWeapon, EquippedWeapon);
     }
 
     public bool Update(Input input, Vector2 mousePosition)
@@ -142,12 +143,12 @@ public class Inventory
         var equippedSlotPosition = new Vector2(EquippedX, EquippedY);
         spriteBatch.Draw(resources.UiTexture, equippedSlotPosition, EquippedSlotRectangle, Color.White);
 
-        if (_equippedWeapon is not null)
+        if (EquippedWeapon is not null)
         {
             var equippedItemPosition = equippedSlotPosition;
             equippedItemPosition.X += ItemSpriteOffset;
             equippedItemPosition.Y += ItemSpriteOffset;
-            spriteBatch.Draw(resources.UiTexture, equippedItemPosition, _equippedWeapon.SourceRectangle, Color.White);
+            spriteBatch.Draw(resources.UiTexture, equippedItemPosition, EquippedWeapon.SourceRectangle, Color.White);
         }
 
         if (_grabbedWeapon is not null)
