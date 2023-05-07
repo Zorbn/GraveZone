@@ -1,11 +1,16 @@
-﻿using Common;
+﻿using System.Diagnostics;
+using Common;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using Microsoft.Xna.Framework;
 
 namespace Server;
 
 public class Server
 {
+    private const float TickTime = 0.05f;
+    private const int MaxSpawnedEnemies = 3;
+    
     private NetPacketProcessor _netPacketProcessor;
     private EventBasedNetListener _listener;
     private NetManager _manager;
@@ -15,8 +20,11 @@ public class Server
     private Random _random;
     private int _mapSeed;
     private int _nextDroppedWeaponId;
+    private int _nextEnemyId;
     private Map _map;
 
+    private float _tickTimer;
+    
     public Server()
     {
         _netPacketProcessor = new NetPacketProcessor();
@@ -54,8 +62,9 @@ public class Server
         _listener.PeerConnectedEvent += peer =>
         {
             Console.WriteLine($"Connection from IP: {peer.EndPoint} with ID: {peer.Id}");
-            
-            var newPlayer = new ServerPlayer { X = 0.5f, Z = 0.5f };
+
+            var playerSpawnPosition = _map.GetSpawnPosition() ?? Vector3.Zero;
+            var newPlayer = new ServerPlayer { X = playerSpawnPosition.X, Z = playerSpawnPosition.Z };
             var newPlayerId = peer.Id;
             
             // Tell the new player their id.
@@ -73,6 +82,16 @@ public class Server
                     X = droppedWeapon.Position.X,
                     Z = droppedWeapon.Position.Z,
                     Id = droppedWeaponId
+                }, DeliveryMethod.ReliableOrdered);
+            }
+            
+            foreach (var (enemyId, enemy) in _map.Enemies)
+            {
+                SendToPeer(peer, new EnemySpawn
+                {
+                    Id = enemyId,
+                    X = enemy.Position.X,
+                    Z = enemy.Position.Z
                 }, DeliveryMethod.ReliableOrdered);
             }
             
@@ -108,18 +127,57 @@ public class Server
             }
         };
         
-        ServerDropWeapon(WeaponType.Dagger, 1.5f, 1.5f);
+        var weaponSpawnPosition = _map.GetSpawnPosition();
 
-        // TODO: Replace with real tick loop.
-        while (!Console.KeyAvailable)
+        if (weaponSpawnPosition is not null)
         {
+            ServerDropWeapon(WeaponType.Dagger, weaponSpawnPosition.Value.X, weaponSpawnPosition.Value.Z);
+        }
+        
+        var stopwatch = new Stopwatch();
+        
+        while (true)
+        {
+            stopwatch.Start();
+
             _manager.PollEvents();
-            Thread.Sleep(15);
+            
+            Tick();
+
+            var deltaTime = (float)stopwatch.Elapsed.TotalMilliseconds;
+            stopwatch.Reset();
+
+            var timeToNextTick = TimeSpan.FromMilliseconds(MathF.Max(TickTime - deltaTime, 0f));
+            Thread.Sleep(timeToNextTick);
         }
         
         _manager.Stop();
     }
 
+    private void Tick()
+    {
+        // Spawn a new enemy each tick that we aren't at the maximum.
+        TrySpawnEnemy();
+    }
+
+    private void TrySpawnEnemy()
+    {
+        if (_map.Enemies.Count >= MaxSpawnedEnemies) return;
+        
+        var enemySpawnPosition = _map.GetSpawnPosition();
+
+        if (enemySpawnPosition is null) return;
+        
+        ServerSpawnEnemy(enemySpawnPosition.Value);
+    }
+
+    private void ServerSpawnEnemy(Vector3 position)
+    {
+        var enemyId = _nextEnemyId++;
+        _map.SpawnEnemy(position.X, position.Z, enemyId);
+        SendToAll(new EnemySpawn { Id = enemyId, X = position.X, Z = position.Z }, DeliveryMethod.ReliableOrdered);
+    }
+    
     private UpdateInventory CreateUpdateInventoryPacket(int playerId, ServerPlayer player)
     {
         var updateInventory = new UpdateInventory

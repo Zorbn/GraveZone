@@ -53,8 +53,6 @@ public class AStar
                 _cameFrom.Add(neighbor, current);
             }
         }
-        
-        Console.WriteLine(_cameFrom.Count);
     }
 
     private void ReconstructPath(Vector3I start, Vector3I goal, List<Vector3I> path)

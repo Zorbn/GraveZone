@@ -103,3 +103,10 @@ public class UpdateInventory
     public int EquippedWeapon { get; set; }
     public int GrabbedWeapon { get; set; }
 }
+
+public class EnemySpawn
+{
+    public int Id { get; set; }
+    public float X { get; set; }
+    public float Z { get; set; }
+}

@@ -53,6 +53,7 @@ public class GameScene : IScene
         Client.NetPacketProcessor.SubscribeReusable<GrabEquippedSlot>(OnGrabEquippedSlot);
         Client.NetPacketProcessor.SubscribeReusable<DropGrabbed>(OnDropGrabbed);
         Client.NetPacketProcessor.SubscribeReusable<UpdateInventory>(OnUpdateInventory);
+        Client.NetPacketProcessor.SubscribeReusable<EnemySpawn>(OnEnemySpawn);
 
         Console.WriteLine("Starting client...");
     }
@@ -124,7 +125,13 @@ public class GameScene : IScene
             }
         }
 
-        Tick(deltaTime);
+        _tickTimer += deltaTime;
+
+        while (_tickTimer > TickTime)
+        {
+            _tickTimer -= TickTime;
+            Tick();
+        }
     }
 
     public void Draw()
@@ -155,6 +162,11 @@ public class GameScene : IScene
         foreach (var (_, droppedWeapon) in _map.DroppedWeapons)
         {
             droppedWeapon.Draw(_spriteRenderer);
+        }
+        
+        foreach (var (_, enemy) in _map.Enemies)
+        {
+            enemy.Draw(_spriteRenderer);
         }
 
         _spriteRenderer.End();
@@ -219,14 +231,8 @@ public class GameScene : IScene
         localPlayer.Inventory.Draw(_game.Resources, _game.SpriteBatch);
     }
 
-    private void Tick(float deltaTime)
+    private void Tick()
     {
-        _tickTimer -= deltaTime;
-
-        if (_tickTimer > 0f) return;
-
-        _tickTimer = TickTime;
-
         foreach (var (_, player) in _players)
         {
             player.Tick(Client, TickTime);
@@ -314,5 +320,10 @@ public class GameScene : IScene
         if (!_players.TryGetValue(updateInventory.PlayerId, out var player)) return;
 
         player.Inventory.UpdateInventory(updateInventory);
+    }
+    
+    private void OnEnemySpawn(EnemySpawn enemySpawn)
+    {
+        _map.SpawnEnemy(enemySpawn.X, enemySpawn.Z, enemySpawn.Id);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Common;
 
-// TODO: Count outside map as solid, spawn player on an empty tile inside the map.
 public class Map
 {
     public const int Size = 16;
@@ -12,6 +11,7 @@ public class Map
     public const float WallShade = 0.8f;
 
     public readonly Dictionary<int, DroppedWeapon> DroppedWeapons;
+    public readonly Dictionary<int, Enemy> Enemies;
     
     private Tile[] _floorTiles;
     private Tile[] _wallTiles;
@@ -35,6 +35,7 @@ public class Map
         _droppedWeaponQueryResults = new HashSet<DroppedWeapon>();
         
         DroppedWeapons = new Dictionary<int, DroppedWeapon>();
+        Enemies = new Dictionary<int, Enemy>();
     }
 
     public void Generate(int seed)
@@ -52,6 +53,22 @@ public class Map
                 _wallTiles[x + z * Size] = Tile.Grass;
             }
         }
+    }
+
+    public Vector3? GetSpawnPosition()
+    {
+        const int tileCount = Size * Size;
+        for (var i = _random.Next(tileCount); i < tileCount; i = (i + 1) % tileCount)
+        {
+            var x = i % Size;
+            var z = i / Size;
+            
+            if (GetWallTile(x, z) != Tile.Air) continue;
+
+            return new Vector3(x + 0.5f, 0f, z + 0.5f);
+        }
+
+        return null;
     }
 
     public Tile GetFloorTile(int x, int z)
@@ -84,6 +101,24 @@ public class Map
                GetWallTileF(at.X + size.X * 0.5f, at.Z + size.Z * 0.5f) != Tile.Air;
     }
 
+    public bool SpawnEnemy(float x, float z, int id)
+    {
+        var tileX = (int)x;
+        var tileZ = (int)z;
+
+        if (tileX is < 0 or >= Size || tileZ is < 0 or >= Size) return false;
+        
+        var newEnemy = new Enemy(x, z);
+        Enemies.Add(id, newEnemy);
+        
+        return true;
+    }
+
+    public void DespawnEnemy(int id)
+    {
+        Enemies.Remove(id);
+    }
+    
     public bool DropWeapon(WeaponType weaponType, float x, float z, int id)
     {
         var droppedWeapon = new DroppedWeapon(weaponType, x, z, id);
