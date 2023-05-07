@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Common;
-using LiteNetLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -16,9 +15,9 @@ public class GameScene : IScene
 
     private readonly BulletHell _game;
 
-    private readonly Map _map;
+    private readonly ClientMap _map;
     private readonly SpriteRenderer _spriteRenderer;
-    private readonly Dictionary<int, Player> _players;
+    private readonly Dictionary<int, ClientPlayer> _players;
     private readonly List<Projectile> _projectiles;
     private readonly Camera _camera;
 
@@ -31,23 +30,29 @@ public class GameScene : IScene
         _game = game;
 
         _camera = new Camera(game.GraphicsDevice);
-        _map = new Map(Common.Map.Size);
+        _map = new ClientMap();
         _spriteRenderer = new SpriteRenderer(500, game.GraphicsDevice);
-        _players = new Dictionary<int, Player>();
+        _players = new Dictionary<int, ClientPlayer>();
         _projectiles = new List<Projectile>();
 
-        _quitButton = new ImageButton(Inventory.X - Resources.TileSize,
-            Inventory.Y + Resources.TileSize * 3, ImageButton.QuitRectangle);
+        _quitButton = new ImageButton(ClientInventory.X - Resources.TileSize,
+            ClientInventory.Y + Resources.TileSize * 3, ImageButton.QuitRectangle);
 
         Client = new Client();
 
         Client.NetPacketProcessor.RegisterNestedType<NetVector3>();
-        Client.NetPacketProcessor.SubscribeReusable<SetLocalId, NetPeer>(OnSetLocalId);
-        Client.NetPacketProcessor.SubscribeReusable<PlayerSpawn, NetPeer>(OnPlayerSpawn);
-        Client.NetPacketProcessor.SubscribeReusable<PlayerDespawn, NetPeer>(OnPlayerDespawn);
-        Client.NetPacketProcessor.SubscribeReusable<PlayerMove, NetPeer>(OnPlayerMove);
-        Client.NetPacketProcessor.SubscribeReusable<ProjectileSpawn, NetPeer>(OnProjectileSpawn);
+        Client.NetPacketProcessor.SubscribeReusable<SetLocalId>(OnSetLocalId);
+        Client.NetPacketProcessor.SubscribeReusable<PlayerSpawn>(OnPlayerSpawn);
+        Client.NetPacketProcessor.SubscribeReusable<PlayerDespawn>(OnPlayerDespawn);
+        Client.NetPacketProcessor.SubscribeReusable<PlayerMove>(OnPlayerMove);
+        Client.NetPacketProcessor.SubscribeReusable<ProjectileSpawn>(OnProjectileSpawn);
         Client.NetPacketProcessor.SubscribeReusable<MapGenerate>(OnMapGenerate);
+        Client.NetPacketProcessor.SubscribeReusable<DroppedWeaponSpawn>(OnDroppedWeaponSpawn);
+        Client.NetPacketProcessor.SubscribeReusable<PickupWeapon>(OnPickupWeapon);
+        Client.NetPacketProcessor.SubscribeReusable<GrabSlot>(OnGrabSlot);
+        Client.NetPacketProcessor.SubscribeReusable<GrabEquippedSlot>(OnGrabEquippedSlot);
+        Client.NetPacketProcessor.SubscribeReusable<DropGrabbed>(OnDropGrabbed);
+        Client.NetPacketProcessor.SubscribeReusable<UpdateInventory>(OnUpdateInventory);
 
         Console.WriteLine("Starting client...");
     }
@@ -147,7 +152,7 @@ public class GameScene : IScene
             projectile.Draw(_spriteRenderer);
         }
         
-        foreach (var droppedWeapon in _map.DroppedWeapons)
+        foreach (var (_, droppedWeapon) in _map.DroppedWeapons)
         {
             droppedWeapon.Draw(_spriteRenderer);
         }
@@ -185,7 +190,7 @@ public class GameScene : IScene
         _camera.Resize(width, height);
     }
 
-    private bool PreUpdateLocal(Input input, Player localPlayer)
+    private bool PreUpdateLocal(Input input, ClientPlayer localPlayer)
     {
         var mousePosition = _game.GetMouseUiPosition();
         var mouseX = (int)mousePosition.X;
@@ -199,17 +204,17 @@ public class GameScene : IScene
             }
         }
         
-        var inventoryCapturedMouse = localPlayer.Inventory.Update(input, mousePosition);
+        var inventoryCapturedMouse = localPlayer.Inventory.Update(Client, input, mousePosition);
 
         return inventoryCapturedMouse;
     }
     
-    private void PostUpdateLocal(Player localPlayer)
+    private void PostUpdateLocal(ClientPlayer localPlayer)
     {
         _camera.SetPosition(localPlayer.Position);
     }
 
-    private void DrawLocal(Player localPlayer)
+    private void DrawLocal(ClientPlayer localPlayer)
     {
         localPlayer.Inventory.Draw(_game.Resources, _game.SpriteBatch);
     }
@@ -228,19 +233,19 @@ public class GameScene : IScene
         }
     }
 
-    private void OnPlayerSpawn(PlayerSpawn playerSpawn, NetPeer peer)
+    private void OnPlayerSpawn(PlayerSpawn playerSpawn)
     {
         Console.WriteLine($"Player spawned with id: {playerSpawn.Id}");
-        _players.Add(playerSpawn.Id, new Player(playerSpawn.Id, playerSpawn.X, playerSpawn.Z));
+        _players.Add(playerSpawn.Id, new ClientPlayer(playerSpawn.Id, playerSpawn.X, playerSpawn.Z));
     }
 
-    private void OnPlayerDespawn(PlayerDespawn playerDespawn, NetPeer peer)
+    private void OnPlayerDespawn(PlayerDespawn playerDespawn)
     {
         Console.WriteLine($"Player de-spawned with id: {playerDespawn.Id}");
         _players.Remove(playerDespawn.Id);
     }
 
-    private void OnPlayerMove(PlayerMove playerMove, NetPeer peer)
+    private void OnPlayerMove(PlayerMove playerMove)
     {
         if (Client.IsLocal(playerMove.Id)) return;
         if (!_players.TryGetValue(playerMove.Id, out var player)) return;
@@ -251,13 +256,13 @@ public class GameScene : IScene
         player.Position = newPosition;
     }
 
-    private void OnSetLocalId(SetLocalId setLocalId, NetPeer peer)
+    private void OnSetLocalId(SetLocalId setLocalId)
     {
         Console.WriteLine($"Updating local ID: {setLocalId.Id}");
         Client.LocalId = setLocalId.Id;
     }
 
-    private void OnProjectileSpawn(ProjectileSpawn projectileSpawn, NetPeer netPeer)
+    private void OnProjectileSpawn(ProjectileSpawn projectileSpawn)
     {
         var direction = new Vector3(projectileSpawn.Direction.X, projectileSpawn.Direction.Y,
             projectileSpawn.Direction.Z);
@@ -268,5 +273,46 @@ public class GameScene : IScene
     {
         _map.Generate(mapGenerate.Seed);
         _map.Mesh(_game.GraphicsDevice);
+    }
+    
+    private void OnDroppedWeaponSpawn(DroppedWeaponSpawn droppedWeaponSpawn)
+    {
+        _map.DropWeapon(droppedWeaponSpawn.WeaponType, droppedWeaponSpawn.X, droppedWeaponSpawn.Z, droppedWeaponSpawn.Id);
+    }
+
+    private void OnPickupWeapon(PickupWeapon pickupWeapon)
+    {
+        if (!_players.TryGetValue(pickupWeapon.PlayerId, out var player)) return;
+        
+        _map.PickupWeapon(pickupWeapon.DroppedWeaponId);
+        player.Inventory.AddWeapon(pickupWeapon.WeaponType);
+    }
+
+    private void OnGrabSlot(GrabSlot grabSlot)
+    {
+        if (!_players.TryGetValue(grabSlot.PlayerId, out var player)) return;
+        
+        player.Inventory.GrabSlot(grabSlot.SlotIndex);
+    }
+    
+    private void OnGrabEquippedSlot(GrabEquippedSlot grabEquippedSlot)
+    {
+        if (!_players.TryGetValue(grabEquippedSlot.PlayerId, out var player)) return;
+        
+        player.Inventory.GrabEquippedSlot();
+    }
+    
+    private void OnDropGrabbed(DropGrabbed dropGrabbed)
+    {
+        if (!_players.TryGetValue(dropGrabbed.PlayerId, out var player)) return;
+        
+        player.Inventory.DropGrabbed(_map, dropGrabbed.X, dropGrabbed.Z, dropGrabbed.DroppedWeaponId);
+    }
+
+    private void OnUpdateInventory(UpdateInventory updateInventory)
+    {
+        if (!_players.TryGetValue(updateInventory.PlayerId, out var player)) return;
+
+        player.Inventory.UpdateInventory(updateInventory);
     }
 }

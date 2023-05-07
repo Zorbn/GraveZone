@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Common;
 using LiteNetLib;
 using Microsoft.Xna.Framework;
@@ -6,17 +7,19 @@ using Microsoft.Xna.Framework.Input;
 
 namespace BulletHell;
 
-public class Player
+public class ClientPlayer
 {
     private const float Speed = 2f;
     private const float SpriteLerp = 10f;
     private static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
     private static readonly Point PlayerSpriteCoords = new(0, 0);
 
+    public readonly ClientInventory Inventory;
+
     private Vector3 _position;
     private Vector3 _spritePosition;
 
-    public readonly Inventory Inventory;
+    private Attacker _attacker;
 
     public Vector3 Position
     {
@@ -26,16 +29,17 @@ public class Player
 
     public readonly int Id;
 
-    public Player(int id, float x, float z)
+    public ClientPlayer(int id, float x, float z)
     {
         Id = id;
 
         _position = new Vector3(x, 0f, z);
         _spritePosition = _position;
-        Inventory = new Inventory();
+        _attacker = new Attacker();
+        Inventory = new ClientInventory();
     }
 
-    private void Move(Vector3 movement, Map map, Vector3 cameraForward, Vector3 cameraRight, float deltaTime)
+    private void Move(Vector3 movement, ClientMap map, Vector3 cameraForward, Vector3 cameraRight, float deltaTime)
     {
         if (movement.Length() == 0f) return;
 
@@ -64,7 +68,8 @@ public class Player
         _spritePosition = _position;
     }
 
-    private void UpdateLocal(Input input, Map map, List<Projectile> projectiles, Client client, Camera camera, float deltaTime)
+    private void UpdateLocal(Input input, ClientMap map, List<Projectile> projectiles, Client client, Camera camera,
+        float deltaTime)
     {
         var movement = Vector3.Zero;
 
@@ -88,16 +93,19 @@ public class Player
             movement.X += 1f;
         }
 
-        foreach (var nearbyDroppedWeapon in map.GetNearbyDroppedWeapons(_position.X, _position.Z))
+        if (input.IsKeyDown(Keys.F))
         {
-            var isColliding = Collision.HasCollision(_position, Size, nearbyDroppedWeapon.Position, DroppedWeapon.Size);
-
-            if (!isColliding) continue;
-            
-            // TODO: Network this:
-            if (Inventory.AddWeapon(nearbyDroppedWeapon.Weapon))
+            foreach (var nearbyDroppedWeapon in map.GetNearbyDroppedWeapons(_position.X, _position.Z))
             {
-                map.PickupWeapon(nearbyDroppedWeapon);
+                var isColliding =
+                    Collision.HasCollision(_position, Size, nearbyDroppedWeapon.Position, DroppedWeapon.Size);
+
+                if (!isColliding) continue;
+
+                if (!Inventory.IsFull())
+                {
+                    map.RequestPickupWeapon(client, nearbyDroppedWeapon.Id);
+                }
             }
         }
 
@@ -114,15 +122,16 @@ public class Player
         var directionToMouse = new Vector3(input.MouseX - viewPosition.X, 0f, input.MouseY - viewPosition.Y);
         directionToMouse = -directionToMouse.Z * camera.Forward + directionToMouse.X * camera.Right;
 
-        Inventory.EquippedWeapon?.Update(deltaTime);
+        _attacker.Update(deltaTime);
 
-        if (input.IsMouseButtonDown(MouseButton.Left))
+        if (input.IsMouseButtonDown(MouseButton.Left) && Inventory.EquippedWeapon is not null)
         {
-            Inventory.EquippedWeapon?.Attack(directionToMouse, _position.X, _position.Z, projectiles, client);
+            _attacker.Attack(Inventory.EquippedWeapon, directionToMouse, _position.X, _position.Z, projectiles, client);
         }
     }
 
-    public void Update(Input input, Map map, List<Projectile> projectiles, Client client, Camera camera, float deltaTime)
+    public void Update(Input input, ClientMap map, List<Projectile> projectiles, Client client, Camera camera,
+        float deltaTime)
     {
         if (client.IsLocal(Id))
         {

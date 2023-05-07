@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Common;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;

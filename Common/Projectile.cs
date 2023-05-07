@@ -1,12 +1,14 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace BulletHell;
+namespace Common;
 
 public class Projectile
 {
+    public static readonly Point ProjectileSpriteCoords = new(8, 0);
     private const float Speed = 8f;
     private static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
-    private static readonly Point ProjectileSpriteCoords = new(8, 0);
+
+    public Vector3 Position => _position;
 
     private Vector3 _direction;
     private Vector3 _position;
@@ -53,10 +55,5 @@ public class Projectile
     public bool Update(Map map, float deltaTime)
     {
         return Move(_direction, map, deltaTime);
-    }
-
-    public void Draw(SpriteRenderer spriteRenderer)
-    {
-        spriteRenderer.Add(_position.X, _position.Z, ProjectileSpriteCoords);
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace BulletHell;
+﻿namespace Common;
 
 public enum Tile
 {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 
-namespace BulletHell;
+namespace Common;
 
 public class Resources
 { 

@@ -1,16 +1,16 @@
 ﻿using System;
+using Common;
+using LiteNetLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletHell;
 
-public class Inventory
+public class ClientInventory : Inventory
 {
     public const int X = BulletHell.UiCenterX - Width * SlotSize / 2;
     public const int Y = BulletHell.UiHeight - SlotSize * Height;
 
-    private const int Width = 10;
-    private const int Height = 2;
     private const int SlotSize = 2 * Resources.TileSize;
     private const int ItemSpriteOffset = Resources.TileSize / 2;
     private const int EquippedX = X + Width * SlotSize;
@@ -20,30 +20,7 @@ public class Inventory
     private static readonly Rectangle SlotRectangle = new(1, 1, SlotSize, SlotSize);
     private static readonly Rectangle EquippedSlotRectangle = new(9 * Resources.TileSize + 7, 1, SlotSize, SlotSize);
     
-    public Weapon EquippedWeapon { get; private set; }
-
-    private Weapon[] _weapons = new Weapon[Width * Height];
-    private Weapon _grabbedWeapon;
     private Vector2 _mousePosition;
-
-    public Inventory()
-    {
-    }
-
-    // Returns true if the weapon was successfully added, false otherwise (ie: the inventory is full).
-    public bool AddWeapon(Weapon weapon)
-    {
-        for (var i = 0; i < _weapons.Length; i++)
-        {
-            if (_weapons[i] is not null) continue;
-
-            _weapons[i] = weapon;
-
-            return true;
-        }
-
-        return false;
-    }
 
     private int GetSlotIndexFromPosition(Vector2 position)
     {
@@ -57,39 +34,7 @@ public class Inventory
         return (int)slotX + (int)slotY * Width;
     }
 
-    public Weapon RemoveWeapon(int i)
-    {
-        var weapon = _weapons[i];
-        _weapons[i] = null;
-
-        return weapon;
-    }
-
-    private void GrabSlot(int i)
-    {
-        if (_grabbedWeapon is null)
-        {
-            var removedWeapon = RemoveWeapon(i);
-            _grabbedWeapon = removedWeapon;
-            return;
-        }
-
-        (_weapons[i], _grabbedWeapon) = (_grabbedWeapon, _weapons[i]);
-    }
-    
-    private void GrabEquippedSlot()
-    {
-        if (_grabbedWeapon is null)
-        {
-            _grabbedWeapon = EquippedWeapon;
-            EquippedWeapon = null;
-            return;
-        }
-        
-        (EquippedWeapon, _grabbedWeapon) = (_grabbedWeapon, EquippedWeapon);
-    }
-
-    public bool Update(Input input, Vector2 mousePosition)
+    public bool Update(Client client, Input input, Vector2 mousePosition)
     {
         _mousePosition = mousePosition;
         
@@ -100,19 +45,19 @@ public class Inventory
 
         if (i != -1)
         {
-            GrabSlot(i);
+            RequestGrabSlot(client, i);
             return true;
         }
         
         if (equippedSlotDestination.Contains(mousePosition))
         {
-            GrabEquippedSlot();
+            RequestGrabEquippedSlot(client);
             return true;
         }
 
-        if (_grabbedWeapon is not null)
+        if (GrabbedWeapon is not null)
         {
-            // TODO: Allow dropping items by clicking outside the inventory when holding one.
+            RequestDropGrabbed(client);
             return true;
         }
 
@@ -128,7 +73,7 @@ public class Inventory
                 var slotPosition = new Vector2(X + x * SlotRectangle.Width, Y + y * SlotRectangle.Height);
                 spriteBatch.Draw(resources.UiTexture, slotPosition, SlotRectangle, Color.White);
 
-                var weapon = _weapons[x + y * Width];
+                var weapon = Weapons[x + y * Width];
 
                 if (weapon is not null)
                 {
@@ -151,10 +96,28 @@ public class Inventory
             spriteBatch.Draw(resources.SpriteTexture, equippedItemPosition, EquippedWeapon.SourceRectangle, Color.White);
         }
 
-        if (_grabbedWeapon is not null)
+        if (GrabbedWeapon is not null)
         {
-            spriteBatch.Draw(resources.SpriteTexture, _mousePosition, _grabbedWeapon.SourceRectangle, Color.White, 0f,
+            spriteBatch.Draw(resources.SpriteTexture, _mousePosition, GrabbedWeapon.SourceRectangle, Color.White, 0f,
                 Vector2.Zero, GrabbedItemScale, SpriteEffects.None, 0f);
         }
+    }
+
+    private void RequestGrabSlot(Client client, int i)
+    {
+        client.SendToServer(new RequestGrabSlot
+        {
+            SlotIndex = i,
+        }, DeliveryMethod.ReliableOrdered);
+    }
+
+    private void RequestGrabEquippedSlot(Client client)
+    {
+        client.SendToServer(new RequestGrabEquippedSlot(), DeliveryMethod.ReliableOrdered);
+    }
+
+    private void RequestDropGrabbed(Client client)
+    {
+        client.SendToServer(new RequestDropGrabbed(), DeliveryMethod.ReliableOrdered);
     }
 }
