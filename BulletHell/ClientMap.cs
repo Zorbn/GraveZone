@@ -8,8 +8,8 @@ public class ClientMap : Map
 {
     private VertexBuffer _vertexBuffer;
     private IndexBuffer _indexBuffer;
-    private ArrayList<VertexPositionColorTexture> _vertices;
-    private ArrayList<ushort> _indices;
+    private readonly ArrayList<VertexPositionColorTexture> _vertices;
+    private readonly ArrayList<ushort> _indices;
     private int _primitives;
 
     public ClientMap()
@@ -20,8 +20,8 @@ public class ClientMap : Map
 
     public void Mesh(GraphicsDevice graphicsDevice)
     {
-        if (_vertexBuffer is not null) _vertexBuffer.Dispose();
-        if (_indexBuffer is not null) _indexBuffer.Dispose();
+        _vertexBuffer?.Dispose();
+        _indexBuffer?.Dispose();
 
         _vertices.Clear();
         _indices.Clear();

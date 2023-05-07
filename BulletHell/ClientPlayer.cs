@@ -92,7 +92,7 @@ public class ClientPlayer
             movement.X += 1f;
         }
 
-        if (input.IsKeyDown(Keys.F))
+        if (input.WasKeyPressed(Keys.F))
         {
             foreach (var nearbyDroppedWeapon in map.GetNearbyDroppedWeapons(_position.X, _position.Z))
             {

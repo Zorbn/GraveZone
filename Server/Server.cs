@@ -55,7 +55,7 @@ public class Server
         {
             Console.WriteLine($"Connection from IP: {peer.EndPoint} with ID: {peer.Id}");
             
-            var newPlayer = new ServerPlayer { X = -1, Z = -1 };
+            var newPlayer = new ServerPlayer { X = 0.5f, Z = 0.5f };
             var newPlayerId = peer.Id;
             
             // Tell the new player their id.

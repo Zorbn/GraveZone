@@ -56,14 +56,14 @@ public class Map
 
     public Tile GetFloorTile(int x, int z)
     {
-        if (x < 0 || z < 0 || x >= Size || z >= Size) return Tile.Air;
+        if (x < 0 || z < 0 || x >= Size || z >= Size) return Tile.Barrier;
 
         return _floorTiles[x + z * Size];
     }
 
     public Tile GetWallTile(int x, int z)
     {
-        if (x < 0 || z < 0 || x >= Size || z >= Size) return Tile.Air;
+        if (x < 0 || z < 0 || x >= Size || z >= Size) return Tile.Barrier;
 
         return _wallTiles[x + z * Size];
     }
