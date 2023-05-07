@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Common;
+﻿using Common;
 using LiteNetLib;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -9,14 +8,14 @@ public class ClientMap : Map
 {
     private VertexBuffer _vertexBuffer;
     private IndexBuffer _indexBuffer;
-    private List<VertexPositionColorTexture> _vertices;
-    private List<ushort> _indices;
+    private ArrayList<VertexPositionColorTexture> _vertices;
+    private ArrayList<ushort> _indices;
     private int _primitives;
 
     public ClientMap()
     {
-        _vertices = new List<VertexPositionColorTexture>();
-        _indices = new List<ushort>();
+        _vertices = new ArrayList<VertexPositionColorTexture>();
+        _indices = new ArrayList<ushort>();
     }
 
     public void Mesh(GraphicsDevice graphicsDevice)
@@ -106,8 +105,8 @@ public class ClientMap : Map
 
         if (_vertices.Count == 0 || _indices.Count == 0) return;
         
-        _vertexBuffer.SetData(_vertices.ToArray());
-        _indexBuffer.SetData(_indices.ToArray());
+        _vertexBuffer.SetData(_vertices.Array, 0, _vertices.Count);
+        _indexBuffer.SetData(_indices.Array, 0, _indices.Count);
         
         _primitives = _indices.Count / 3;
     }
