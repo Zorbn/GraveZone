@@ -31,7 +31,7 @@ public class EntitiesInTiles<T>
         _entitiesInTiles[x + z * _size].Remove(entity);
     }
     
-    public IEnumerable<T> GetNearbyEntities(float x, float z)
+    public IEnumerable<T> GetNearby(float x, float z)
     {
         _entityQueryResults.Clear();
         

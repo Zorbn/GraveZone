@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Common;
+﻿using Common;
 using LiteNetLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -94,7 +93,7 @@ public class ClientPlayer
 
         if (input.WasKeyPressed(Keys.F))
         {
-            foreach (var nearbyDroppedWeapon in map.GetNearbyDroppedWeapons(_position.X, _position.Z))
+            foreach (var nearbyDroppedWeapon in map.DroppedWeaponsInTiles.GetNearby(_position.X, _position.Z))
             {
                 var isColliding =
                     Collision.HasCollision(_position, Size, nearbyDroppedWeapon.Position, DroppedWeapon.Size);

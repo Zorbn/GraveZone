@@ -10,38 +10,37 @@ public class Server
 {
     private const float TickTime = 0.05f;
     private const int MaxSpawnedEnemies = 3;
-    
-    private NetPacketProcessor _netPacketProcessor;
-    private EventBasedNetListener _listener;
-    private NetManager _manager;
-    private NetDataWriter _writer;
+    private const int TicksPerRepath = 2;
 
-    private Dictionary<int, ServerPlayer> _players;
-    private Random _random;
+    private NetPacketProcessor _netPacketProcessor;
+    private EventBasedNetListener _listener = new();
+    private NetManager _manager;
+    private NetDataWriter _writer = new();
+
+    private Dictionary<int, ServerPlayer> _players = new();
+    private Random _random = new();
     private int _mapSeed;
     private int _nextDroppedWeaponId;
     private int _nextEnemyId;
-    private Map _map;
+    private Map _map = new();
+    private AStar _aStar = new();
 
-    private float _tickTimer;
+    private int _tickCount;
     
     public Server()
     {
         _netPacketProcessor = new NetPacketProcessor();
         _netPacketProcessor.RegisterNestedType<NetVector3>();
-        _netPacketProcessor.SubscribeReusable<PlayerMove, NetPeer>(OnPlayerMove);
-        _netPacketProcessor.SubscribeReusable<PlayerAttack, NetPeer>(OnPlayerAttack);
-        _netPacketProcessor.SubscribeReusable<RequestPickupWeapon, NetPeer>(OnRequestPickupWeapon);
-        _netPacketProcessor.SubscribeReusable<RequestGrabSlot, NetPeer>(OnRequestGrabSlot);
-        _netPacketProcessor.SubscribeReusable<RequestGrabEquippedSlot, NetPeer>(OnRequestGrabEquippedSlot);
-        _netPacketProcessor.SubscribeReusable<RequestDropGrabbed, NetPeer>(OnRequestDropGrabbed);
-        _listener = new EventBasedNetListener();
-        _manager = new NetManager(_listener);
-        _writer = new NetDataWriter();
-
-        _players = new Dictionary<int, ServerPlayer>();
-        _map = new Map();
-        _random = new Random();
+        _netPacketProcessor.SubscribeNetSerializable<PlayerMove, NetPeer>(OnPlayerMove);
+        _netPacketProcessor.SubscribeNetSerializable<PlayerAttack, NetPeer>(OnPlayerAttack);
+        _netPacketProcessor.SubscribeNetSerializable<RequestPickupWeapon, NetPeer>(OnRequestPickupWeapon);
+        _netPacketProcessor.SubscribeNetSerializable<RequestGrabSlot, NetPeer>(OnRequestGrabSlot);
+        _netPacketProcessor.SubscribeNetSerializable<RequestGrabEquippedSlot, NetPeer>(OnRequestGrabEquippedSlot);
+        _netPacketProcessor.SubscribeNetSerializable<RequestDropGrabbed, NetPeer>(OnRequestDropGrabbed);
+        _manager = new NetManager(_listener)
+        {
+            AutoRecycle = true
+        };
     }
     
     public void Run()
@@ -64,7 +63,7 @@ public class Server
             Console.WriteLine($"Connection from IP: {peer.EndPoint} with ID: {peer.Id}");
 
             var playerSpawnPosition = _map.GetSpawnPosition() ?? Vector3.Zero;
-            var newPlayer = new ServerPlayer { X = playerSpawnPosition.X, Z = playerSpawnPosition.Z };
+            var newPlayer = new ServerPlayer { Position = playerSpawnPosition };
             var newPlayerId = peer.Id;
             
             // Tell the new player their id.
@@ -75,14 +74,24 @@ public class Server
             // Notify new player of old players.
             foreach (var (playerId, player) in _players)
             {
-                SendToPeer(peer, new PlayerSpawn { X = player.X, Z = player.Z, Id = playerId }, DeliveryMethod.ReliableOrdered);
-                SendToPeer(peer, CreateUpdateInventoryPacket(playerId, player), DeliveryMethod.ReliableOrdered);
+                SendToPeer(peer, new PlayerSpawn
+                {
+                    X = player.Position.X,
+                    Z = player.Position.Z,
+                    Id = playerId
+                }, DeliveryMethod.ReliableOrdered);
+                SendRefToPeer(peer, CreateUpdateInventoryPacket(playerId, player), DeliveryMethod.ReliableOrdered);
             }
             
             // Notify all players of new player.
             _players[newPlayerId] = newPlayer;
-            SendToAll(new PlayerSpawn { X = newPlayer.X, Z = newPlayer.Z, Id = newPlayerId }, DeliveryMethod.ReliableOrdered);
-            SendToAll(CreateUpdateInventoryPacket(newPlayerId, newPlayer), DeliveryMethod.ReliableOrdered);
+            SendToAll(new PlayerSpawn
+            {
+                X = newPlayer.Position.X,
+                Z = newPlayer.Position.Z,
+                Id = newPlayerId
+            }, DeliveryMethod.ReliableOrdered);
+            SendRefToAll(CreateUpdateInventoryPacket(newPlayerId, newPlayer), DeliveryMethod.ReliableOrdered);
         };
         
         _listener.PeerDisconnectedEvent += (peer, info) =>
@@ -121,10 +130,10 @@ public class Server
             
             Tick();
 
-            var deltaTime = (float)stopwatch.Elapsed.TotalMilliseconds;
+            var deltaTime = (float)stopwatch.Elapsed.TotalSeconds;
             stopwatch.Reset();
 
-            var timeToNextTick = TimeSpan.FromMilliseconds(MathF.Max(TickTime - deltaTime, 0f));
+            var timeToNextTick = TimeSpan.FromSeconds(MathF.Max(TickTime - deltaTime, 0f));
             Thread.Sleep(timeToNextTick);
         }
         
@@ -145,8 +154,46 @@ public class Server
             // and a damage value which is then applied here.
             ServerDamageEnemy(hitEnemy, 10);
         }
+        
+        ServerMapUpdate();
+
+        ++_tickCount;
     }
 
+    // Alternative to Map.Update for server-only actions.
+    private void ServerMapUpdate()
+    {
+        var shouldRepath = _tickCount % TicksPerRepath == 0;
+        
+        foreach (var (enemyId, enemy) in _map.Enemies)
+        {
+            if (shouldRepath)
+            {
+                var nearestPlayerLocation = new Vector3I();
+                var nearestPlayerDistance = float.PositiveInfinity;
+                foreach (var (_, player) in _players)
+                {
+                    var distance = (player.Position - enemy.Position).Length();
+                    
+                    if (distance >= nearestPlayerDistance) continue;
+
+                    nearestPlayerDistance = distance;
+                    nearestPlayerLocation = new Vector3I(player.Position);
+                }
+                
+                enemy.CalculatePath(_aStar, _map, nearestPlayerLocation);
+            }
+            
+            enemy.UpdateServer(_map, TickTime);
+            SendToAll(new EnemyMove
+            {
+                Id = enemyId,
+                X = enemy.Position.X,
+                Z = enemy.Position.Z
+            }, DeliveryMethod.Unreliable);
+        }
+    }
+    
     private void SendMapStateToPeer(NetPeer peer)
     {
         // Tell the new player to generate the map.
@@ -202,7 +249,7 @@ public class Server
         var successfullySpawned = _map.SpawnEnemy(position.X, position.Z, enemyId);
 
         if (!successfullySpawned) return;
-        
+
         SendToAll(new EnemySpawn { Id = enemyId, X = position.X, Z = position.Z }, DeliveryMethod.ReliableOrdered);
     }
     
@@ -214,7 +261,7 @@ public class Server
         {
             _map.DespawnEnemy(enemy.Id);
         }
-        
+
         SendToAll(new EnemyTakeDamage { Id = enemy.Id, Damage = damage }, DeliveryMethod.ReliableOrdered);
     }
     
@@ -243,7 +290,7 @@ public class Server
         var successfullyDropped = _map.DropWeapon(weaponType, x, z, droppedWeaponId);
 
         if (!successfullyDropped) return;
-        
+
         SendToAll(new DroppedWeaponSpawn
         {
             WeaponType = weaponType,
@@ -256,7 +303,7 @@ public class Server
     private void ServerPickupWeapon(int playerId, int droppedWeaponId, WeaponType weaponType)
     {
         _map.PickupWeapon(droppedWeaponId);
-        
+
         SendToAll(new PickupWeapon
         {
             PlayerId = playerId,
@@ -266,6 +313,30 @@ public class Server
     }
     
     public void SendToPeer<T>(NetPeer peer, T packet, DeliveryMethod deliveryMethod)
+        where T : INetSerializable
+    {
+        _writer.Reset();
+        _netPacketProcessor.WriteNetSerializable(_writer, ref packet);
+        peer.Send(_writer, deliveryMethod);
+    }
+    
+    public void SendToAll<T>(T packet, DeliveryMethod deliveryMethod)
+        where T : INetSerializable
+    {
+        _writer.Reset();
+        _netPacketProcessor.WriteNetSerializable(_writer, ref packet);
+        _manager.SendToAll(_writer, deliveryMethod);
+    }
+
+    public void SendToAll<T>(T packet, DeliveryMethod deliveryMethod, NetPeer excludePeer)
+        where T : INetSerializable
+    {
+        _writer.Reset();
+        _netPacketProcessor.WriteNetSerializable(_writer, ref packet);
+        _manager.SendToAll(_writer, deliveryMethod, excludePeer);
+    }
+    
+    public void SendRefToPeer<T>(NetPeer peer, T packet, DeliveryMethod deliveryMethod)
         where T : class, new()
     {
         _writer.Reset();
@@ -273,7 +344,7 @@ public class Server
         peer.Send(_writer, deliveryMethod);
     }
     
-    public void SendToAll<T>(T packet, DeliveryMethod deliveryMethod)
+    public void SendRefToAll<T>(T packet, DeliveryMethod deliveryMethod)
         where T : class, new()
     {
         _writer.Reset();
@@ -281,7 +352,7 @@ public class Server
         _manager.SendToAll(_writer, deliveryMethod);
     }
     
-    public void SendToAll<T>(T packet, DeliveryMethod deliveryMethod, NetPeer excludePeer)
+    public void SendRefToAll<T>(T packet, DeliveryMethod deliveryMethod, NetPeer excludePeer)
         where T : class, new()
     {
         _writer.Reset();
@@ -293,9 +364,9 @@ public class Server
     {
         if (!_players.TryGetValue(peer.Id, out var player)) return;
 
-        player.X = playerMove.X;
-        player.Z = playerMove.Z;
-        
+        player.Position.X = playerMove.X;
+        player.Position.Z = playerMove.Z;
+
         SendToAll(new PlayerMove { Id = peer.Id, X = playerMove.X, Z = playerMove.Z }, DeliveryMethod.Unreliable);
     }
     
@@ -349,11 +420,11 @@ public class Server
         if (!_players.TryGetValue(peer.Id, out var player)) return;
         
         var droppedWeaponId = _nextDroppedWeaponId++;
-        player.Inventory.DropGrabbed(_map, player.X, player.Z, droppedWeaponId);
+        player.Inventory.DropGrabbed(_map, player.Position.X, player.Position.Z, droppedWeaponId);
         SendToAll(new DropGrabbed
         {
-            X = player.X,
-            Z = player.Z,
+            X = player.Position.X,
+            Z = player.Position.Z,
             DroppedWeaponId = droppedWeaponId,
             PlayerId = peer.Id
         }, DeliveryMethod.ReliableOrdered);

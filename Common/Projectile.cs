@@ -50,7 +50,7 @@ public class Projectile
 
         _position.Z = newPosition.Z;
 
-        var nearbyEnemies = map.GetNearbyEnemies((int)_position.X, (int)_position.Z);
+        var nearbyEnemies = map.EnemiesInTiles.GetNearby((int)_position.X, (int)_position.Z);
         foreach (var nearbyEnemy in nearbyEnemies)
         {
             if (!Collision.HasCollision(_position, Size, nearbyEnemy.Position, Enemy.Size)) continue;

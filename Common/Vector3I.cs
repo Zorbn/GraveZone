@@ -1,4 +1,6 @@
-﻿namespace Common;
+﻿using Microsoft.Xna.Framework;
+
+namespace Common;
 
 public struct Vector3I : IEquatable<Vector3I>
 {
@@ -12,7 +14,16 @@ public struct Vector3I : IEquatable<Vector3I>
         Y = y;
         Z = z;
     }
+    
+    public Vector3I(Vector3 vector) : this((int)vector.X, (int)vector.Y, (int)vector.Z)
+    {
+    }
 
+    public Vector3 ToVector3()
+    {
+        return new Vector3(X, Y, Z);
+    }
+    
     public static bool operator ==(Vector3I a, Vector3I b)
     {
         return a.Equals(b);

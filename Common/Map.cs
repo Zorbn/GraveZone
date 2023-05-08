@@ -30,8 +30,8 @@ public class Map
     private readonly Tile[] _floorTiles = new Tile[TileCount];
     private readonly Tile[] _wallTiles = new Tile[TileCount];
 
-    private readonly EntitiesInTiles<DroppedWeapon> _droppedWeaponsInTiles = new(Size);
-    private readonly EntitiesInTiles<Enemy> _enemiesInTiles = new(Size);
+    public readonly EntitiesInTiles<DroppedWeapon> DroppedWeaponsInTiles = new(Size);
+    public readonly EntitiesInTiles<Enemy> EnemiesInTiles = new(Size);
 
     public readonly UpdateResults LastUpdateResults = new();
     
@@ -126,7 +126,7 @@ public class Map
         Enemies.Add(id, newEnemy);
         
         // TODO: Update tile positions for enemies when they move.
-        _enemiesInTiles.Add(newEnemy, tileX, tileZ);
+        EnemiesInTiles.Add(newEnemy, tileX, tileZ);
         
         return true;
     }
@@ -138,7 +138,7 @@ public class Map
         var enemyTileX = (int)enemy.Position.X;
         var enemyTileZ = (int)enemy.Position.Z;
         
-        _enemiesInTiles.Remove(enemy, enemyTileX, enemyTileZ);
+        EnemiesInTiles.Remove(enemy, enemyTileX, enemyTileZ);
         
         Enemies.Remove(id);
     }
@@ -152,7 +152,7 @@ public class Map
         if (tileX is < 0 or >= Size || tileZ is < 0 or >= Size) return false;
         
         DroppedWeapons.Add(id, droppedWeapon);
-        _droppedWeaponsInTiles.Add(droppedWeapon, tileX, tileZ);
+        DroppedWeaponsInTiles.Add(droppedWeapon, tileX, tileZ);
 
         return true;
     }
@@ -170,10 +170,6 @@ public class Map
         if (x is < 0 or >= Size || z is < 0 or >= Size) return;
 
         DroppedWeapons.Remove(id);
-        _droppedWeaponsInTiles.Remove(droppedWeapon, x, z);
+        DroppedWeaponsInTiles.Remove(droppedWeapon, x, z);
     }
-
-    public IEnumerable<DroppedWeapon> GetNearbyDroppedWeapons(float x, float z) => _droppedWeaponsInTiles.GetNearbyEntities(x, z);
-    
-    public IEnumerable<Enemy> GetNearbyEnemies(float x, float z) => _enemiesInTiles.GetNearbyEntities(x, z);
 }

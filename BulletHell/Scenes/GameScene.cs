@@ -39,20 +39,21 @@ public class GameScene : IScene
         Client = new Client();
 
         Client.NetPacketProcessor.RegisterNestedType<NetVector3>();
-        Client.NetPacketProcessor.SubscribeReusable<SetLocalId>(OnSetLocalId);
-        Client.NetPacketProcessor.SubscribeReusable<PlayerSpawn>(OnPlayerSpawn);
-        Client.NetPacketProcessor.SubscribeReusable<PlayerDespawn>(OnPlayerDespawn);
-        Client.NetPacketProcessor.SubscribeReusable<PlayerMove>(OnPlayerMove);
-        Client.NetPacketProcessor.SubscribeReusable<ProjectileSpawn>(OnProjectileSpawn);
-        Client.NetPacketProcessor.SubscribeReusable<MapGenerate>(OnMapGenerate);
-        Client.NetPacketProcessor.SubscribeReusable<DroppedWeaponSpawn>(OnDroppedWeaponSpawn);
-        Client.NetPacketProcessor.SubscribeReusable<PickupWeapon>(OnPickupWeapon);
-        Client.NetPacketProcessor.SubscribeReusable<GrabSlot>(OnGrabSlot);
-        Client.NetPacketProcessor.SubscribeReusable<GrabEquippedSlot>(OnGrabEquippedSlot);
-        Client.NetPacketProcessor.SubscribeReusable<DropGrabbed>(OnDropGrabbed);
+        Client.NetPacketProcessor.SubscribeNetSerializable<SetLocalId>(OnSetLocalId);
+        Client.NetPacketProcessor.SubscribeNetSerializable<PlayerSpawn>(OnPlayerSpawn);
+        Client.NetPacketProcessor.SubscribeNetSerializable<PlayerDespawn>(OnPlayerDespawn);
+        Client.NetPacketProcessor.SubscribeNetSerializable<PlayerMove>(OnPlayerMove);
+        Client.NetPacketProcessor.SubscribeNetSerializable<ProjectileSpawn>(OnProjectileSpawn);
+        Client.NetPacketProcessor.SubscribeNetSerializable<MapGenerate>(OnMapGenerate);
+        Client.NetPacketProcessor.SubscribeNetSerializable<DroppedWeaponSpawn>(OnDroppedWeaponSpawn);
+        Client.NetPacketProcessor.SubscribeNetSerializable<PickupWeapon>(OnPickupWeapon);
+        Client.NetPacketProcessor.SubscribeNetSerializable<GrabSlot>(OnGrabSlot);
+        Client.NetPacketProcessor.SubscribeNetSerializable<GrabEquippedSlot>(OnGrabEquippedSlot);
+        Client.NetPacketProcessor.SubscribeNetSerializable<DropGrabbed>(OnDropGrabbed);
         Client.NetPacketProcessor.SubscribeReusable<UpdateInventory>(OnUpdateInventory);
-        Client.NetPacketProcessor.SubscribeReusable<EnemySpawn>(OnEnemySpawn);
-        Client.NetPacketProcessor.SubscribeReusable<EnemyTakeDamage>(OnEnemyTakeDamage);
+        Client.NetPacketProcessor.SubscribeNetSerializable<EnemySpawn>(OnEnemySpawn);
+        Client.NetPacketProcessor.SubscribeNetSerializable<EnemyTakeDamage>(OnEnemyTakeDamage);
+        Client.NetPacketProcessor.SubscribeNetSerializable<EnemyMove>(OnEnemyMove);
 
         Console.WriteLine("Starting client...");
     }
@@ -327,5 +328,12 @@ public class GameScene : IScene
         {
             _map.DespawnEnemy(enemy.Id);
         }
+    }
+    
+    private void OnEnemyMove(EnemyMove enemyMove)
+    {
+        if (!_map.Enemies.TryGetValue(enemyMove.Id, out var enemy)) return;
+
+        enemy.MoveTo(_map, enemyMove.X, enemyMove.Z);
     }
 }

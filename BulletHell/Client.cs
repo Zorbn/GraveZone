@@ -21,7 +21,10 @@ public class Client
         _writer = new NetDataWriter();
         NetPacketProcessor = new NetPacketProcessor();
         _listener = new EventBasedNetListener();
-        _manager = new NetManager(_listener);
+        _manager = new NetManager(_listener)
+        {
+            AutoRecycle = true
+        };
         _manager.Start();
         
         _listener.NetworkReceiveEvent += (fromPeer, dataReader, channel, deliveryMethod) =>
@@ -56,10 +59,10 @@ public class Client
     }
 
     public void SendToServer<T>(T packet, DeliveryMethod deliveryMethod)
-        where T : class, new()
+        where T : INetSerializable
     {
         _writer.Reset();
-        NetPacketProcessor.Write(_writer, packet);
+        NetPacketProcessor.WriteNetSerializable(_writer, ref packet);
         _manager.FirstPeer.Send(_writer, deliveryMethod);
     }
 
