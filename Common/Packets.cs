@@ -110,3 +110,9 @@ public class EnemySpawn
     public float X { get; set; }
     public float Z { get; set; }
 }
+
+public class EnemyTakeDamage
+{
+    public int Id { get; set; }
+    public int Damage { get; set; }
+}

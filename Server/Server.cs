@@ -70,30 +70,7 @@ public class Server
             // Tell the new player their id.
             SendToPeer(peer, new SetLocalId { Id = newPlayerId }, DeliveryMethod.ReliableOrdered);
             
-            // Tell the new player to generate the map.
-            SendToPeer(peer, new MapGenerate { Seed = _mapSeed }, DeliveryMethod.ReliableOrdered);
-            
-            // Populate the map for the new player.
-            foreach (var (droppedWeaponId, droppedWeapon) in _map.DroppedWeapons)
-            {
-                SendToPeer(peer, new DroppedWeaponSpawn
-                {
-                    WeaponType = droppedWeapon.Weapon.WeaponType,
-                    X = droppedWeapon.Position.X,
-                    Z = droppedWeapon.Position.Z,
-                    Id = droppedWeaponId
-                }, DeliveryMethod.ReliableOrdered);
-            }
-            
-            foreach (var (enemyId, enemy) in _map.Enemies)
-            {
-                SendToPeer(peer, new EnemySpawn
-                {
-                    Id = enemyId,
-                    X = enemy.Position.X,
-                    Z = enemy.Position.Z
-                }, DeliveryMethod.ReliableOrdered);
-            }
+            SendMapStateToPeer(peer);
             
             // Notify new player of old players.
             foreach (var (playerId, player) in _players)
@@ -158,6 +135,54 @@ public class Server
     {
         // Spawn a new enemy each tick that we aren't at the maximum.
         TrySpawnEnemy();
+        
+        _map.Update(TickTime);
+
+        foreach (var hitEnemy in _map.LastUpdateResults.HitEnemies)
+        {
+            // TODO: Make different weapons have different damage values which are passed into the projectile
+            // and then UpdateResults should store Hits instead of raw enemies. The hits will store an enemy
+            // and a damage value which is then applied here.
+            ServerDamageEnemy(hitEnemy, 10);
+        }
+    }
+
+    private void SendMapStateToPeer(NetPeer peer)
+    {
+        // Tell the new player to generate the map.
+        SendToPeer(peer, new MapGenerate { Seed = _mapSeed }, DeliveryMethod.ReliableOrdered);
+            
+        // Populate the map for the new player.
+        foreach (var (droppedWeaponId, droppedWeapon) in _map.DroppedWeapons)
+        {
+            SendToPeer(peer, new DroppedWeaponSpawn
+            {
+                WeaponType = droppedWeapon.Weapon.WeaponType,
+                X = droppedWeapon.Position.X,
+                Z = droppedWeapon.Position.Z,
+                Id = droppedWeaponId
+            }, DeliveryMethod.ReliableOrdered);
+        }
+            
+        foreach (var (enemyId, enemy) in _map.Enemies)
+        {
+            SendToPeer(peer, new EnemySpawn
+            {
+                Id = enemyId,
+                X = enemy.Position.X,
+                Z = enemy.Position.Z
+            }, DeliveryMethod.ReliableOrdered);
+        }
+        
+        foreach (var projectile in _map.Projectiles)
+        {
+            SendToPeer(peer, new ProjectileSpawn
+            {
+                Direction = new NetVector3(projectile.Direction),
+                X = projectile.Position.X,
+                Z = projectile.Position.Z
+            }, DeliveryMethod.ReliableOrdered);
+        }
     }
 
     private void TrySpawnEnemy()
@@ -174,8 +199,23 @@ public class Server
     private void ServerSpawnEnemy(Vector3 position)
     {
         var enemyId = _nextEnemyId++;
-        _map.SpawnEnemy(position.X, position.Z, enemyId);
+        var successfullySpawned = _map.SpawnEnemy(position.X, position.Z, enemyId);
+
+        if (!successfullySpawned) return;
+        
         SendToAll(new EnemySpawn { Id = enemyId, X = position.X, Z = position.Z }, DeliveryMethod.ReliableOrdered);
+    }
+    
+    private void ServerDamageEnemy(Enemy enemy, int damage)
+    {
+        var enemyDied = enemy.TakeDamage(damage);
+
+        if (enemyDied)
+        {
+            _map.DespawnEnemy(enemy.Id);
+        }
+        
+        SendToAll(new EnemyTakeDamage { Id = enemy.Id, Damage = damage }, DeliveryMethod.ReliableOrdered);
     }
     
     private UpdateInventory CreateUpdateInventoryPacket(int playerId, ServerPlayer player)
@@ -261,6 +301,10 @@ public class Server
     
     private void OnPlayerAttack(PlayerAttack playerAttack, NetPeer peer)
     {
+        var direction = new Vector3(playerAttack.Direction.X, playerAttack.Direction.Y,
+            playerAttack.Direction.Z);
+        _map.Projectiles.Add(new Projectile(direction, playerAttack.X, playerAttack.Z));
+        
         // Send the new projectile to all players except the player who created the projectile.
         // That player will have already spawned its own local copy.
         SendToAll(new ProjectileSpawn { Direction = playerAttack.Direction, X = playerAttack.X, Z = playerAttack.Z }, DeliveryMethod.ReliableOrdered, peer);

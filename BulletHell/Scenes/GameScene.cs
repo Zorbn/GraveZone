@@ -18,7 +18,6 @@ public class GameScene : IScene
     private readonly ClientMap _map;
     private readonly SpriteRenderer _spriteRenderer;
     private readonly Dictionary<int, ClientPlayer> _players;
-    private readonly List<Projectile> _projectiles;
     private readonly Camera _camera;
 
     private readonly ImageButton _quitButton;
@@ -33,7 +32,6 @@ public class GameScene : IScene
         _map = new ClientMap();
         _spriteRenderer = new SpriteRenderer(500, game.GraphicsDevice);
         _players = new Dictionary<int, ClientPlayer>();
-        _projectiles = new List<Projectile>();
 
         _quitButton = new ImageButton(ClientInventory.X - Resources.TileSize,
             ClientInventory.Y + Resources.TileSize * 3, ImageButton.QuitRectangle);
@@ -54,6 +52,7 @@ public class GameScene : IScene
         Client.NetPacketProcessor.SubscribeReusable<DropGrabbed>(OnDropGrabbed);
         Client.NetPacketProcessor.SubscribeReusable<UpdateInventory>(OnUpdateInventory);
         Client.NetPacketProcessor.SubscribeReusable<EnemySpawn>(OnEnemySpawn);
+        Client.NetPacketProcessor.SubscribeReusable<EnemyTakeDamage>(OnEnemyTakeDamage);
 
         Console.WriteLine("Starting client...");
     }
@@ -107,23 +106,15 @@ public class GameScene : IScene
 
         foreach (var (_, player) in _players)
         {
-            player.Update(input, _map, _projectiles, Client, _camera, deltaTime);
+            player.Update(input, _map, Client, _camera, deltaTime);
         }
 
         if (hasLocalPlayer)
         {
             PostUpdateLocal(localPlayer);
         }
-
-        for (var i = _projectiles.Count - 1; i >= 0; i--)
-        {
-            var hadCollision = _projectiles[i].Update(_map, deltaTime);
-
-            if (hadCollision)
-            {
-                _projectiles.RemoveAt(i);
-            }
-        }
+        
+        _map.Update(deltaTime);
 
         _tickTimer += deltaTime;
 
@@ -154,7 +145,7 @@ public class GameScene : IScene
         }
 
         // TODO: Move projectiles into map and have a map.DrawSprites method.
-        foreach (var projectile in _projectiles)
+        foreach (var projectile in _map.Projectiles)
         {
             projectile.Draw(_spriteRenderer);
         }
@@ -270,9 +261,8 @@ public class GameScene : IScene
 
     private void OnProjectileSpawn(ProjectileSpawn projectileSpawn)
     {
-        var direction = new Vector3(projectileSpawn.Direction.X, projectileSpawn.Direction.Y,
-            projectileSpawn.Direction.Z);
-        _projectiles.Add(new Projectile(direction, projectileSpawn.X, projectileSpawn.Z));
+        var direction = projectileSpawn.Direction.ToVector3();
+        _map.Projectiles.Add(new Projectile(direction, projectileSpawn.X, projectileSpawn.Z));
     }
 
     private void OnMapGenerate(MapGenerate mapGenerate)
@@ -325,5 +315,17 @@ public class GameScene : IScene
     private void OnEnemySpawn(EnemySpawn enemySpawn)
     {
         _map.SpawnEnemy(enemySpawn.X, enemySpawn.Z, enemySpawn.Id);
+    }
+    
+    private void OnEnemyTakeDamage(EnemyTakeDamage enemyTakeDamage)
+    {
+        if (!_map.Enemies.TryGetValue(enemyTakeDamage.Id, out var enemy)) return;
+
+        var enemyDied = enemy.TakeDamage(enemyTakeDamage.Damage);
+        
+        if (enemyDied)
+        {
+            _map.DespawnEnemy(enemy.Id);
+        }
     }
 }

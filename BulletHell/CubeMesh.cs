@@ -16,6 +16,7 @@ public static class CubeMesh
 
     // Used to prevent texture bleeding, where bits of nearby textures
     // are rendered alongside the desired one.
+    // TODO: 
     private static readonly float Padding = Math.Min(UnitX, UnitY) * 0.025f;
 
     public static readonly Dictionary<Direction, VertexPositionColorTexture[]> Vertices = new()

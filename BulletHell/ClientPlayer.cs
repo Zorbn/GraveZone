@@ -67,7 +67,7 @@ public class ClientPlayer
         _spritePosition = _position;
     }
 
-    private void UpdateLocal(Input input, ClientMap map, List<Projectile> projectiles, Client client, Camera camera,
+    private void UpdateLocal(Input input, ClientMap map, Client client, Camera camera,
         float deltaTime)
     {
         var movement = Vector3.Zero;
@@ -125,16 +125,16 @@ public class ClientPlayer
 
         if (input.IsMouseButtonDown(MouseButton.Left) && Inventory.EquippedWeapon is not null)
         {
-            _attacker.Attack(Inventory.EquippedWeapon, directionToMouse, _position.X, _position.Z, projectiles, client);
+            _attacker.Attack(Inventory.EquippedWeapon, directionToMouse, _position.X, _position.Z, map.Projectiles, client);
         }
     }
 
-    public void Update(Input input, ClientMap map, List<Projectile> projectiles, Client client, Camera camera,
+    public void Update(Input input, ClientMap map, Client client, Camera camera,
         float deltaTime)
     {
         if (client.IsLocal(Id))
         {
-            UpdateLocal(input, map, projectiles, client, camera, deltaTime);
+            UpdateLocal(input, map, client, camera, deltaTime);
             return;
         }
 

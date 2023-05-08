@@ -4,39 +4,38 @@ namespace Common;
 
 public class Map
 {
+    public class UpdateResults
+    {
+        public readonly List<Enemy> HitEnemies = new();
+
+        public void Clear()
+        {
+            HitEnemies.Clear();
+        }
+    }
+    
     public const int Size = 16;
+    private const int TileCount = Size * Size;
     public const float TileScale = 1f;
     public const float TileHeight = 2f;
     public const float FloorShade = 1.0f;
     public const float WallShade = 0.8f;
 
-    public readonly Dictionary<int, DroppedWeapon> DroppedWeapons;
-    public readonly Dictionary<int, Enemy> Enemies;
+    public readonly Dictionary<int, DroppedWeapon> DroppedWeapons = new();
+    public readonly Dictionary<int, Enemy> Enemies = new();
+    // Projectiles don't have an id because the clients simulate projectiles
+    // locally to reduce the number of packets sent for each projectile.
+    public readonly List<Projectile> Projectiles = new();
+
+    private readonly Tile[] _floorTiles = new Tile[TileCount];
+    private readonly Tile[] _wallTiles = new Tile[TileCount];
+
+    private readonly EntitiesInTiles<DroppedWeapon> _droppedWeaponsInTiles = new(Size);
+    private readonly EntitiesInTiles<Enemy> _enemiesInTiles = new(Size);
+
+    public readonly UpdateResults LastUpdateResults = new();
     
-    private Tile[] _floorTiles;
-    private Tile[] _wallTiles;
-    private List<DroppedWeapon>[] _droppedWeaponsInTiles;
-    private HashSet<DroppedWeapon> _droppedWeaponQueryResults;
-
     private Random _random;
-
-    public Map()
-    {
-        var tileCount = Size * Size;
-        _floorTiles = new Tile[tileCount];
-        _wallTiles = new Tile[tileCount];
-        
-        _droppedWeaponsInTiles = new List<DroppedWeapon>[tileCount];
-        for (var i = 0; i < tileCount; i++)
-        {
-            _droppedWeaponsInTiles[i] = new List<DroppedWeapon>();
-        }
-        
-        _droppedWeaponQueryResults = new HashSet<DroppedWeapon>();
-        
-        DroppedWeapons = new Dictionary<int, DroppedWeapon>();
-        Enemies = new Dictionary<int, Enemy>();
-    }
 
     public void Generate(int seed)
     {
@@ -69,6 +68,21 @@ public class Map
         }
 
         return null;
+    }
+
+    public void Update(float deltaTime)
+    {
+        LastUpdateResults.Clear();
+        
+        for (var i = Projectiles.Count - 1; i >= 0; i--)
+        {
+            var hadCollision = Projectiles[i].Update(this, deltaTime);
+
+            if (hadCollision)
+            {
+                Projectiles.RemoveAt(i);
+            }
+        }
     }
 
     public Tile GetFloorTile(int x, int z)
@@ -108,14 +122,24 @@ public class Map
 
         if (tileX is < 0 or >= Size || tileZ is < 0 or >= Size) return false;
         
-        var newEnemy = new Enemy(x, z);
+        var newEnemy = new Enemy(x, z, id);
         Enemies.Add(id, newEnemy);
+        
+        // TODO: Update tile positions for enemies when they move.
+        _enemiesInTiles.Add(newEnemy, tileX, tileZ);
         
         return true;
     }
 
     public void DespawnEnemy(int id)
     {
+        if (!Enemies.TryGetValue(id, out var enemy)) return;
+
+        var enemyTileX = (int)enemy.Position.X;
+        var enemyTileZ = (int)enemy.Position.Z;
+        
+        _enemiesInTiles.Remove(enemy, enemyTileX, enemyTileZ);
+        
         Enemies.Remove(id);
     }
     
@@ -128,7 +152,7 @@ public class Map
         if (tileX is < 0 or >= Size || tileZ is < 0 or >= Size) return false;
         
         DroppedWeapons.Add(id, droppedWeapon);
-        _droppedWeaponsInTiles[tileX + tileZ * Size].Add(droppedWeapon);
+        _droppedWeaponsInTiles.Add(droppedWeapon, tileX, tileZ);
 
         return true;
     }
@@ -146,37 +170,10 @@ public class Map
         if (x is < 0 or >= Size || z is < 0 or >= Size) return;
 
         DroppedWeapons.Remove(id);
-        _droppedWeaponsInTiles[x + z * Size].Remove(droppedWeapon);
+        _droppedWeaponsInTiles.Remove(droppedWeapon, x, z);
     }
 
-    public IEnumerable<DroppedWeapon> GetNearbyDroppedWeapons(float x, float z)
-    {
-        _droppedWeaponQueryResults.Clear();
-        
-        var tileX = (int)x;
-        var tileZ = (int)z;
-
-        for (var zi = -1; zi <= 1; zi++)
-        {
-            var targetZ = tileZ + zi;
-            
-            for (var xi = -1; xi <= 1; xi++)
-            {
-                var targetX = tileX + xi;
-                
-                if (targetX is < 0 or >= Size || targetZ is < 0 or >= Size) continue;
-
-                var droppedWeaponsInTile = _droppedWeaponsInTiles[targetX + targetZ * Size];
-                foreach (var droppedWeapon in droppedWeaponsInTile)
-                {
-                    _droppedWeaponQueryResults.Add(droppedWeapon);
-                }
-            }
-        }
-
-        foreach (var droppedWeapon in _droppedWeaponQueryResults)
-        {
-            yield return droppedWeapon;
-        }
-    }
+    public IEnumerable<DroppedWeapon> GetNearbyDroppedWeapons(float x, float z) => _droppedWeaponsInTiles.GetNearbyEntities(x, z);
+    
+    public IEnumerable<Enemy> GetNearbyEnemies(float x, float z) => _enemiesInTiles.GetNearbyEntities(x, z);
 }

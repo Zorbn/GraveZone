@@ -21,7 +21,7 @@ public class Attacker
         _attackTimer = weapon.AttackCooldown;
         projectiles.Add(new Projectile(direction, x, z));
         
-        var netDirectionToMouse = new NetVector3 { X = direction.X, Y = direction.Y, Z = direction.Z } ;
+        var netDirectionToMouse = new NetVector3(direction) ;
         client.SendToServer(new PlayerAttack { Direction = netDirectionToMouse, X = x, Z = z }, DeliveryMethod.ReliableOrdered);
     }
 }

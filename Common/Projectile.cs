@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using BulletHell;
+using Microsoft.Xna.Framework;
 
 namespace Common;
 
@@ -9,13 +10,13 @@ public class Projectile
     private static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
 
     public Vector3 Position => _position;
+    public readonly Vector3 Direction;
 
-    private Vector3 _direction;
     private Vector3 _position;
 
     public Projectile(Vector3 direction, float x, float z)
     {
-        _direction = direction;
+        Direction = direction;
         _position = new Vector3(x, 0f, z);
     }
 
@@ -49,11 +50,22 @@ public class Projectile
 
         _position.Z = newPosition.Z;
 
+        var nearbyEnemies = map.GetNearbyEnemies((int)_position.X, (int)_position.Z);
+        foreach (var nearbyEnemy in nearbyEnemies)
+        {
+            if (!Collision.HasCollision(_position, Size, nearbyEnemy.Position, Enemy.Size)) continue;
+
+            hasCollision = true;
+            map.LastUpdateResults.HitEnemies.Add(nearbyEnemy);
+
+            break;
+        }
+
         return hasCollision;
     }
 
     public bool Update(Map map, float deltaTime)
     {
-        return Move(_direction, map, deltaTime);
+        return Move(Direction, map, deltaTime);
     }
 }
