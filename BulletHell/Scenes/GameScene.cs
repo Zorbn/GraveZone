@@ -145,21 +145,7 @@ public class GameScene : IScene
             pair.Value.Draw(_spriteRenderer);
         }
 
-        // TODO: Move projectiles into map and have a map.DrawSprites method.
-        foreach (var projectile in _map.Projectiles)
-        {
-            projectile.Draw(_spriteRenderer);
-        }
-        
-        foreach (var (_, droppedWeapon) in _map.DroppedWeapons)
-        {
-            droppedWeapon.Draw(_spriteRenderer);
-        }
-        
-        foreach (var (_, enemy) in _map.Enemies)
-        {
-            enemy.Draw(_spriteRenderer);
-        }
+        _map.DrawSprites(_spriteRenderer);
 
         _spriteRenderer.End();
 

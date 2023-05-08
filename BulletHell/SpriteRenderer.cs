@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Common;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletHell;
@@ -29,7 +30,7 @@ public class SpriteRenderer
         _indexBuffer = new IndexBuffer(graphicsDevice, typeof(ushort), maxIndices, BufferUsage.WriteOnly);
     }
 
-    public void Add(float x, float z, Point spriteCoords)
+    public void Add(float x, float z, Sprite sprite)
     {
         var baseVertexCount = _vertexI;
         foreach (var index in SpriteMesh.Indices)
@@ -38,6 +39,8 @@ public class SpriteRenderer
             ++_indexI;
         }
 
+        var texCoords = SpriteMesh.GetTexCoord(sprite);
+
         foreach (var vertex in SpriteMesh.Vertices)
         {
             var newVertex = vertex;
@@ -45,7 +48,7 @@ public class SpriteRenderer
             newVertex.Position.X = newVertex.Position.X * 0.8f + x;
             newVertex.Position.Y *= 1.75f;
             newVertex.Position.Z = newVertex.Position.Z * 0.8f + z;
-            newVertex.TextureCoordinate += new Vector2(spriteCoords.X * SpriteMesh.InvTextureWidth, spriteCoords.Y * SpriteMesh.InvTextureHeight);
+            newVertex.TextureCoordinate += new Vector2(texCoords.X, texCoords.Y);
             _vertices[_vertexI] = newVertex;
             ++_vertexI;
         }

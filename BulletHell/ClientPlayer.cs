@@ -151,6 +151,6 @@ public class ClientPlayer
 
     public void Draw(SpriteRenderer spriteRenderer)
     {
-        spriteRenderer.Add(_spritePosition.X, _spritePosition.Z, PlayerSpriteCoords);
+        spriteRenderer.Add(_spritePosition.X, _spritePosition.Z, Sprite.Player);
     }
 }

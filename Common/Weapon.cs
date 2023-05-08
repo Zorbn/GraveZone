@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-
-namespace Common;
+﻿namespace Common;
 
 public class Weapon
 {
@@ -11,19 +9,18 @@ public class Weapon
 
     static Weapon()
     {
-        Register(new Weapon(WeaponType.Dagger, 0.2f,
-            new Rectangle(1, 31 * Resources.TileSize, Resources.TileSize, Resources.TileSize)));
+        Register(new Weapon(WeaponType.Dagger, 0.2f, Sprite.Dagger));
     }
 
-    public readonly Rectangle SourceRectangle;
+    public readonly Sprite Sprite;
     public readonly float AttackCooldown;
     public readonly WeaponType WeaponType;
 
-    private Weapon(WeaponType weaponType, float attackCooldown, Rectangle sourceRectangle)
+    private Weapon(WeaponType weaponType, float attackCooldown, Sprite sprite)
     {
         WeaponType = weaponType;
         AttackCooldown = attackCooldown;
-        SourceRectangle = sourceRectangle;
+        Sprite = sprite;
     }
 
     private static void Register(Weapon weapon)

@@ -124,4 +124,22 @@ public class ClientMap : Map
         graphicsDevice.Indices = _indexBuffer;
         graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, _primitives);
     }
+
+    public void DrawSprites(SpriteRenderer spriteRenderer)
+    {
+        foreach (var projectile in Projectiles)
+        {
+            projectile.Draw(spriteRenderer);
+        }
+        
+        foreach (var (_, droppedWeapon) in DroppedWeapons)
+        {
+            droppedWeapon.Draw(spriteRenderer);
+        }
+        
+        foreach (var (_, enemy) in Enemies)
+        {
+            enemy.Draw(spriteRenderer);
+        }
+    }
 }

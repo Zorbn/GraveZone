@@ -9,6 +9,6 @@ public static class ClientEnemy
     public static void Draw(this Enemy enemy, SpriteRenderer spriteRenderer)
     {
         // TODO: Give enemies sprites so they don't look like projectiles.
-        spriteRenderer.Add(enemy.Position.X, enemy.Position.Z, new Point(8, 0));
+        spriteRenderer.Add(enemy.Position.X, enemy.Position.Z, Sprite.Projectile);
     }
 }

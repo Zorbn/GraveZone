@@ -80,7 +80,8 @@ public class ClientInventory : Inventory
                     var itemPosition = slotPosition;
                     itemPosition.X += ItemSpriteOffset;
                     itemPosition.Y += ItemSpriteOffset;
-                    spriteBatch.Draw(resources.SpriteTexture, itemPosition, weapon.SourceRectangle, Color.White);
+                    var sourceRectangle = SpriteMesh.GetSourceRectangle(weapon.Sprite);
+                    spriteBatch.Draw(resources.SpriteTexture, itemPosition, sourceRectangle, Color.White);
                 }
             }
         }
@@ -93,12 +94,14 @@ public class ClientInventory : Inventory
             var equippedItemPosition = equippedSlotPosition;
             equippedItemPosition.X += ItemSpriteOffset;
             equippedItemPosition.Y += ItemSpriteOffset;
-            spriteBatch.Draw(resources.SpriteTexture, equippedItemPosition, EquippedWeapon.SourceRectangle, Color.White);
+            var sourceRectangle = SpriteMesh.GetSourceRectangle(EquippedWeapon.Sprite);
+            spriteBatch.Draw(resources.SpriteTexture, equippedItemPosition, sourceRectangle, Color.White);
         }
 
         if (GrabbedWeapon is not null)
         {
-            spriteBatch.Draw(resources.SpriteTexture, _mousePosition, GrabbedWeapon.SourceRectangle, Color.White, 0f,
+            var sourceRectangle = SpriteMesh.GetSourceRectangle(GrabbedWeapon.Sprite);
+            spriteBatch.Draw(resources.SpriteTexture, _mousePosition, sourceRectangle, Color.White, 0f,
                 Vector2.Zero, GrabbedItemScale, SpriteEffects.None, 0f);
         }
     }

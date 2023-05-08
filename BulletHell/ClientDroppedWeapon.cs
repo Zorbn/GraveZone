@@ -7,6 +7,6 @@ public static class ClientDroppedWeapon
 {
     public static void Draw(this DroppedWeapon droppedWeapon, SpriteRenderer spriteRenderer)
     {
-        spriteRenderer.Add(droppedWeapon.Position.X, droppedWeapon.Position.Z, droppedWeapon.Weapon.SourceRectangle.Location);
+        spriteRenderer.Add(droppedWeapon.Position.X, droppedWeapon.Position.Z, droppedWeapon.Weapon.Sprite);
     }
 }
