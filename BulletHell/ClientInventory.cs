@@ -1,26 +1,31 @@
-﻿using System;
-using Common;
+﻿using Common;
 using LiteNetLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletHell;
 
-public class ClientInventory : Inventory
+public class ClientInventory
 {
-    public const int X = BulletHell.UiCenterX - Width * SlotSize / 2;
-    public const int Y = BulletHell.UiHeight - SlotSize * Height;
+    public const int X = BulletHell.UiCenterX - Inventory.Width * SlotSize / 2;
+    public const int Y = BulletHell.UiHeight - SlotSize * Inventory.Height;
 
     private const int SlotSize = 2 * Resources.TileSize;
     private const int ItemSpriteOffset = Resources.TileSize / 2;
-    private const int EquippedX = X + Width * SlotSize;
+    private const int EquippedX = X + Inventory.Width * SlotSize;
     private const int EquippedY = Y + SlotSize;
     private const int GrabbedItemScale = 2;
 
     private static readonly Rectangle SlotRectangle = new(1, 1, SlotSize, SlotSize);
     private static readonly Rectangle EquippedSlotRectangle = new(9 * Resources.TileSize + 7, 1, SlotSize, SlotSize);
     
+    private readonly Inventory _inventory;
     private Vector2 _mousePosition;
+
+    public ClientInventory(Inventory inventory)
+    {
+        _inventory = inventory;
+    }
 
     private int GetSlotIndexFromPosition(Vector2 position)
     {
@@ -29,9 +34,9 @@ public class ClientInventory : Inventory
         var slotX = (position.X - X) / SlotRectangle.Width;
         var slotY = (position.Y - Y) / SlotRectangle.Height;
 
-        if (slotX is < 0 or >= Width || slotY is < 0 or >= Height) return -1;
+        if (slotX is < 0 or >= Inventory.Width || slotY is < 0 or >= Inventory.Height) return -1;
 
-        return (int)slotX + (int)slotY * Width;
+        return (int)slotX + (int)slotY * Inventory.Width;
     }
 
     public bool Update(Client client, Input input, Vector2 mousePosition)
@@ -55,7 +60,7 @@ public class ClientInventory : Inventory
             return true;
         }
 
-        if (GrabbedWeaponStats is not null)
+        if (_inventory.GrabbedWeaponStats is not null)
         {
             RequestDropGrabbed(client);
             return true;
@@ -66,14 +71,14 @@ public class ClientInventory : Inventory
 
     public void Draw(Resources resources, SpriteBatch spriteBatch)
     {
-        for (var y = 0; y < Height; y++)
+        for (var y = 0; y < Inventory.Height; y++)
         {
-            for (var x = 0; x < Width; x++)
+            for (var x = 0; x < Inventory.Width; x++)
             {
                 var slotPosition = new Vector2(X + x * SlotRectangle.Width, Y + y * SlotRectangle.Height);
                 spriteBatch.Draw(resources.UiTexture, slotPosition, SlotRectangle, Color.White);
 
-                var weapon = Weapons[x + y * Width];
+                var weapon = _inventory.Weapons[x + y * Inventory.Width];
 
                 if (weapon is not null)
                 {
@@ -89,18 +94,18 @@ public class ClientInventory : Inventory
         var equippedSlotPosition = new Vector2(EquippedX, EquippedY);
         spriteBatch.Draw(resources.UiTexture, equippedSlotPosition, EquippedSlotRectangle, Color.White);
 
-        if (EquippedWeaponStats is not null)
+        if (_inventory.EquippedWeaponStats is not null)
         {
             var equippedItemPosition = equippedSlotPosition;
             equippedItemPosition.X += ItemSpriteOffset;
             equippedItemPosition.Y += ItemSpriteOffset;
-            var sourceRectangle = SpriteMesh.GetSourceRectangle(EquippedWeaponStats.Sprite);
+            var sourceRectangle = SpriteMesh.GetSourceRectangle(_inventory.EquippedWeaponStats.Sprite);
             spriteBatch.Draw(resources.SpriteTexture, equippedItemPosition, sourceRectangle, Color.White);
         }
 
-        if (GrabbedWeaponStats is not null)
+        if (_inventory.GrabbedWeaponStats is not null)
         {
-            var sourceRectangle = SpriteMesh.GetSourceRectangle(GrabbedWeaponStats.Sprite);
+            var sourceRectangle = SpriteMesh.GetSourceRectangle(_inventory.GrabbedWeaponStats.Sprite);
             spriteBatch.Draw(resources.SpriteTexture, _mousePosition, sourceRectangle, Color.White, 0f,
                 Vector2.Zero, GrabbedItemScale, SpriteEffects.None, 0f);
         }

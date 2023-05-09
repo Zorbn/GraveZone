@@ -12,21 +12,21 @@ public class Server
     private const int MaxSpawnedEnemies = 3;
     private const int TicksPerRepath = 2;
 
-    private NetPacketProcessor _netPacketProcessor;
-    private EventBasedNetListener _listener = new();
-    private NetManager _manager;
-    private NetDataWriter _writer = new();
+    private readonly NetPacketProcessor _netPacketProcessor;
+    private readonly EventBasedNetListener _listener = new();
+    private readonly NetManager _manager;
+    private readonly NetDataWriter _writer = new();
 
-    private Dictionary<int, ServerPlayer> _players = new();
-    private Random _random = new();
+    private readonly Dictionary<int, Player> _players = new();
+    private readonly Random _random = new();
     private int _mapSeed;
     private int _nextDroppedWeaponId;
     private int _nextEnemyId;
-    private Map _map = new();
-    private AStar _aStar = new();
+    private readonly Map _map = new();
+    private readonly AStar _aStar = new();
 
     private int _tickCount;
-    
+
     public Server()
     {
         _netPacketProcessor = new NetPacketProcessor();
@@ -42,14 +42,14 @@ public class Server
             AutoRecycle = true
         };
     }
-    
+
     public void Run()
     {
         Console.WriteLine("Starting server...");
 
         _mapSeed = _random.Next();
         _map.Generate(_mapSeed);
-        
+
         _manager.Start(Networking.Port);
 
         _listener.ConnectionRequestEvent += request =>
@@ -57,20 +57,20 @@ public class Server
             // TODO: Use AcceptIfKey/Connection keys to make servers password protected.
             request.Accept();
         };
-        
+
         _listener.PeerConnectedEvent += peer =>
         {
             Console.WriteLine($"Connection from IP: {peer.EndPoint} with ID: {peer.Id}");
 
             var playerSpawnPosition = _map.GetSpawnPosition() ?? Vector3.Zero;
-            var newPlayer = new ServerPlayer { Position = playerSpawnPosition };
             var newPlayerId = peer.Id;
-            
+            var newPlayer = new Player(newPlayerId, playerSpawnPosition.X, playerSpawnPosition.Z);
+
             // Tell the new player their id.
             SendToPeer(peer, new SetLocalId { Id = newPlayerId }, DeliveryMethod.ReliableOrdered);
-            
+
             SendMapStateToPeer(peer);
-            
+
             // Notify new player of old players.
             foreach (var (playerId, player) in _players)
             {
@@ -82,7 +82,7 @@ public class Server
                 }, DeliveryMethod.ReliableOrdered);
                 SendRefToPeer(peer, CreateUpdateInventoryPacket(playerId, player), DeliveryMethod.ReliableOrdered);
             }
-            
+
             // Notify all players of new player.
             _players[newPlayerId] = newPlayer;
             SendToAll(new PlayerSpawn
@@ -93,15 +93,15 @@ public class Server
             }, DeliveryMethod.ReliableOrdered);
             SendRefToAll(CreateUpdateInventoryPacket(newPlayerId, newPlayer), DeliveryMethod.ReliableOrdered);
         };
-        
-        _listener.PeerDisconnectedEvent += (peer, info) =>
+
+        _listener.PeerDisconnectedEvent += (peer, _) =>
         {
             Console.WriteLine($"Peer disconnected with ID: {peer.Id}");
             _players.Remove(peer.Id);
             SendToAll(new PlayerDespawn { Id = peer.Id }, DeliveryMethod.ReliableOrdered);
         };
-        
-        _listener.NetworkReceiveEvent += (fromPeer, dataReader, channel, deliveryMethod) =>
+
+        _listener.NetworkReceiveEvent += (fromPeer, dataReader, _, _) =>
         {
             try
             {
@@ -112,22 +112,22 @@ public class Server
                 Console.WriteLine($"Received unknown packet from peer: {fromPeer.Id}");
             }
         };
-        
+
         var weaponSpawnPosition = _map.GetSpawnPosition();
 
         if (weaponSpawnPosition is not null)
         {
             ServerDropWeapon(WeaponType.Dagger, weaponSpawnPosition.Value.X, weaponSpawnPosition.Value.Z);
         }
-        
+
         var stopwatch = new Stopwatch();
-        
+
         while (true)
         {
             stopwatch.Start();
 
             _manager.PollEvents();
-            
+
             Tick();
 
             var deltaTime = (float)stopwatch.Elapsed.TotalSeconds;
@@ -136,7 +136,7 @@ public class Server
             var timeToNextTick = TimeSpan.FromSeconds(MathF.Max(TickTime - deltaTime, 0f));
             Thread.Sleep(timeToNextTick);
         }
-        
+
         _manager.Stop();
     }
 
@@ -144,7 +144,7 @@ public class Server
     {
         // Spawn a new enemy each tick that we aren't at the maximum.
         TrySpawnEnemy();
-        
+
         _map.Update(TickTime);
 
         foreach (var hitEnemy in _map.LastUpdateResults.HitEnemies)
@@ -154,7 +154,7 @@ public class Server
             // and a damage value which is then applied here.
             ServerDamageEnemy(hitEnemy, 10);
         }
-        
+
         ServerMapUpdate();
 
         ++_tickCount;
@@ -164,26 +164,26 @@ public class Server
     private void ServerMapUpdate()
     {
         var shouldRepath = _tickCount % TicksPerRepath == 0;
-        
+
         foreach (var (enemyId, enemy) in _map.Enemies)
         {
             if (shouldRepath)
             {
-                var nearestPlayerLocation = new Vector3I();
+                Player nearestPlayer = null;
                 var nearestPlayerDistance = float.PositiveInfinity;
                 foreach (var (_, player) in _players)
                 {
                     var distance = (player.Position - enemy.Position).Length();
-                    
+
                     if (distance >= nearestPlayerDistance) continue;
 
                     nearestPlayerDistance = distance;
-                    nearestPlayerLocation = new Vector3I(player.Position);
+                    nearestPlayer = player;
                 }
-                
-                enemy.CalculatePath(_aStar, _map, nearestPlayerLocation);
+
+                enemy.CalculatePath(_aStar, _map, nearestPlayer);
             }
-            
+
             enemy.UpdateServer(_map, TickTime);
             SendToAll(new EnemyMove
             {
@@ -193,12 +193,12 @@ public class Server
             }, DeliveryMethod.Unreliable);
         }
     }
-    
+
     private void SendMapStateToPeer(NetPeer peer)
     {
         // Tell the new player to generate the map.
         SendToPeer(peer, new MapGenerate { Seed = _mapSeed }, DeliveryMethod.ReliableOrdered);
-            
+
         // Populate the map for the new player.
         foreach (var (droppedWeaponId, droppedWeapon) in _map.DroppedWeapons)
         {
@@ -210,7 +210,7 @@ public class Server
                 Id = droppedWeaponId
             }, DeliveryMethod.ReliableOrdered);
         }
-            
+
         foreach (var (enemyId, enemy) in _map.Enemies)
         {
             SendToPeer(peer, new EnemySpawn
@@ -221,7 +221,7 @@ public class Server
                 Z = enemy.Position.Z
             }, DeliveryMethod.ReliableOrdered);
         }
-        
+
         foreach (var projectile in _map.Projectiles)
         {
             SendToPeer(peer, new ProjectileSpawn
@@ -236,11 +236,11 @@ public class Server
     private void TrySpawnEnemy()
     {
         if (_map.Enemies.Count >= MaxSpawnedEnemies) return;
-        
+
         var enemySpawnPosition = _map.GetSpawnPosition();
 
         if (enemySpawnPosition is null) return;
-        
+
         ServerSpawnEnemy(enemySpawnPosition.Value);
     }
 
@@ -259,7 +259,7 @@ public class Server
             Z = position.Z
         }, DeliveryMethod.ReliableOrdered);
     }
-    
+
     private void ServerDamageEnemy(Enemy enemy, int damage)
     {
         var enemyDied = enemy.TakeDamage(damage);
@@ -271,15 +271,15 @@ public class Server
 
         SendToAll(new EnemyTakeDamage { Id = enemy.Id, Damage = damage }, DeliveryMethod.ReliableOrdered);
     }
-    
-    private UpdateInventory CreateUpdateInventoryPacket(int playerId, ServerPlayer player)
+
+    private UpdateInventory CreateUpdateInventoryPacket(int playerId, Player player)
     {
         var updateInventory = new UpdateInventory
         {
             PlayerId = playerId,
             Weapons = new int[Inventory.SlotCount],
         };
-        
+
         for (var i = 0; i < Inventory.SlotCount; i++)
         {
             updateInventory.Weapons[i] = (int)(player.Inventory.Weapons[i]?.WeaponType ?? WeaponType.None);
@@ -306,7 +306,7 @@ public class Server
             Id = droppedWeaponId
         }, DeliveryMethod.ReliableOrdered);
     }
-    
+
     private void ServerPickupWeapon(int playerId, int droppedWeaponId, WeaponType weaponType)
     {
         _map.PickupWeapon(droppedWeaponId);
@@ -318,7 +318,7 @@ public class Server
             WeaponType = weaponType
         }, DeliveryMethod.ReliableOrdered);
     }
-    
+
     public void SendToPeer<T>(NetPeer peer, T packet, DeliveryMethod deliveryMethod)
         where T : INetSerializable
     {
@@ -326,7 +326,7 @@ public class Server
         _netPacketProcessor.WriteNetSerializable(_writer, ref packet);
         peer.Send(_writer, deliveryMethod);
     }
-    
+
     public void SendToAll<T>(T packet, DeliveryMethod deliveryMethod)
         where T : INetSerializable
     {
@@ -342,7 +342,7 @@ public class Server
         _netPacketProcessor.WriteNetSerializable(_writer, ref packet);
         _manager.SendToAll(_writer, deliveryMethod, excludePeer);
     }
-    
+
     public void SendRefToPeer<T>(NetPeer peer, T packet, DeliveryMethod deliveryMethod)
         where T : class, new()
     {
@@ -350,7 +350,7 @@ public class Server
         _netPacketProcessor.Write(_writer, packet);
         peer.Send(_writer, deliveryMethod);
     }
-    
+
     public void SendRefToAll<T>(T packet, DeliveryMethod deliveryMethod)
         where T : class, new()
     {
@@ -358,7 +358,7 @@ public class Server
         _netPacketProcessor.Write(_writer, packet);
         _manager.SendToAll(_writer, deliveryMethod);
     }
-    
+
     public void SendRefToAll<T>(T packet, DeliveryMethod deliveryMethod, NetPeer excludePeer)
         where T : class, new()
     {
@@ -366,28 +366,28 @@ public class Server
         _netPacketProcessor.Write(_writer, packet);
         _manager.SendToAll(_writer, deliveryMethod, excludePeer);
     }
-    
+
     private void OnPlayerMove(PlayerMove playerMove, NetPeer peer)
     {
         if (!_players.TryGetValue(peer.Id, out var player)) return;
 
-        player.Position.X = playerMove.X;
-        player.Position.Z = playerMove.Z;
+        player.Position = player.Position with { X = playerMove.X, Z = playerMove.Z };
 
-        SendToAll(new PlayerMove { Id = peer.Id, X = playerMove.X, Z = playerMove.Z }, DeliveryMethod.Unreliable);
+        SendToAll(playerMove with { Id = peer.Id }, DeliveryMethod.Unreliable);
     }
-    
+
     private void OnPlayerAttack(PlayerAttack playerAttack, NetPeer peer)
     {
         var direction = new Vector3(playerAttack.Direction.X, playerAttack.Direction.Y,
             playerAttack.Direction.Z);
         _map.Projectiles.Add(new Projectile(direction, playerAttack.X, playerAttack.Z));
-        
+
         // Send the new projectile to all players except the player who created the projectile.
         // That player will have already spawned its own local copy.
-        SendToAll(new ProjectileSpawn { Direction = playerAttack.Direction, X = playerAttack.X, Z = playerAttack.Z }, DeliveryMethod.ReliableOrdered, peer);
+        SendToAll(new ProjectileSpawn { Direction = playerAttack.Direction, X = playerAttack.X, Z = playerAttack.Z },
+            DeliveryMethod.ReliableOrdered, peer);
     }
-    
+
     private void OnRequestPickupWeapon(RequestPickupWeapon requestPickupWeapon, NetPeer peer)
     {
         if (!_players.TryGetValue(peer.Id, out var player)) return;
@@ -402,7 +402,7 @@ public class Server
     private void OnRequestGrabSlot(RequestGrabSlot requestGrabSlot, NetPeer peer)
     {
         if (!_players.TryGetValue(peer.Id, out var player)) return;
-        
+
         player.Inventory.GrabSlot(requestGrabSlot.SlotIndex);
         SendToAll(new GrabSlot
         {
@@ -410,22 +410,22 @@ public class Server
             SlotIndex = requestGrabSlot.SlotIndex
         }, DeliveryMethod.ReliableOrdered);
     }
-    
+
     private void OnRequestGrabEquippedSlot(RequestGrabEquippedSlot requestGrabEquippedSlot, NetPeer peer)
     {
         if (!_players.TryGetValue(peer.Id, out var player)) return;
-        
+
         player.Inventory.GrabEquippedSlot();
         SendToAll(new GrabEquippedSlot
         {
             PlayerId = peer.Id,
         }, DeliveryMethod.ReliableOrdered);
     }
-    
+
     private void OnRequestDropGrabbed(RequestDropGrabbed requestDropGrabbed, NetPeer peer)
     {
         if (!_players.TryGetValue(peer.Id, out var player)) return;
-        
+
         var droppedWeaponId = _nextDroppedWeaponId++;
         player.Inventory.DropGrabbed(_map, player.Position.X, player.Position.Z, droppedWeaponId);
         SendToAll(new DropGrabbed

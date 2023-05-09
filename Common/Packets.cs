@@ -5,7 +5,7 @@ namespace Common;
 public struct SetLocalId : INetSerializable
 {
     public int Id { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Id);
@@ -22,7 +22,7 @@ public struct PlayerSpawn : INetSerializable
     public int Id { get; set; }
     public float X { get; set; }
     public float Z { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Id);
@@ -41,7 +41,7 @@ public struct PlayerSpawn : INetSerializable
 public struct PlayerDespawn : INetSerializable
 {
     public int Id { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Id);
@@ -58,7 +58,7 @@ public struct PlayerMove : INetSerializable
     public int Id { get; set; }
     public float X { get; set; }
     public float Z { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Id);
@@ -80,7 +80,7 @@ public struct PlayerAttack : INetSerializable
     public NetVector3 Direction { get; set; }
     public float X { get; set; }
     public float Z { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Direction);
@@ -102,7 +102,7 @@ public struct ProjectileSpawn : INetSerializable
     public NetVector3 Direction { get; set; }
     public float X { get; set; }
     public float Z { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Direction);
@@ -121,7 +121,7 @@ public struct ProjectileSpawn : INetSerializable
 public struct MapGenerate : INetSerializable
 {
     public int Seed { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Seed);
@@ -139,7 +139,7 @@ public struct DroppedWeaponSpawn : INetSerializable
     public float X { get; set; }
     public float Z { get; set; }
     public int Id { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put((int)WeaponType);
@@ -160,7 +160,7 @@ public struct DroppedWeaponSpawn : INetSerializable
 public struct RequestPickupWeapon : INetSerializable
 {
     public int DroppedWeaponId { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(DroppedWeaponId);
@@ -177,7 +177,7 @@ public struct PickupWeapon : INetSerializable
     public int PlayerId { get; set; }
     public int DroppedWeaponId { get; set; }
     public WeaponType WeaponType { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(PlayerId);
@@ -196,7 +196,7 @@ public struct PickupWeapon : INetSerializable
 public struct RequestGrabSlot : INetSerializable
 {
     public int SlotIndex { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(SlotIndex);
@@ -212,7 +212,7 @@ public struct GrabSlot : INetSerializable
 {
     public int PlayerId { get; set; }
     public int SlotIndex { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(PlayerId);
@@ -225,6 +225,7 @@ public struct GrabSlot : INetSerializable
         SlotIndex = reader.GetInt();
     }
 }
+
 public struct RequestGrabEquippedSlot : INetSerializable
 {
     public void Serialize(NetDataWriter writer)
@@ -239,7 +240,7 @@ public struct RequestGrabEquippedSlot : INetSerializable
 public struct GrabEquippedSlot : INetSerializable
 {
     public int PlayerId { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(PlayerId);
@@ -268,7 +269,7 @@ public struct DropGrabbed : INetSerializable
     public float Z { get; set; }
     public int DroppedWeaponId { get; set; }
     public int PlayerId { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(X);
@@ -300,7 +301,7 @@ public struct EnemySpawn : INetSerializable
     public EnemyType EnemyType { get; set; }
     public float X { get; set; }
     public float Z { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Id);
@@ -322,7 +323,7 @@ public struct EnemyTakeDamage : INetSerializable
 {
     public int Id { get; set; }
     public int Damage { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Id);
@@ -341,7 +342,7 @@ public struct EnemyMove : INetSerializable
     public int Id { get; set; }
     public float X { get; set; }
     public float Z { get; set; }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Id);

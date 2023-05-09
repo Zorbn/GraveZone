@@ -1,41 +1,23 @@
-﻿using System.Collections.Generic;
-using Common;
+﻿using Common;
 using LiteNetLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace BulletHell;
 
-public class ClientPlayer
+public class ClientPlayer : Player
 {
-    private const float Speed = 2f;
-    private static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
-    private static readonly Point PlayerSpriteCoords = new(0, 0);
+    public readonly ClientInventory ClientInventory;
 
-    public readonly ClientInventory Inventory;
-
-    private Vector3 _position;
     private Vector3 _spritePosition;
 
-    private Attacker _attacker;
-    private List<string> _helloWorld;
+    private readonly Attacker _attacker;
 
-    public Vector3 Position
+    public ClientPlayer(int id, float x, float z) : base(id, x, z)
     {
-        get => _position;
-        set => _position = value;
-    }
-
-    public readonly int Id;
-
-    public ClientPlayer(int id, float x, float z)
-    {
-        Id = id;
-
-        _position = new Vector3(x, 0f, z);
-        _spritePosition = _position;
+        _spritePosition = Position;
         _attacker = new Attacker();
-        Inventory = new ClientInventory();
+        ClientInventory = new ClientInventory(Inventory);
     }
 
     private void Move(Vector3 movement, ClientMap map, Vector3 cameraForward, Vector3 cameraRight, float deltaTime)
@@ -45,26 +27,26 @@ public class ClientPlayer
         movement = movement.Z * cameraForward + movement.X * cameraRight;
         movement.Normalize();
 
-        var newPosition = _position;
+        var newPosition = Position;
         newPosition.X += movement.X * Speed * deltaTime;
 
         if (map.IsCollidingWithBox(newPosition, Size))
         {
-            newPosition.X = _position.X;
+            newPosition.X = Position.X;
         }
 
-        _position.X = newPosition.X;
+        Position = newPosition;
 
         newPosition.Z += movement.Z * Speed * deltaTime;
 
         if (map.IsCollidingWithBox(newPosition, Size))
         {
-            newPosition.Z = _position.Z;
+            newPosition.Z = Position.Z;
         }
 
-        _position.Z = newPosition.Z;
+        Position = newPosition;
 
-        _spritePosition = _position;
+        _spritePosition = Position;
     }
 
     private void UpdateLocal(Input input, ClientMap map, Client client, Camera camera,
@@ -94,10 +76,10 @@ public class ClientPlayer
 
         if (input.WasKeyPressed(Keys.F))
         {
-            foreach (var nearbyDroppedWeapon in map.DroppedWeaponsInTiles.GetNearby(_position.X, _position.Z))
+            foreach (var nearbyDroppedWeapon in map.DroppedWeaponsInTiles.GetNearby(Position.X, Position.Z))
             {
                 var isColliding =
-                    Collision.HasCollision(_position, Size, nearbyDroppedWeapon.Position, Weapon.Size);
+                    Collision.HasCollision(Position, Size, nearbyDroppedWeapon.Position, Weapon.Size);
 
                 if (!isColliding) continue;
 
@@ -111,7 +93,7 @@ public class ClientPlayer
         Move(movement, map, camera.Forward, camera.Right, deltaTime);
 
         // Compute the player's position on the screen:
-        var viewPosition = new Vector4(_position, 1f);
+        var viewPosition = new Vector4(Position, 1f);
         var worldViewProjectionMatrix = camera.WorldMatrix * camera.ViewMatrix * camera.ProjectionMatrix;
         viewPosition = Vector4.Transform(viewPosition, worldViewProjectionMatrix);
         viewPosition /= viewPosition.W;
@@ -125,7 +107,7 @@ public class ClientPlayer
 
         if (input.IsMouseButtonDown(MouseButton.Left) && Inventory.EquippedWeaponStats is not null)
         {
-            _attacker.Attack(Inventory.EquippedWeaponStats, directionToMouse, _position.X, _position.Z, map.Projectiles, client);
+            _attacker.Attack(Inventory.EquippedWeaponStats, directionToMouse, Position.X, Position.Z, map.Projectiles, client);
         }
     }
 
@@ -138,14 +120,14 @@ public class ClientPlayer
             return;
         }
 
-        _spritePosition = Vector3.Lerp(_spritePosition, _position, SpriteInfo.SpriteLerp * deltaTime);
+        _spritePosition = Vector3.Lerp(_spritePosition, Position, SpriteInfo.SpriteLerp * deltaTime);
     }
 
     public void Tick(Client client, float deltaTime)
     {
         if (client.IsLocal(Id))
         {
-            client.SendToServer(new PlayerMove { Id = Id, X = _position.X, Z = _position.Z },
+            client.SendToServer(new PlayerMove { Id = Id, X = Position.X, Z = Position.Z },
                 DeliveryMethod.Unreliable);
         }
     }

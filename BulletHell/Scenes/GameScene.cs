@@ -206,7 +206,7 @@ public class GameScene : IScene
             }
         }
         
-        var inventoryCapturedMouse = localPlayer.Inventory.Update(Client, input, mousePosition);
+        var inventoryCapturedMouse = localPlayer.ClientInventory.Update(Client, input, mousePosition);
 
         return inventoryCapturedMouse;
     }
@@ -218,7 +218,7 @@ public class GameScene : IScene
 
     private void DrawLocal(ClientPlayer localPlayer)
     {
-        localPlayer.Inventory.Draw(_game.Resources, _game.SpriteBatch);
+        localPlayer.ClientInventory.Draw(_game.Resources, _game.SpriteBatch);
     }
 
     private void Tick()
