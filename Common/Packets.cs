@@ -297,12 +297,14 @@ public class UpdateInventory
 public struct EnemySpawn : INetSerializable
 {
     public int Id { get; set; }
+    public EnemyType EnemyType { get; set; }
     public float X { get; set; }
     public float Z { get; set; }
     
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Id);
+        writer.Put((int)EnemyType);
         writer.Put(X);
         writer.Put(Z);
     }
@@ -310,6 +312,7 @@ public struct EnemySpawn : INetSerializable
     public void Deserialize(NetDataReader reader)
     {
         Id = reader.GetInt();
+        EnemyType = (EnemyType)reader.GetInt();
         X = reader.GetFloat();
         Z = reader.GetFloat();
     }

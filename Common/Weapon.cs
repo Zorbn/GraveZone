@@ -1,30 +1,19 @@
-﻿namespace Common;
+﻿using Microsoft.Xna.Framework;
+
+namespace Common;
 
 public class Weapon
 {
-    public static readonly Dictionary<WeaponType, Weapon> Registry = new()
-    {
-        { WeaponType.None, null }
-    };
+    public static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
+    
+    public readonly WeaponStats Stats;
+    public readonly Vector3 Position;
+    public readonly int Id;
 
-    static Weapon()
+    public Weapon(WeaponType weaponType, float x, float z, int id)
     {
-        Register(new Weapon(WeaponType.Dagger, 0.2f, Sprite.Dagger));
-    }
-
-    public readonly Sprite Sprite;
-    public readonly float AttackCooldown;
-    public readonly WeaponType WeaponType;
-
-    private Weapon(WeaponType weaponType, float attackCooldown, Sprite sprite)
-    {
-        WeaponType = weaponType;
-        AttackCooldown = attackCooldown;
-        Sprite = sprite;
-    }
-
-    private static void Register(Weapon weapon)
-    {
-        Registry.Add(weapon.WeaponType, weapon);
+        Stats = WeaponStats.Registry[weaponType];
+        Position = new Vector3(x, 0f, z);
+        Id = id;
     }
 }

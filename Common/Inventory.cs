@@ -6,9 +6,9 @@ public class Inventory
     public const int Height = 2;
     public const int SlotCount = Width * Height;
     
-    public Weapon EquippedWeapon { get; private set; }
-    public readonly Weapon[] Weapons = new Weapon[Width * Height];
-    public Weapon GrabbedWeapon { get; private set; }
+    public WeaponStats EquippedWeaponStats { get; private set; }
+    public readonly WeaponStats[] Weapons = new WeaponStats[Width * Height];
+    public WeaponStats GrabbedWeaponStats { get; private set; }
 
     public bool IsFull()
     {
@@ -26,7 +26,7 @@ public class Inventory
     // Returns true if the weapon was successfully added, false otherwise (ie: the inventory is full).
     public bool AddWeapon(WeaponType weaponType)
     {
-        var weapon = Weapon.Registry[weaponType];
+        var weapon = WeaponStats.Registry[weaponType];
         
         for (var i = 0; i < Weapons.Length; i++)
         {
@@ -40,7 +40,7 @@ public class Inventory
         return false;
     }
 
-    public Weapon RemoveWeapon(int i)
+    public WeaponStats RemoveWeapon(int i)
     {
         var weapon = Weapons[i];
         Weapons[i] = null;
@@ -50,44 +50,44 @@ public class Inventory
     
     public void GrabSlot(int i)
     {
-        if (GrabbedWeapon is null)
+        if (GrabbedWeaponStats is null)
         {
             var removedWeapon = RemoveWeapon(i);
-            GrabbedWeapon = removedWeapon;
+            GrabbedWeaponStats = removedWeapon;
             return;
         }
         
-        (Weapons[i], GrabbedWeapon) = (GrabbedWeapon, Weapons[i]);
+        (Weapons[i], GrabbedWeaponStats) = (GrabbedWeaponStats, Weapons[i]);
     }
     
     public void GrabEquippedSlot()
     {
-        if (GrabbedWeapon is null)
+        if (GrabbedWeaponStats is null)
         {
-            GrabbedWeapon = EquippedWeapon;
-            EquippedWeapon = null;
+            GrabbedWeaponStats = EquippedWeaponStats;
+            EquippedWeaponStats = null;
             return;
         }
         
-        (EquippedWeapon, GrabbedWeapon) = (GrabbedWeapon, EquippedWeapon);
+        (EquippedWeaponStats, GrabbedWeaponStats) = (GrabbedWeaponStats, EquippedWeaponStats);
     }
 
     public void DropGrabbed(Map map, float x, float z, int id)
     {
-        if (GrabbedWeapon is null) return;
+        if (GrabbedWeaponStats is null) return;
 
-        map.DropWeapon(GrabbedWeapon.WeaponType, x, z, id);
-        GrabbedWeapon = null;
+        map.DropWeapon(GrabbedWeaponStats.WeaponType, x, z, id);
+        GrabbedWeaponStats = null;
     }
 
     public void UpdateInventory(UpdateInventory updateInventory)
     {
         for (var i = 0; i < SlotCount; i++)
         {
-            Weapons[i] = Weapon.Registry[(WeaponType)updateInventory.Weapons[i]];
+            Weapons[i] = WeaponStats.Registry[(WeaponType)updateInventory.Weapons[i]];
         }
 
-        EquippedWeapon = Weapon.Registry[(WeaponType)updateInventory.EquippedWeapon];
-        GrabbedWeapon = Weapon.Registry[(WeaponType)updateInventory.EquippedWeapon];
+        EquippedWeaponStats = WeaponStats.Registry[(WeaponType)updateInventory.EquippedWeapon];
+        GrabbedWeaponStats = WeaponStats.Registry[(WeaponType)updateInventory.EquippedWeapon];
     }
 }

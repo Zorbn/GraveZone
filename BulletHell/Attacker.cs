@@ -14,11 +14,11 @@ public class Attacker
         _attackTimer -= deltaTime;
     }
 
-    public void Attack(Weapon weapon, Vector3 direction, float x, float z, List<Projectile> projectiles, Client client)
+    public void Attack(WeaponStats weaponStats, Vector3 direction, float x, float z, List<Projectile> projectiles, Client client)
     {
         if (_attackTimer > 0f) return;
 
-        _attackTimer = weapon.AttackCooldown;
+        _attackTimer = weaponStats.AttackCooldown;
         projectiles.Add(new Projectile(direction, x, z));
         
         var netDirectionToMouse = new NetVector3(direction) ;

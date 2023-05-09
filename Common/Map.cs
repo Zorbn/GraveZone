@@ -21,7 +21,7 @@ public class Map
     public const float FloorShade = 1.0f;
     public const float WallShade = 0.8f;
 
-    public readonly Dictionary<int, DroppedWeapon> DroppedWeapons = new();
+    public readonly Dictionary<int, Weapon> DroppedWeapons = new();
     public readonly Dictionary<int, Enemy> Enemies = new();
     // Projectiles don't have an id because the clients simulate projectiles
     // locally to reduce the number of packets sent for each projectile.
@@ -30,7 +30,7 @@ public class Map
     private readonly Tile[] _floorTiles = new Tile[TileCount];
     private readonly Tile[] _wallTiles = new Tile[TileCount];
 
-    public readonly EntitiesInTiles<DroppedWeapon> DroppedWeaponsInTiles = new(Size);
+    public readonly EntitiesInTiles<Weapon> DroppedWeaponsInTiles = new(Size);
     public readonly EntitiesInTiles<Enemy> EnemiesInTiles = new(Size);
 
     public readonly UpdateResults LastUpdateResults = new();
@@ -115,20 +115,25 @@ public class Map
                GetWallTileF(at.X + size.X * 0.5f, at.Z + size.Z * 0.5f) != Tile.Air;
     }
 
-    public bool SpawnEnemy(float x, float z, int id)
+    public Enemy SpawnRandomEnemy(float x, float z, int id)
+    {
+        var enemyType = EnemyStats.EnemyTypes.Choose(_random);
+        return SpawnEnemy(enemyType, x, z, id);
+    }
+    
+    public Enemy SpawnEnemy(EnemyType enemyType, float x, float z, int id)
     {
         var tileX = (int)x;
         var tileZ = (int)z;
 
-        if (tileX is < 0 or >= Size || tileZ is < 0 or >= Size) return false;
+        if (tileX is < 0 or >= Size || tileZ is < 0 or >= Size) return null;
         
-        var newEnemy = new Enemy(x, z, id);
+        var newEnemy = new Enemy(enemyType, x, z, id);
         Enemies.Add(id, newEnemy);
         
-        // TODO: Update tile positions for enemies when they move.
         EnemiesInTiles.Add(newEnemy, tileX, tileZ);
         
-        return true;
+        return newEnemy;
     }
 
     public void DespawnEnemy(int id)
@@ -145,7 +150,7 @@ public class Map
     
     public bool DropWeapon(WeaponType weaponType, float x, float z, int id)
     {
-        var droppedWeapon = new DroppedWeapon(weaponType, x, z, id);
+        var droppedWeapon = new Weapon(weaponType, x, z, id);
         var tileX = (int)droppedWeapon.Position.X;
         var tileZ = (int)droppedWeapon.Position.Z;
 

@@ -10,6 +10,7 @@ namespace BulletHell.Scenes;
 public class GameScene : IScene
 {
     private const float TickTime = 0.05f;
+    private const float AnimationFrameTime = 0.25f;
 
     public readonly Client Client;
 
@@ -23,6 +24,8 @@ public class GameScene : IScene
     private readonly ImageButton _quitButton;
 
     private float _tickTimer;
+    private int _animationFrame;
+    private float _animationFrameTimer;
 
     public GameScene(BulletHell game)
     {
@@ -67,6 +70,14 @@ public class GameScene : IScene
     public void Update(Input input, float deltaTime)
     {
         Client.PollEvents();
+        
+        _animationFrameTimer += deltaTime;
+
+        while (_animationFrameTimer > AnimationFrameTime)
+        {
+            _animationFrameTimer -= AnimationFrameTime;
+            ++_animationFrame;
+        }
 
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             input.IsKeyDown(Keys.Escape))
@@ -116,6 +127,7 @@ public class GameScene : IScene
         }
         
         _map.Update(deltaTime);
+        _map.UpdateClient(deltaTime);
 
         _tickTimer += deltaTime;
 
@@ -145,7 +157,7 @@ public class GameScene : IScene
             pair.Value.Draw(_spriteRenderer);
         }
 
-        _map.DrawSprites(_spriteRenderer);
+        _map.DrawSprites(_spriteRenderer, _animationFrame);
 
         _spriteRenderer.End();
 
@@ -301,7 +313,7 @@ public class GameScene : IScene
     
     private void OnEnemySpawn(EnemySpawn enemySpawn)
     {
-        _map.SpawnEnemy(enemySpawn.X, enemySpawn.Z, enemySpawn.Id);
+        _map.SpawnEnemy(enemySpawn.EnemyType, enemySpawn.X, enemySpawn.Z, enemySpawn.Id);
     }
     
     private void OnEnemyTakeDamage(EnemyTakeDamage enemyTakeDamage)

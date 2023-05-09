@@ -55,7 +55,7 @@ public class ClientInventory : Inventory
             return true;
         }
 
-        if (GrabbedWeapon is not null)
+        if (GrabbedWeaponStats is not null)
         {
             RequestDropGrabbed(client);
             return true;
@@ -89,18 +89,18 @@ public class ClientInventory : Inventory
         var equippedSlotPosition = new Vector2(EquippedX, EquippedY);
         spriteBatch.Draw(resources.UiTexture, equippedSlotPosition, EquippedSlotRectangle, Color.White);
 
-        if (EquippedWeapon is not null)
+        if (EquippedWeaponStats is not null)
         {
             var equippedItemPosition = equippedSlotPosition;
             equippedItemPosition.X += ItemSpriteOffset;
             equippedItemPosition.Y += ItemSpriteOffset;
-            var sourceRectangle = SpriteMesh.GetSourceRectangle(EquippedWeapon.Sprite);
+            var sourceRectangle = SpriteMesh.GetSourceRectangle(EquippedWeaponStats.Sprite);
             spriteBatch.Draw(resources.SpriteTexture, equippedItemPosition, sourceRectangle, Color.White);
         }
 
-        if (GrabbedWeapon is not null)
+        if (GrabbedWeaponStats is not null)
         {
-            var sourceRectangle = SpriteMesh.GetSourceRectangle(GrabbedWeapon.Sprite);
+            var sourceRectangle = SpriteMesh.GetSourceRectangle(GrabbedWeaponStats.Sprite);
             spriteBatch.Draw(resources.SpriteTexture, _mousePosition, sourceRectangle, Color.White, 0f,
                 Vector2.Zero, GrabbedItemScale, SpriteEffects.None, 0f);
         }

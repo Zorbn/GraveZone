@@ -23,7 +23,7 @@ public class BulletHell : Game
 
     private IScene _scene;
     private IScene _nextScene;
-    
+
     public BulletHell()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -85,7 +85,7 @@ public class BulletHell : Game
     protected override void Update(GameTime gameTime)
     {
         var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        
+
         _input.Update(IsActive);
         _scene.Update(_input, deltaTime);
 

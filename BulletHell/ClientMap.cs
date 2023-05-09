@@ -115,6 +115,14 @@ public class ClientMap : Map
     {
         client.SendToServer(new RequestPickupWeapon { DroppedWeaponId = id }, DeliveryMethod.ReliableOrdered);
     }
+
+    public void UpdateClient(float deltaTime)
+    {
+        foreach (var (i, enemy) in Enemies)
+        {
+            enemy.UpdateClient(deltaTime);
+        }
+    }
     
     public void Draw(GraphicsDevice graphicsDevice)
     {
@@ -125,7 +133,7 @@ public class ClientMap : Map
         graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, _primitives);
     }
 
-    public void DrawSprites(SpriteRenderer spriteRenderer)
+    public void DrawSprites(SpriteRenderer spriteRenderer, int animationFrame)
     {
         foreach (var projectile in Projectiles)
         {
@@ -139,7 +147,7 @@ public class ClientMap : Map
         
         foreach (var (_, enemy) in Enemies)
         {
-            enemy.Draw(spriteRenderer);
+            enemy.Draw(spriteRenderer, animationFrame);
         }
     }
 }

@@ -204,7 +204,7 @@ public class Server
         {
             SendToPeer(peer, new DroppedWeaponSpawn
             {
-                WeaponType = droppedWeapon.Weapon.WeaponType,
+                WeaponType = droppedWeapon.Stats.WeaponType,
                 X = droppedWeapon.Position.X,
                 Z = droppedWeapon.Position.Z,
                 Id = droppedWeaponId
@@ -216,6 +216,7 @@ public class Server
             SendToPeer(peer, new EnemySpawn
             {
                 Id = enemyId,
+                EnemyType = enemy.Stats.EnemyType,
                 X = enemy.Position.X,
                 Z = enemy.Position.Z
             }, DeliveryMethod.ReliableOrdered);
@@ -246,11 +247,17 @@ public class Server
     private void ServerSpawnEnemy(Vector3 position)
     {
         var enemyId = _nextEnemyId++;
-        var successfullySpawned = _map.SpawnEnemy(position.X, position.Z, enemyId);
+        var enemy = _map.SpawnRandomEnemy(position.X, position.Z, enemyId);
 
-        if (!successfullySpawned) return;
+        if (enemy is null) return;
 
-        SendToAll(new EnemySpawn { Id = enemyId, X = position.X, Z = position.Z }, DeliveryMethod.ReliableOrdered);
+        SendToAll(new EnemySpawn
+        {
+            Id = enemyId,
+            EnemyType = enemy.Stats.EnemyType,
+            X = position.X,
+            Z = position.Z
+        }, DeliveryMethod.ReliableOrdered);
     }
     
     private void ServerDamageEnemy(Enemy enemy, int damage)
@@ -278,8 +285,8 @@ public class Server
             updateInventory.Weapons[i] = (int)(player.Inventory.Weapons[i]?.WeaponType ?? WeaponType.None);
         }
 
-        updateInventory.EquippedWeapon = (int)(player.Inventory.EquippedWeapon?.WeaponType ?? WeaponType.None);
-        updateInventory.GrabbedWeapon = (int)(player.Inventory.GrabbedWeapon?.WeaponType ?? WeaponType.None);
+        updateInventory.EquippedWeapon = (int)(player.Inventory.EquippedWeaponStats?.WeaponType ?? WeaponType.None);
+        updateInventory.GrabbedWeapon = (int)(player.Inventory.GrabbedWeaponStats?.WeaponType ?? WeaponType.None);
 
         return updateInventory;
     }
@@ -386,9 +393,9 @@ public class Server
         if (!_players.TryGetValue(peer.Id, out var player)) return;
         if (!_map.DroppedWeapons.TryGetValue(requestPickupWeapon.DroppedWeaponId, out var droppedWeapon)) return;
 
-        if (player.Inventory.AddWeapon(droppedWeapon.Weapon.WeaponType))
+        if (player.Inventory.AddWeapon(droppedWeapon.Stats.WeaponType))
         {
-            ServerPickupWeapon(peer.Id, droppedWeapon.Id, droppedWeapon.Weapon.WeaponType);
+            ServerPickupWeapon(peer.Id, droppedWeapon.Id, droppedWeapon.Stats.WeaponType);
         }
     }
 

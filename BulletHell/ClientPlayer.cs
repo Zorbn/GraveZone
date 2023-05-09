@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using System.Collections.Generic;
+using Common;
 using LiteNetLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -8,7 +9,6 @@ namespace BulletHell;
 public class ClientPlayer
 {
     private const float Speed = 2f;
-    private const float SpriteLerp = 10f;
     private static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
     private static readonly Point PlayerSpriteCoords = new(0, 0);
 
@@ -18,6 +18,7 @@ public class ClientPlayer
     private Vector3 _spritePosition;
 
     private Attacker _attacker;
+    private List<string> _helloWorld;
 
     public Vector3 Position
     {
@@ -96,7 +97,7 @@ public class ClientPlayer
             foreach (var nearbyDroppedWeapon in map.DroppedWeaponsInTiles.GetNearby(_position.X, _position.Z))
             {
                 var isColliding =
-                    Collision.HasCollision(_position, Size, nearbyDroppedWeapon.Position, DroppedWeapon.Size);
+                    Collision.HasCollision(_position, Size, nearbyDroppedWeapon.Position, Weapon.Size);
 
                 if (!isColliding) continue;
 
@@ -122,9 +123,9 @@ public class ClientPlayer
 
         _attacker.Update(deltaTime);
 
-        if (input.IsMouseButtonDown(MouseButton.Left) && Inventory.EquippedWeapon is not null)
+        if (input.IsMouseButtonDown(MouseButton.Left) && Inventory.EquippedWeaponStats is not null)
         {
-            _attacker.Attack(Inventory.EquippedWeapon, directionToMouse, _position.X, _position.Z, map.Projectiles, client);
+            _attacker.Attack(Inventory.EquippedWeaponStats, directionToMouse, _position.X, _position.Z, map.Projectiles, client);
         }
     }
 
@@ -132,12 +133,12 @@ public class ClientPlayer
         float deltaTime)
     {
         if (client.IsLocal(Id))
-        {
+        {  
             UpdateLocal(input, map, client, camera, deltaTime);
             return;
         }
 
-        _spritePosition = Vector3.Lerp(_spritePosition, _position, SpriteLerp * deltaTime);
+        _spritePosition = Vector3.Lerp(_spritePosition, _position, SpriteInfo.SpriteLerp * deltaTime);
     }
 
     public void Tick(Client client, float deltaTime)

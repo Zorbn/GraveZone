@@ -5,8 +5,8 @@ namespace BulletHell;
 
 public static class ClientDroppedWeapon
 {
-    public static void Draw(this DroppedWeapon droppedWeapon, SpriteRenderer spriteRenderer)
+    public static void Draw(this Weapon weapon, SpriteRenderer spriteRenderer)
     {
-        spriteRenderer.Add(droppedWeapon.Position.X, droppedWeapon.Position.Z, droppedWeapon.Weapon.Sprite);
+        spriteRenderer.Add(weapon.Position.X, weapon.Position.Z, weapon.Stats.Sprite);
     }
 }
