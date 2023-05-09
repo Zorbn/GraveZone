@@ -301,6 +301,7 @@ public struct EnemySpawn : INetSerializable
     public EnemyType EnemyType { get; set; }
     public float X { get; set; }
     public float Z { get; set; }
+    public int Health { get; set; }
 
     public void Serialize(NetDataWriter writer)
     {
@@ -308,6 +309,7 @@ public struct EnemySpawn : INetSerializable
         writer.Put((int)EnemyType);
         writer.Put(X);
         writer.Put(Z);
+        writer.Put(Health);
     }
 
     public void Deserialize(NetDataReader reader)
@@ -316,6 +318,7 @@ public struct EnemySpawn : INetSerializable
         EnemyType = (EnemyType)reader.GetInt();
         X = reader.GetFloat();
         Z = reader.GetFloat();
+        Health = reader.GetInt();
     }
 }
 

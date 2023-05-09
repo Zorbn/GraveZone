@@ -121,14 +121,14 @@ public class Map
         return SpawnEnemy(enemyType, x, z, id);
     }
     
-    public Enemy SpawnEnemy(EnemyType enemyType, float x, float z, int id)
+    public Enemy SpawnEnemy(EnemyType enemyType, float x, float z, int id, int? health = null)
     {
         var tileX = (int)x;
         var tileZ = (int)z;
 
         if (tileX is < 0 or >= Size || tileZ is < 0 or >= Size) return null;
         
-        var newEnemy = new Enemy(enemyType, x, z, id);
+        var newEnemy = new Enemy(enemyType, x, z, id, health);
         Enemies.Add(id, newEnemy);
         
         EnemiesInTiles.Add(newEnemy, tileX, tileZ);

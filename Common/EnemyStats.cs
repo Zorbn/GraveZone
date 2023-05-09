@@ -9,19 +9,22 @@ public class EnemyStats
 
     static EnemyStats()
     {
-        Register(new EnemyStats(EnemyType.VampireMimic, new[] { Sprite.MimicClosed, Sprite.MimicVampire }));
-        Register(new EnemyStats(EnemyType.ShelledMimic, new[] { Sprite.MimicClosed, Sprite.MimicShelled }));
+        Register(new EnemyStats(EnemyType.VampireMimic, 20, new[] { Sprite.MimicClosed, Sprite.MimicVampire }));
+        Register(new EnemyStats(EnemyType.ShelledMimic, 30, new[] { Sprite.MimicClosed, Sprite.MimicShelled }));
 
         EnemyTypes = new ReadOnlyCollection<EnemyType>(Registry.Keys.ToList());
     }
 
     public readonly ReadOnlyCollection<Sprite> Sprites;
+    public readonly int MaxHealth;
     public readonly EnemyType EnemyType;
 
-    private EnemyStats(EnemyType enemyType, Sprite[] sprites)
+    private EnemyStats(EnemyType enemyType, int maxHealth, Sprite[] sprites)
     {
         EnemyType = enemyType;
+        MaxHealth = maxHealth;
         Sprites = new ReadOnlyCollection<Sprite>(sprites);
+        
     }
 
     private static void Register(EnemyStats enemyStats)

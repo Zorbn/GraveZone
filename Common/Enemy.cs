@@ -2,39 +2,44 @@
 
 namespace Common;
 
-// TODO: Make enemies drop weapons
 // TODO: Make enemies attack players by spawning projectiles (ie: ShelledMimic spawns 360 degree burst, VampireMimic fires single shot towards player.)
+// Each enemy attacks based on what weapon it has equipped (these are the same weapons that players can equip) and enemies have
+// a small chance to drop their weapon for the player when they die.
 public class Enemy
 {
-    private const int MaxHealth = 20;
     private const float NodeReachedDistance = 0.1f;
     private const float MoveSpeed = 1f;
     public  static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
 
     public Vector3 Position => _position;
     public Vector3 SpritePosition { get; private set; }
-
+    public int Health => _health;
+    
     public readonly int Id;
     public readonly EnemyStats Stats;
     
     private Vector3 _position;
-    private int _health = MaxHealth;
+    private int _health;
 
     private List<Vector3I> _path = new();
     private int _targetPathNodeI;
 
     private Player _targetPlayer;
 
-    public Enemy(EnemyType enemyType, float x, float z, int id)
+    public Enemy(EnemyType enemyType, float x, float z, int id, int? health = null)
     {
         Stats = EnemyStats.Registry[enemyType];
+        health ??= Stats.MaxHealth;
         Id = id;
         _position = new Vector3(x, 0f, z);
+        _health = health.Value;
         SpritePosition = _position;
     }
 
     public void CalculatePath(AStar aStar, Map map, Player targetPlayer)
     {
+        if (targetPlayer is null) return;
+        
         _targetPlayer = targetPlayer;
         _targetPathNodeI = 0;
         var startTilePosition = new Vector3I(_position);

@@ -113,6 +113,8 @@ public class Server
             }
         };
 
+        // TODO: Replace this initial weapon with another way of getting a weapon
+        // when you start out.
         var weaponSpawnPosition = _map.GetSpawnPosition();
 
         if (weaponSpawnPosition is not null)
@@ -218,7 +220,8 @@ public class Server
                 Id = enemyId,
                 EnemyType = enemy.Stats.EnemyType,
                 X = enemy.Position.X,
-                Z = enemy.Position.Z
+                Z = enemy.Position.Z,
+                Health = enemy.Health
             }, DeliveryMethod.ReliableOrdered);
         }
 
@@ -256,7 +259,8 @@ public class Server
             Id = enemyId,
             EnemyType = enemy.Stats.EnemyType,
             X = position.X,
-            Z = position.Z
+            Z = position.Z,
+            Health = enemy.Health
         }, DeliveryMethod.ReliableOrdered);
     }
 
@@ -266,6 +270,7 @@ public class Server
 
         if (enemyDied)
         {
+            ServerDropWeapon(WeaponType.Dagger, enemy.Position.X, enemy.Position.Z);
             _map.DespawnEnemy(enemy.Id);
         }
 

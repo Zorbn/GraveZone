@@ -313,7 +313,7 @@ public class GameScene : IScene
     
     private void OnEnemySpawn(EnemySpawn enemySpawn)
     {
-        _map.SpawnEnemy(enemySpawn.EnemyType, enemySpawn.X, enemySpawn.Z, enemySpawn.Id);
+        _map.SpawnEnemy(enemySpawn.EnemyType, enemySpawn.X, enemySpawn.Z, enemySpawn.Id, enemySpawn.Health);
     }
     
     private void OnEnemyTakeDamage(EnemyTakeDamage enemyTakeDamage)
