@@ -6,11 +6,13 @@ public class Map
 {
     public class UpdateResults
     {
-        public readonly List<EnemyHit> EnemyHits = new();
+        public readonly List<EntityHit<Enemy>> EnemyHits = new();
+        public readonly List<EntityHit<Player>> PlayerHits = new();
 
         public void Clear()
         {
             EnemyHits.Clear();
+            PlayerHits.Clear();
         }
     }
     
@@ -32,6 +34,7 @@ public class Map
 
     public readonly EntitiesInTiles<Weapon> DroppedWeaponsInTiles = new(Size);
     public readonly EntitiesInTiles<Enemy> EnemiesInTiles = new(Size);
+    public readonly EntitiesInTiles<Player> PlayersInTiles = new(Size);
 
     public readonly UpdateResults LastUpdateResults = new();
     

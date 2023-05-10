@@ -136,14 +136,14 @@ public class GameScene : IScene
         {
             player.Update(input, _map, Client, _camera, deltaTime);
         }
+        
+        _map.Update(deltaTime);
+        _map.UpdateClient(Client.LocalId, deltaTime);
 
         if (hasLocalPlayer)
         {
             PostUpdateLocal(localPlayer);
         }
-
-        _map.Update(deltaTime);
-        _map.UpdateClient(deltaTime);
 
         _tickTimer += deltaTime;
 
@@ -247,15 +247,20 @@ public class GameScene : IScene
 
     private void OnPlayerSpawn(PlayerSpawn playerSpawn)
     {
-        Console.WriteLine($"Player spawned with id: {playerSpawn.Id}");
         _players.Add(playerSpawn.Id,
-            new ClientPlayer(new Attacker(Team.Players, _playerAttackAction), playerSpawn.Id, playerSpawn.X, playerSpawn.Z));
+            new ClientPlayer(new Attacker(Team.Players, _playerAttackAction), _map, playerSpawn.Id, playerSpawn.X, playerSpawn.Z));
+        
+        Console.WriteLine($"Player spawned with id: {playerSpawn.Id}");
     }
 
     private void OnPlayerDespawn(PlayerDespawn playerDespawn)
     {
-        Console.WriteLine($"Player de-spawned with id: {playerDespawn.Id}");
+        if (!_players.TryGetValue(playerDespawn.Id, out var player)) return;
+
+        player.Despawn(_map);
         _players.Remove(playerDespawn.Id);
+        
+        Console.WriteLine($"Player de-spawned with id: {playerDespawn.Id}");
     }
 
     private void OnPlayerMove(PlayerMove playerMove)
@@ -266,7 +271,7 @@ public class GameScene : IScene
         var newPosition = player.Position;
         newPosition.X = playerMove.X;
         newPosition.Z = playerMove.Z;
-        player.Position = newPosition;
+        player.MoveTo(_map, newPosition);
     }
 
     private void OnSetLocalId(SetLocalId setLocalId)

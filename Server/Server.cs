@@ -78,7 +78,7 @@ public class Server
 
             var playerSpawnPosition = _map.GetSpawnPosition() ?? Vector3.Zero;
             var newPlayerId = peer.Id;
-            var newPlayer = new Player(newPlayerId, playerSpawnPosition.X, playerSpawnPosition.Z);
+            var newPlayer = new Player(_map, newPlayerId, playerSpawnPosition.X, playerSpawnPosition.Z);
 
             // Tell the new player their id.
             SendToPeer(peer, new SetLocalId { Id = newPlayerId }, DeliveryMethod.ReliableOrdered);
@@ -110,9 +110,13 @@ public class Server
 
         _listener.PeerDisconnectedEvent += (peer, _) =>
         {
-            Console.WriteLine($"Peer disconnected with ID: {peer.Id}");
+            if (!_players.TryGetValue(peer.Id, out var player)) return;
+
+            player.Despawn(_map);
             _players.Remove(peer.Id);
             SendToAll(new PlayerDespawn { Id = peer.Id }, DeliveryMethod.ReliableOrdered);
+            
+            Console.WriteLine($"Peer disconnected with ID: {peer.Id}");
         };
 
         _listener.NetworkReceiveEvent += (fromPeer, dataReader, _, _) =>
@@ -165,7 +169,7 @@ public class Server
 
         foreach (var enemyHit in _map.LastUpdateResults.EnemyHits)
         {
-            ServerDamageEnemy(enemyHit.Enemy, enemyHit.Damage);
+            ServerDamageEnemy(enemyHit.Entity, enemyHit.Damage);
         }
 
         ServerMapUpdate();
@@ -389,7 +393,7 @@ public class Server
     {
         if (!_players.TryGetValue(peer.Id, out var player)) return;
 
-        player.Position = player.Position with { X = playerMove.X, Z = playerMove.Z };
+        player.MoveTo(_map, player.Position with { X = playerMove.X, Z = playerMove.Z });
 
         SendToAll(playerMove with { Id = peer.Id }, DeliveryMethod.Unreliable);
     }

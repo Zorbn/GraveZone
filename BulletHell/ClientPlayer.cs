@@ -13,7 +13,7 @@ public class ClientPlayer : Player
 
     private readonly Attacker _attacker;
 
-    public ClientPlayer(Attacker attacker, int id, float x, float z) : base(id, x, z)
+    public ClientPlayer(Attacker attacker, Map map, int id, float x, float z) : base(map, id, x, z)
     {
         _spritePosition = Position;
         _attacker = attacker;
@@ -34,9 +34,7 @@ public class ClientPlayer : Player
         {
             newPosition.X = Position.X;
         }
-
-        Position = newPosition;
-
+        
         newPosition.Z += movement.Z * Speed * deltaTime;
 
         if (map.IsCollidingWithBox(newPosition, Size))
@@ -44,7 +42,7 @@ public class ClientPlayer : Player
             newPosition.Z = Position.Z;
         }
 
-        Position = newPosition;
+        MoveTo(map, newPosition);
 
         _spritePosition = Position;
     }

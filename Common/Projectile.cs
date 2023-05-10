@@ -61,7 +61,7 @@ public class Projectile
                 CheckEnemyCollisions(map, ref hasCollision);
                 break;
             case Team.Enemies:
-                // CheckPlayerCollisions();
+                CheckPlayerCollisions(map, ref hasCollision);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -78,9 +78,27 @@ public class Projectile
             if (!Collision.HasCollision(_position, Size, nearbyEnemy.Position, Enemy.Size)) continue;
 
             hasCollision = true;
-            map.LastUpdateResults.EnemyHits.Add(new EnemyHit
+            map.LastUpdateResults.EnemyHits.Add(new EntityHit<Enemy>
             {
-                Enemy = nearbyEnemy,
+                Entity = nearbyEnemy,
+                Damage = Stats.Damage
+            });
+
+            break;
+        }
+    }
+    
+    private void CheckPlayerCollisions(Map map, ref bool hasCollision)
+    {
+        var nearbyPlayers = map.PlayersInTiles.GetNearby((int)_position.X, (int)_position.Z);
+        foreach (var nearbyPlayer in nearbyPlayers)
+        {
+            if (!Collision.HasCollision(_position, Size, nearbyPlayer.Position, Player.Size)) continue;
+
+            hasCollision = true;
+            map.LastUpdateResults.PlayerHits.Add(new EntityHit<Player>
+            {
+                Entity = nearbyPlayer,
                 Damage = Stats.Damage
             });
 

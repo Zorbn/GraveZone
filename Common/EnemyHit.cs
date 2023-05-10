@@ -1,7 +1,7 @@
 ﻿namespace Common;
 
-public struct EnemyHit
+public struct EntityHit<T>
 {
-    public Enemy Enemy;
+    public T Entity;
     public int Damage;
 }
