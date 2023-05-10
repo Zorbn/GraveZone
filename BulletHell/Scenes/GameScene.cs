@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework.Input;
 
 namespace BulletHell.Scenes;
 
-// TODO: Make sure client disconnects if server unexpectedly shuts down.
 public class GameScene : IScene
 {
     private const float TickTime = 0.05f;
@@ -44,6 +43,11 @@ public class GameScene : IScene
             ClientInventory.Y + Resources.TileSize * 3, ImageButton.QuitRectangle);
 
         Client = new Client();
+
+        Client.DisconnectedEvent += () =>
+        {
+            _game.SetScene(new MainMenuScene(_game));
+        };
 
         Client.NetPacketProcessor.RegisterNestedType<NetVector3>();
         Client.NetPacketProcessor.SubscribeNetSerializable<SetLocalId>(OnSetLocalId);

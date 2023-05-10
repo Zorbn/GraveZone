@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using System;
+using Common;
 using LiteNetLib;
 using LiteNetLib.Utils;
 
@@ -10,7 +11,9 @@ public class Client
     public int LocalId { get; set; } = -1;
 
     public delegate void OnConnection();
+    public delegate void OnDisconnection();
     public event OnConnection ConnectedEvent;
+    public event OnDisconnection DisconnectedEvent;
     
     private readonly EventBasedNetListener _listener;
     private readonly NetManager _manager;
@@ -27,7 +30,7 @@ public class Client
         };
         _manager.Start();
         
-        _listener.NetworkReceiveEvent += (fromPeer, dataReader, channel, deliveryMethod) =>
+        _listener.NetworkReceiveEvent += (fromPeer, dataReader, _, _) =>
         {
             NetPacketProcessor.ReadAllPackets(dataReader, fromPeer);
         };
@@ -36,12 +39,17 @@ public class Client
         {
             ConnectedEvent?.Invoke();
         };
+
+        _listener.PeerDisconnectedEvent += (_, _) =>
+        {
+            DisconnectedEvent?.Invoke();
+        };
     }
 
     public void Connect(string ip)
     {
         _manager.Connect(ip, Networking.Port, "");
-    }
+    }  
 
     public void Disconnect()
     {
@@ -63,7 +71,7 @@ public class Client
     {
         _writer.Reset();
         NetPacketProcessor.WriteNetSerializable(_writer, ref packet);
-        _manager.FirstPeer.Send(_writer, deliveryMethod);
+        _manager.FirstPeer?.Send(_writer, deliveryMethod);
     }
 
     public bool IsLocal(int playerId)
