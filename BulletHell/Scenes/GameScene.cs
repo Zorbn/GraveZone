@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using Common;
+using LiteNetLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace BulletHell.Scenes;
 
+// TODO: Make sure client disconnects if server unexpectedly shuts down.
 public class GameScene : IScene
 {
     private const float TickTime = 0.05f;
@@ -26,6 +28,8 @@ public class GameScene : IScene
     private float _tickTimer;
     private int _animationFrame;
     private float _animationFrameTimer;
+
+    private readonly Action<WeaponStats, Vector3, float, float, Map> _playerAttackAction;
 
     public GameScene(BulletHell game)
     {
@@ -59,6 +63,18 @@ public class GameScene : IScene
         Client.NetPacketProcessor.SubscribeNetSerializable<EnemyMove>(OnEnemyMove);
 
         Console.WriteLine("Starting client...");
+
+        _playerAttackAction = (weaponStats, direction, attackX, attackZ, _) =>
+        {
+            var netDirection = new NetVector3(direction);
+            Client.SendToServer(new PlayerAttack
+            {
+                Direction = netDirection,
+                X = attackX,
+                Z = attackZ,
+                WeaponType = weaponStats.WeaponType
+            }, DeliveryMethod.ReliableOrdered);
+        };
     }
 
     public void Exit()
@@ -232,7 +248,8 @@ public class GameScene : IScene
     private void OnPlayerSpawn(PlayerSpawn playerSpawn)
     {
         Console.WriteLine($"Player spawned with id: {playerSpawn.Id}");
-        _players.Add(playerSpawn.Id, new ClientPlayer(playerSpawn.Id, playerSpawn.X, playerSpawn.Z));
+        _players.Add(playerSpawn.Id,
+            new ClientPlayer(new Attacker(Team.Players, _playerAttackAction), playerSpawn.Id, playerSpawn.X, playerSpawn.Z));
     }
 
     private void OnPlayerDespawn(PlayerDespawn playerDespawn)
@@ -260,8 +277,8 @@ public class GameScene : IScene
 
     private void OnProjectileSpawn(ProjectileSpawn projectileSpawn)
     {
-        _map.AddAttackProjectiles(projectileSpawn.WeaponType, projectileSpawn.Direction.ToVector3(), projectileSpawn.X,
-            projectileSpawn.Z);
+        _map.AddAttackProjectiles(projectileSpawn.WeaponType, projectileSpawn.Team,
+            projectileSpawn.Direction.ToVector3(), projectileSpawn.X, projectileSpawn.Z);
     }
 
     private void OnMapGenerate(MapGenerate mapGenerate)
@@ -314,7 +331,7 @@ public class GameScene : IScene
 
     private void OnEnemySpawn(EnemySpawn enemySpawn)
     {
-        _map.SpawnEnemy(enemySpawn.EnemyType, enemySpawn.X, enemySpawn.Z, enemySpawn.Id, enemySpawn.Health);
+        _map.SpawnEnemy(enemySpawn.EnemyType, enemySpawn.X, enemySpawn.Z, enemySpawn.Id, null, enemySpawn.Health);
     }
 
     private void OnEnemyTakeDamage(EnemyTakeDamage enemyTakeDamage)

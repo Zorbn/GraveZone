@@ -106,6 +106,7 @@ public struct ProjectileSpawn : INetSerializable
     public float X { get; set; }
     public float Z { get; set; }
     public WeaponType WeaponType { get; set; }
+    public Team Team { get; set; }
 
     public void Serialize(NetDataWriter writer)
     {
@@ -113,6 +114,7 @@ public struct ProjectileSpawn : INetSerializable
         writer.Put(X);
         writer.Put(Z);
         writer.Put((int)WeaponType);
+        writer.Put((int)Team);
     }
 
     public void Deserialize(NetDataReader reader)
@@ -121,6 +123,7 @@ public struct ProjectileSpawn : INetSerializable
         X = reader.GetFloat();
         Z = reader.GetFloat();
         WeaponType = (WeaponType)reader.GetInt();
+        Team = (Team)reader.GetInt();
     }
 }
 

@@ -115,20 +115,20 @@ public class Map
                GetWallTileF(at.X + size.X * 0.5f, at.Z + size.Z * 0.5f) != Tile.Air;
     }
 
-    public Enemy SpawnRandomEnemy(float x, float z, int id)
+    public Enemy SpawnRandomEnemy(float x, float z, int id, Attacker attacker)
     {
         var enemyType = EnemyStats.EnemyTypes.Choose(_random);
-        return SpawnEnemy(enemyType, x, z, id);
+        return SpawnEnemy(enemyType, x, z, id, attacker);
     }
     
-    public Enemy SpawnEnemy(EnemyType enemyType, float x, float z, int id, int? health = null)
+    public Enemy SpawnEnemy(EnemyType enemyType, float x, float z, int id, Attacker attacker, int? health = null)
     {
         var tileX = (int)x;
         var tileZ = (int)z;
 
         if (tileX is < 0 or >= Size || tileZ is < 0 or >= Size) return null;
         
-        var newEnemy = new Enemy(enemyType, x, z, id, health);
+        var newEnemy = new Enemy(enemyType, x, z, id, attacker, health);
         Enemies.Add(id, newEnemy);
         
         EnemiesInTiles.Add(newEnemy, tileX, tileZ);
@@ -178,7 +178,7 @@ public class Map
         DroppedWeaponsInTiles.Remove(droppedWeapon, x, z);
     }
 
-    public void AddAttackProjectiles(WeaponType weaponType, Vector3 direction, float x, float z)
+    public void AddAttackProjectiles(WeaponType weaponType, Team team, Vector3 direction, float x, float z)
     {
         var weaponStats = WeaponStats.Registry[weaponType];
         foreach (var projectileSpawn in weaponStats.ProjectileSpawns)
@@ -186,7 +186,7 @@ public class Map
             var rotation = Matrix.CreateRotationY(MathHelper.ToRadians(projectileSpawn.Angle));
             var forward = projectileSpawn.RelativeToForward ? direction : Vector3.Forward;
             var projectileDirection = Vector3.Transform(forward, rotation);
-            Projectiles.Add(new Projectile(projectileSpawn.ProjectileType, weaponType, projectileDirection, x, z));
+            Projectiles.Add(new Projectile(projectileSpawn.ProjectileType, weaponType, team, projectileDirection, x, z));
         }
     }
 }

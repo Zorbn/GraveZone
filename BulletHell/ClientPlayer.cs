@@ -13,10 +13,10 @@ public class ClientPlayer : Player
 
     private readonly Attacker _attacker;
 
-    public ClientPlayer(int id, float x, float z) : base(id, x, z)
+    public ClientPlayer(Attacker attacker, int id, float x, float z) : base(id, x, z)
     {
         _spritePosition = Position;
-        _attacker = new Attacker();
+        _attacker = attacker;
         ClientInventory = new ClientInventory(Inventory);
     }
 
@@ -107,7 +107,7 @@ public class ClientPlayer : Player
 
         if (input.IsMouseButtonDown(MouseButton.Left) && Inventory.EquippedWeaponStats is not null)
         {
-            _attacker.Attack(Inventory.EquippedWeaponStats, directionToMouse, Position.X, Position.Z, map, client);
+            _attacker.Attack(Inventory.EquippedWeaponStats, directionToMouse, Position.X, Position.Z, map);
         }
     }
 

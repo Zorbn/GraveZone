@@ -2,6 +2,7 @@
 
 namespace Common;
 
+// TODO: Consider adding a stat to slow player & enemy move speed when attacking with each weapon.
 public class WeaponStats
 {
     public static readonly Dictionary<WeaponType, WeaponStats> Registry = new()

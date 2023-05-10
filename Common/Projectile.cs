@@ -12,13 +12,15 @@ public class Projectile
     public readonly Vector3 Direction;
     public readonly ProjectileStats Stats;
     public readonly WeaponType WeaponType;
-
+    public readonly Team Team;
+    
     private Vector3 _position;
 
-    public Projectile(ProjectileType projectileType, WeaponType weaponType, Vector3 direction, float x, float z)
+    public Projectile(ProjectileType projectileType, WeaponType weaponType, Team team, Vector3 direction, float x, float z)
     {
         Stats = ProjectileStats.Registry[projectileType];
         WeaponType = weaponType;
+        Team = team;
         Direction = direction;
         _position = new Vector3(x, 0f, z);
     }
@@ -53,6 +55,23 @@ public class Projectile
 
         _position.Z = newPosition.Z;
 
+        switch (Team)
+        {
+            case Team.Players:
+                CheckEnemyCollisions(map, ref hasCollision);
+                break;
+            case Team.Enemies:
+                // CheckPlayerCollisions();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        return hasCollision;
+    }
+
+    private void CheckEnemyCollisions(Map map, ref bool hasCollision)
+    {
         var nearbyEnemies = map.EnemiesInTiles.GetNearby((int)_position.X, (int)_position.Z);
         foreach (var nearbyEnemy in nearbyEnemies)
         {
@@ -67,8 +86,6 @@ public class Projectile
 
             break;
         }
-
-        return hasCollision;
     }
 
     public bool Update(Map map, float deltaTime)

@@ -24,6 +24,7 @@ public class Server
     private int _nextEnemyId;
     private readonly Map _map = new();
     private readonly AStar _aStar = new();
+    private readonly Action<WeaponStats, Vector3, float, float, Map> _enemyAttackAction;
 
     private int _tickCount;
 
@@ -40,6 +41,19 @@ public class Server
         _manager = new NetManager(_listener)
         {
             AutoRecycle = true
+        };
+
+        _enemyAttackAction = (weaponStats, direction, attackX, attackZ, _) =>
+        {
+            var netDirection = new NetVector3(direction);
+            SendToAll(new ProjectileSpawn
+            {
+                Direction = netDirection,
+                X = attackX,
+                Z = attackZ,
+                WeaponType = weaponStats.WeaponType,
+                Team = Team.Enemies
+            }, DeliveryMethod.ReliableOrdered);
         };
     }
 
@@ -229,7 +243,8 @@ public class Server
                 Direction = new NetVector3(projectile.Direction),
                 X = projectile.Position.X,
                 Z = projectile.Position.Z,
-                WeaponType = projectile.WeaponType
+                WeaponType = projectile.WeaponType,
+                Team = projectile.Team
             }, DeliveryMethod.ReliableOrdered);
         }
     }
@@ -248,7 +263,7 @@ public class Server
     private void ServerSpawnEnemy(Vector3 position)
     {
         var enemyId = _nextEnemyId++;
-        var enemy = _map.SpawnRandomEnemy(position.X, position.Z, enemyId);
+        var enemy = _map.SpawnRandomEnemy(position.X, position.Z, enemyId, new Attacker(Team.Enemies, _enemyAttackAction));
 
         if (enemy is null) return;
 
@@ -381,7 +396,7 @@ public class Server
 
     private void OnPlayerAttack(PlayerAttack playerAttack, NetPeer peer)
     {
-        _map.AddAttackProjectiles(playerAttack.WeaponType, playerAttack.Direction.ToVector3(), playerAttack.X,
+        _map.AddAttackProjectiles(playerAttack.WeaponType, Team.Players, playerAttack.Direction.ToVector3(), playerAttack.X,
             playerAttack.Z);
 
         // Send the new projectile to all players except the player who created the projectile.
@@ -391,7 +406,8 @@ public class Server
                 Direction = playerAttack.Direction,
                 X = playerAttack.X,
                 Z = playerAttack.Z,
-                WeaponType = playerAttack.WeaponType
+                WeaponType = playerAttack.WeaponType,
+                Team = Team.Players
             },
             DeliveryMethod.ReliableOrdered, peer);
     }
