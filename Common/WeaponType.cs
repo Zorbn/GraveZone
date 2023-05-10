@@ -3,5 +3,6 @@
 public enum WeaponType
 {
     None,
-    Dagger
+    Dagger,
+    Sword
 }

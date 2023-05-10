@@ -6,7 +6,7 @@ namespace Common;
 public class Projectile
 {
     private const float Speed = 8f;
-    private static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
+    private static readonly Vector3 Size = new(0.6f, 1.0f, 0.6f);
 
     public Vector3 Position => _position;
     public readonly Vector3 Direction;

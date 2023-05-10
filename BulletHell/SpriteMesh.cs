@@ -8,7 +8,6 @@ namespace BulletHell;
 public static class SpriteMesh
 {
     private const int TextureWidthTiles = 25;
-    private const int TextureHeightTiles = 25;
     private const int TextureSize = 256;
     private const float UnitX = Resources.TileSize / (float)TextureSize;
     private const float UnitY = Resources.TileSize / (float)TextureSize;
@@ -31,7 +30,7 @@ public static class SpriteMesh
     {
         var i = (int)sprite;
         var x = i % TextureWidthTiles;
-        var y = i / TextureHeightTiles;
+        var y = i / TextureWidthTiles;
         return new Vector2(PaddingX + PaddedUnitX * x, PaddingY + PaddedUnitY * y);
     }
     
@@ -40,7 +39,7 @@ public static class SpriteMesh
     {
         var i = (int)sprite;
         var x = i % TextureWidthTiles;
-        var y = i / TextureHeightTiles;
+        var y = i / TextureWidthTiles;
         return new Rectangle(1 + (Resources.TileSize + 2) * x, 1 + (Resources.TileSize + 2) * y, Resources.TileSize,
             Resources.TileSize);
     }

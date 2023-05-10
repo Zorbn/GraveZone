@@ -9,7 +9,6 @@ namespace BulletHell;
 public static class CubeMesh
 {
     private const int TextureWidthTiles = 25;
-    private const int TextureHeightTiles = 25;
     private const int TextureSize = 256;
     private const float UnitX = Resources.TileSize / (float)TextureSize;
     private const float UnitY = Resources.TileSize / (float)TextureSize;
@@ -141,7 +140,7 @@ public static class CubeMesh
     {
         var i = (int)tile;
         var x = i % TextureWidthTiles;
-        var y = i / TextureHeightTiles;
+        var y = i / TextureWidthTiles;
         return new Vector2(PaddingX + PaddedUnitX * x, PaddingY + PaddedUnitY * y);
     }
 }

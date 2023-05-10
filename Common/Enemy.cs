@@ -2,9 +2,6 @@
 
 namespace Common;
 
-// TODO: Make enemies attack players by spawning projectiles (ie: ShelledMimic spawns 360 degree burst, VampireMimic fires single shot towards player.)
-// Each enemy attacks based on what weapon it has equipped (these are the same weapons that players can equip) and enemies have
-// a small chance to drop their weapon for the player when they die.
 public class Enemy
 {
     private const float NodeReachedDistance = 0.1f;
@@ -26,12 +23,13 @@ public class Enemy
 
     private Player _targetPlayer;
     private readonly Attacker _attacker;
-    private readonly WeaponStats _weaponStats = WeaponStats.Registry[WeaponType.Dagger];
+    private readonly WeaponStats _weaponStats;
 
     public Enemy(EnemyType enemyType, float x, float z, int id,
         Attacker attacker, int? health = null)
     {
         Stats = EnemyStats.Registry[enemyType];
+        _weaponStats = WeaponStats.Registry[Stats.WeaponType];
         Id = id;
         _position = new Vector3(x, 0f, z);
         SpritePosition = _position;

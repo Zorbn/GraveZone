@@ -290,7 +290,11 @@ public class Server
 
         if (enemyDied)
         {
-            ServerDropWeapon(WeaponType.Dagger, enemy.Position.X, enemy.Position.Z);
+            if (_random.NextSingle() < enemy.Stats.WeaponDropRate)
+            {
+                ServerDropWeapon(enemy.Stats.WeaponType, enemy.Position.X, enemy.Position.Z);
+            }
+            
             _map.DespawnEnemy(enemy.Id);
         }
 
