@@ -9,8 +9,8 @@ public class ClientInventory
 {
     public const int X = BulletHell.UiCenterX - Inventory.Width * SlotSize / 2;
     public const int Y = BulletHell.UiHeight - SlotSize * Inventory.Height;
+    public const int SlotSize = 2 * Resources.TileSize;
 
-    private const int SlotSize = 2 * Resources.TileSize;
     private const int ItemSpriteOffset = Resources.TileSize / 2;
     private const int EquippedX = X + Inventory.Width * SlotSize;
     private const int EquippedY = Y + SlotSize;

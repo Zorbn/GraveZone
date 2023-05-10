@@ -1,14 +1,19 @@
 ﻿using Common;
 using LiteNetLib;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace BulletHell;
 
 public class ClientPlayer : Player
 {
-    public readonly ClientInventory ClientInventory;
+    private const int HealthBarWidth = Inventory.Width * ClientInventory.SlotSize;
+    private const int HealthBarHeight = Resources.TileSize / 2;
+    private const int HealthBarX = ClientInventory.X;
+    private const int HealthBarY = ClientInventory.Y - HealthBarHeight;
 
+    public readonly ClientInventory ClientInventory;
 
     private readonly Attacker _attacker;
 
@@ -32,7 +37,7 @@ public class ClientPlayer : Player
         {
             newPosition.X = Position.X;
         }
-        
+
         newPosition.Z += movement.Z * Speed * deltaTime;
 
         if (map.IsCollidingWithBox(newPosition, Size))
@@ -40,7 +45,7 @@ public class ClientPlayer : Player
             newPosition.Z = Position.Z;
         }
 
-        Teleport(map, newPosition); 
+        Teleport(map, newPosition);
     }
 
     private void UpdateLocal(Input input, ClientMap map, Client client, Camera camera,
@@ -114,11 +119,11 @@ public class ClientPlayer : Player
         float deltaTime)
     {
         if (ShouldUpdateLocally(client))
-        {  
+        {
             UpdateLocal(input, map, client, camera, deltaTime);
             return;
         }
-        
+
         SpritePosition = Vector3.Lerp(SpritePosition, Position, SpriteInfo.SpriteLerp * deltaTime);
     }
 
@@ -134,5 +139,16 @@ public class ClientPlayer : Player
     public void Draw(SpriteRenderer spriteRenderer)
     {
         spriteRenderer.Add(SpritePosition.X, SpritePosition.Z, Sprite.Player);
+    }
+
+    public void DrawHud(Resources resources, SpriteBatch spriteBatch)
+    {
+        ClientInventory.Draw(resources, spriteBatch);
+
+        var healthBarDestination = new Rectangle(HealthBarX, HealthBarY, HealthBarWidth, HealthBarHeight);
+        spriteBatch.Draw(resources.UiTexture, healthBarDestination, Resources.BlackRectangle, Color.White);
+        var currentHealthBarWidth = (int)(HealthBarWidth * (Health / (float)MaxHealth));
+        healthBarDestination.Width = currentHealthBarWidth;
+        spriteBatch.Draw(resources.UiTexture, healthBarDestination, Resources.WhiteRectangle, Color.Red);
     }
 }

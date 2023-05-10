@@ -14,7 +14,7 @@ public class TextRenderer
     // Characters have one pixel pixel of padding around them in the texture sheet to prevent texture bleeding.
     private static readonly Rectangle CharRectangle = new(TextureXStart * Resources.TileSize + 1,
         TextureYStart * Resources.TileSize - 1, Resources.TileSize - 1, Resources.TileSize);
-    private static readonly Rectangle TextBackgroundRectangle = new(1, 2 * Resources.TileSize + 3, Resources.TileSize, Resources.TileSize);
+    private static readonly Rectangle TextBackgroundRectangle = Resources.BlackRectangle;
 
     public static void Draw(string text, int x, int y, Resources resources, SpriteBatch spriteBatch, Color color, bool withBackground = true, int scale = 1, bool centered = false)
     {

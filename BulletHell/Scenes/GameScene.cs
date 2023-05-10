@@ -251,7 +251,7 @@ public class GameScene : IScene
 
     private void DrawLocal(ClientPlayer localPlayer)
     {
-        localPlayer.ClientInventory.Draw(_game.Resources, _game.SpriteBatch);
+        localPlayer.DrawHud(_game.Resources, _game.SpriteBatch);
     }
 
     private void Tick()
