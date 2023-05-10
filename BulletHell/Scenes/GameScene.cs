@@ -70,7 +70,7 @@ public class GameScene : IScene
     public void Update(Input input, float deltaTime)
     {
         Client.PollEvents();
-        
+
         _animationFrameTimer += deltaTime;
 
         while (_animationFrameTimer > AnimationFrameTime)
@@ -106,7 +106,7 @@ public class GameScene : IScene
         if (hasLocalPlayer)
         {
             var uiCapturedMouse = PreUpdateLocal(input, localPlayer);
-            
+
             // If the mouse was interacting with the ui that needs to be recorded so that mouse
             // clicks don't have side effects anywhere else (ie: player clicks on the inventory
             // and accidentally attacks at the same time).
@@ -125,7 +125,7 @@ public class GameScene : IScene
         {
             PostUpdateLocal(localPlayer);
         }
-        
+
         _map.Update(deltaTime);
         _map.UpdateClient(deltaTime);
 
@@ -176,7 +176,7 @@ public class GameScene : IScene
         }
 
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
-        
+
         _quitButton.Draw(_game.SpriteBatch, _game.Resources);
 
         if (_players.TryGetValue(Client.LocalId, out var localPlayer))
@@ -197,7 +197,7 @@ public class GameScene : IScene
         var mousePosition = _game.GetMouseUiPosition();
         var mouseX = (int)mousePosition.X;
         var mouseY = (int)mousePosition.Y;
-            
+
         if (input.WasMouseButtonPressed(MouseButton.Left))
         {
             if (_quitButton.Contains(mouseX, mouseY))
@@ -205,12 +205,12 @@ public class GameScene : IScene
                 _game.SetScene(new MainMenuScene(_game));
             }
         }
-        
+
         var inventoryCapturedMouse = localPlayer.ClientInventory.Update(Client, input, mousePosition);
 
         return inventoryCapturedMouse;
     }
-    
+
     private void PostUpdateLocal(ClientPlayer localPlayer)
     {
         _camera.SetPosition(localPlayer.Position);
@@ -260,8 +260,8 @@ public class GameScene : IScene
 
     private void OnProjectileSpawn(ProjectileSpawn projectileSpawn)
     {
-        var direction = projectileSpawn.Direction.ToVector3();
-        _map.Projectiles.Add(new Projectile(direction, projectileSpawn.X, projectileSpawn.Z));
+        _map.AddAttackProjectiles(projectileSpawn.WeaponType, projectileSpawn.Direction.ToVector3(), projectileSpawn.X,
+            projectileSpawn.Z);
     }
 
     private void OnMapGenerate(MapGenerate mapGenerate)
@@ -269,16 +269,17 @@ public class GameScene : IScene
         _map.Generate(mapGenerate.Seed);
         _map.Mesh(_game.GraphicsDevice);
     }
-    
+
     private void OnDroppedWeaponSpawn(DroppedWeaponSpawn droppedWeaponSpawn)
     {
-        _map.DropWeapon(droppedWeaponSpawn.WeaponType, droppedWeaponSpawn.X, droppedWeaponSpawn.Z, droppedWeaponSpawn.Id);
+        _map.DropWeapon(droppedWeaponSpawn.WeaponType, droppedWeaponSpawn.X, droppedWeaponSpawn.Z,
+            droppedWeaponSpawn.Id);
     }
 
     private void OnPickupWeapon(PickupWeapon pickupWeapon)
     {
         if (!_players.TryGetValue(pickupWeapon.PlayerId, out var player)) return;
-        
+
         _map.PickupWeapon(pickupWeapon.DroppedWeaponId);
         player.Inventory.AddWeapon(pickupWeapon.WeaponType);
     }
@@ -286,21 +287,21 @@ public class GameScene : IScene
     private void OnGrabSlot(GrabSlot grabSlot)
     {
         if (!_players.TryGetValue(grabSlot.PlayerId, out var player)) return;
-        
+
         player.Inventory.GrabSlot(grabSlot.SlotIndex);
     }
-    
+
     private void OnGrabEquippedSlot(GrabEquippedSlot grabEquippedSlot)
     {
         if (!_players.TryGetValue(grabEquippedSlot.PlayerId, out var player)) return;
-        
+
         player.Inventory.GrabEquippedSlot();
     }
-    
+
     private void OnDropGrabbed(DropGrabbed dropGrabbed)
     {
         if (!_players.TryGetValue(dropGrabbed.PlayerId, out var player)) return;
-        
+
         player.Inventory.DropGrabbed(_map, dropGrabbed.X, dropGrabbed.Z, dropGrabbed.DroppedWeaponId);
     }
 
@@ -310,24 +311,24 @@ public class GameScene : IScene
 
         player.Inventory.UpdateInventory(updateInventory);
     }
-    
+
     private void OnEnemySpawn(EnemySpawn enemySpawn)
     {
         _map.SpawnEnemy(enemySpawn.EnemyType, enemySpawn.X, enemySpawn.Z, enemySpawn.Id, enemySpawn.Health);
     }
-    
+
     private void OnEnemyTakeDamage(EnemyTakeDamage enemyTakeDamage)
     {
         if (!_map.Enemies.TryGetValue(enemyTakeDamage.Id, out var enemy)) return;
 
         var enemyDied = enemy.TakeDamage(enemyTakeDamage.Damage);
-        
+
         if (enemyDied)
         {
             _map.DespawnEnemy(enemy.Id);
         }
     }
-    
+
     private void OnEnemyMove(EnemyMove enemyMove)
     {
         if (!_map.Enemies.TryGetValue(enemyMove.Id, out var enemy)) return;

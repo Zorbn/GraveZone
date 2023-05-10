@@ -107,7 +107,7 @@ public class ClientPlayer : Player
 
         if (input.IsMouseButtonDown(MouseButton.Left) && Inventory.EquippedWeaponStats is not null)
         {
-            _attacker.Attack(Inventory.EquippedWeaponStats, directionToMouse, Position.X, Position.Z, map.Projectiles, client);
+            _attacker.Attack(Inventory.EquippedWeaponStats, directionToMouse, Position.X, Position.Z, map, client);
         }
     }
 

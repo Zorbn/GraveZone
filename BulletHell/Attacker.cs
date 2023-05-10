@@ -14,14 +14,21 @@ public class Attacker
         _attackTimer -= deltaTime;
     }
 
-    public void Attack(WeaponStats weaponStats, Vector3 direction, float x, float z, List<Projectile> projectiles, Client client)
+    public void Attack(WeaponStats weaponStats, Vector3 direction, float x, float z, Map map, Client client)
     {
         if (_attackTimer > 0f) return;
 
         _attackTimer = weaponStats.AttackCooldown;
-        projectiles.Add(new Projectile(direction, x, z));
+        map.AddAttackProjectiles(weaponStats.WeaponType, direction, x, z);
+        
         
         var netDirectionToMouse = new NetVector3(direction) ;
-        client.SendToServer(new PlayerAttack { Direction = netDirectionToMouse, X = x, Z = z }, DeliveryMethod.ReliableOrdered);
+        client.SendToServer(new PlayerAttack
+        {
+            Direction = netDirectionToMouse, 
+            X = x, 
+            Z = z,
+            WeaponType = weaponStats.WeaponType
+        }, DeliveryMethod.ReliableOrdered);
     }
 }

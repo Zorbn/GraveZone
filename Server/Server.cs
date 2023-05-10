@@ -231,7 +231,8 @@ public class Server
             {
                 Direction = new NetVector3(projectile.Direction),
                 X = projectile.Position.X,
-                Z = projectile.Position.Z
+                Z = projectile.Position.Z,
+                WeaponType = projectile.WeaponType
             }, DeliveryMethod.ReliableOrdered);
         }
     }
@@ -383,13 +384,18 @@ public class Server
 
     private void OnPlayerAttack(PlayerAttack playerAttack, NetPeer peer)
     {
-        var direction = new Vector3(playerAttack.Direction.X, playerAttack.Direction.Y,
-            playerAttack.Direction.Z);
-        _map.Projectiles.Add(new Projectile(direction, playerAttack.X, playerAttack.Z));
+        _map.AddAttackProjectiles(playerAttack.WeaponType, playerAttack.Direction.ToVector3(), playerAttack.X,
+            playerAttack.Z);
 
         // Send the new projectile to all players except the player who created the projectile.
         // That player will have already spawned its own local copy.
-        SendToAll(new ProjectileSpawn { Direction = playerAttack.Direction, X = playerAttack.X, Z = playerAttack.Z },
+        SendToAll(new ProjectileSpawn
+            {
+                Direction = playerAttack.Direction,
+                X = playerAttack.X,
+                Z = playerAttack.Z,
+                WeaponType = playerAttack.WeaponType
+            },
             DeliveryMethod.ReliableOrdered, peer);
     }
 

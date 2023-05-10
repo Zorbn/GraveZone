@@ -1,4 +1,6 @@
-﻿namespace Common;
+﻿using System.Collections.ObjectModel;
+
+namespace Common;
 
 public class WeaponStats
 {
@@ -9,18 +11,31 @@ public class WeaponStats
 
     static WeaponStats()
     {
-        Register(new WeaponStats(WeaponType.Dagger, 0.2f, Sprite.Dagger));
+        Register(new WeaponStats(WeaponType.Dagger, 0.2f, Sprite.Dagger, new[]
+        {
+            new ProjectileSpawnData
+            {
+                ProjectileType = ProjectileType.ThrownDagger, Angle = -10f, RelativeToForward = true
+            },
+            new ProjectileSpawnData
+            {
+                ProjectileType = ProjectileType.ThrownDagger, Angle = 10f, RelativeToForward = true
+            }
+        }));
     }
 
     public readonly Sprite Sprite;
     public readonly float AttackCooldown;
+    public readonly ReadOnlyCollection<ProjectileSpawnData> ProjectileSpawns;
     public readonly WeaponType WeaponType;
 
-    private WeaponStats(WeaponType weaponType, float attackCooldown, Sprite sprite)
+    private WeaponStats(WeaponType weaponType, float attackCooldown, Sprite sprite,
+        ProjectileSpawnData[] projectileSpawns)
     {
         WeaponType = weaponType;
         AttackCooldown = attackCooldown;
         Sprite = sprite;
+        ProjectileSpawns = new ReadOnlyCollection<ProjectileSpawnData>(projectileSpawns);
     }
 
     private static void Register(WeaponStats weaponStats)

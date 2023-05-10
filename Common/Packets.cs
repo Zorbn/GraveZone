@@ -80,12 +80,14 @@ public struct PlayerAttack : INetSerializable
     public NetVector3 Direction { get; set; }
     public float X { get; set; }
     public float Z { get; set; }
+    public WeaponType WeaponType { get; set; }
 
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Direction);
         writer.Put(X);
         writer.Put(Z);
+        writer.Put((int)WeaponType);
     }
 
     public void Deserialize(NetDataReader reader)
@@ -93,6 +95,7 @@ public struct PlayerAttack : INetSerializable
         Direction = reader.Get<NetVector3>();
         X = reader.GetFloat();
         Z = reader.GetFloat();
+        WeaponType = (WeaponType)reader.GetInt();
     }
 }
 
@@ -102,12 +105,14 @@ public struct ProjectileSpawn : INetSerializable
     public NetVector3 Direction { get; set; }
     public float X { get; set; }
     public float Z { get; set; }
+    public WeaponType WeaponType { get; set; }
 
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Direction);
         writer.Put(X);
         writer.Put(Z);
+        writer.Put((int)WeaponType);
     }
 
     public void Deserialize(NetDataReader reader)
@@ -115,6 +120,7 @@ public struct ProjectileSpawn : INetSerializable
         Direction = reader.Get<NetVector3>();
         X = reader.GetFloat();
         Z = reader.GetFloat();
+        WeaponType = (WeaponType)reader.GetInt();
     }
 }
 

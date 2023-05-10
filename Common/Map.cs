@@ -177,4 +177,16 @@ public class Map
         DroppedWeapons.Remove(id);
         DroppedWeaponsInTiles.Remove(droppedWeapon, x, z);
     }
+
+    public void AddAttackProjectiles(WeaponType weaponType, Vector3 direction, float x, float z)
+    {
+        var weaponStats = WeaponStats.Registry[weaponType];
+        foreach (var projectileSpawn in weaponStats.ProjectileSpawns)
+        {
+            var rotation = Matrix.CreateRotationY(MathHelper.ToRadians(projectileSpawn.Angle));
+            var forward = projectileSpawn.RelativeToForward ? direction : Vector3.Forward;
+            var projectileDirection = Vector3.Transform(forward, rotation);
+            Projectiles.Add(new Projectile(projectileSpawn.ProjectileType, weaponType, projectileDirection, x, z));
+        }
+    }
 }
