@@ -59,7 +59,11 @@ public class Projectile
             if (!Collision.HasCollision(_position, Size, nearbyEnemy.Position, Enemy.Size)) continue;
 
             hasCollision = true;
-            map.LastUpdateResults.HitEnemies.Add(nearbyEnemy);
+            map.LastUpdateResults.EnemyHits.Add(new EnemyHit
+            {
+                Enemy = nearbyEnemy,
+                Damage = Stats.Damage
+            });
 
             break;
         }

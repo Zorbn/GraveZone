@@ -6,11 +6,11 @@ public class Map
 {
     public class UpdateResults
     {
-        public readonly List<Enemy> HitEnemies = new();
+        public readonly List<EnemyHit> EnemyHits = new();
 
         public void Clear()
         {
-            HitEnemies.Clear();
+            EnemyHits.Clear();
         }
     }
     

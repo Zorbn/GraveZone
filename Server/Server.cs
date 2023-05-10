@@ -149,12 +149,9 @@ public class Server
 
         _map.Update(TickTime);
 
-        foreach (var hitEnemy in _map.LastUpdateResults.HitEnemies)
+        foreach (var enemyHit in _map.LastUpdateResults.EnemyHits)
         {
-            // TODO: Make different weapons have different damage values which are passed into the projectile
-            // and then UpdateResults should store Hits instead of raw enemies. The hits will store an enemy
-            // and a damage value which is then applied here.
-            ServerDamageEnemy(hitEnemy, 10);
+            ServerDamageEnemy(enemyHit.Enemy, enemyHit.Damage);
         }
 
         ServerMapUpdate();
