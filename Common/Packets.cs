@@ -22,12 +22,14 @@ public struct PlayerSpawn : INetSerializable
     public int Id { get; set; }
     public float X { get; set; }
     public float Z { get; set; }
+    public int Health { get; set; }
 
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Id);
         writer.Put(X);
         writer.Put(Z);
+        writer.Put(Health);
     }
 
     public void Deserialize(NetDataReader reader)
@@ -35,6 +37,7 @@ public struct PlayerSpawn : INetSerializable
         Id = reader.GetInt();
         X = reader.GetFloat();
         Z = reader.GetFloat();
+        Health = reader.GetInt();
     }
 }
 
@@ -96,6 +99,48 @@ public struct PlayerAttack : INetSerializable
         X = reader.GetFloat();
         Z = reader.GetFloat();
         WeaponType = (WeaponType)reader.GetInt();
+    }
+}
+
+// When the client sends this packet to the server, the server looks at the sender's Id
+// rather than using the Id in the packet to prevent cheating. So for client -> server Id
+// doesn't need to be specified. For server -> client, Id is used and should be specified. 
+public struct PlayerTakeDamage : INetSerializable
+{
+    public int Id { get; set; }
+    public int Damage { get; set; }
+
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(Id);
+        writer.Put(Damage);
+    }
+
+    public void Deserialize(NetDataReader reader)
+    {
+        Id = reader.GetInt();
+        Damage = reader.GetInt();
+    }
+}
+
+public struct PlayerRespawn : INetSerializable
+{
+    public int Id { get; set; }
+    public float X { get; set; }
+    public float Z { get; set; }
+
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(Id);
+        writer.Put(X);
+        writer.Put(Z);
+    }
+
+    public void Deserialize(NetDataReader reader)
+    {
+        Id = reader.GetInt();
+        X = reader.GetFloat();
+        Z = reader.GetFloat();
     }
 }
 

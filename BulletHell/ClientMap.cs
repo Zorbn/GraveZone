@@ -117,18 +117,11 @@ public class ClientMap : Map
         client.SendToServer(new RequestPickupWeapon { DroppedWeaponId = id }, DeliveryMethod.ReliableOrdered);
     }
 
-    public void UpdateClient(int localId, float deltaTime)
+    public void UpdateClient(float deltaTime)
     {
         foreach (var (_, enemy) in Enemies)
         {
             enemy.UpdateClient(deltaTime);
-        }
-
-        foreach (var playerHit in LastUpdateResults.PlayerHits)
-        {
-            if (playerHit.Entity.Id != localId) continue;
-            
-            Console.WriteLine($"Local player was hit for {playerHit.Damage} damage!");
         }
     }
     

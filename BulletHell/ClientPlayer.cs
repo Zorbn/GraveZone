@@ -9,13 +9,11 @@ public class ClientPlayer : Player
 {
     public readonly ClientInventory ClientInventory;
 
-    private Vector3 _spritePosition;
 
     private readonly Attacker _attacker;
 
-    public ClientPlayer(Attacker attacker, Map map, int id, float x, float z) : base(map, id, x, z)
+    public ClientPlayer(Attacker attacker, Map map, int id, float x, float z, int? health) : base(map, id, x, z, health)
     {
-        _spritePosition = Position;
         _attacker = attacker;
         ClientInventory = new ClientInventory(Inventory);
     }
@@ -42,9 +40,7 @@ public class ClientPlayer : Player
             newPosition.Z = Position.Z;
         }
 
-        MoveTo(map, newPosition);
-
-        _spritePosition = Position;
+        Teleport(map, newPosition); 
     }
 
     private void UpdateLocal(Input input, ClientMap map, Client client, Camera camera,
@@ -109,21 +105,26 @@ public class ClientPlayer : Player
         }
     }
 
+    private bool ShouldUpdateLocally(Client client)
+    {
+        return client.IsLocal(Id) && !IsDead;
+    }
+
     public void Update(Input input, ClientMap map, Client client, Camera camera,
         float deltaTime)
     {
-        if (client.IsLocal(Id))
+        if (ShouldUpdateLocally(client))
         {  
             UpdateLocal(input, map, client, camera, deltaTime);
             return;
         }
-
-        _spritePosition = Vector3.Lerp(_spritePosition, Position, SpriteInfo.SpriteLerp * deltaTime);
+        
+        SpritePosition = Vector3.Lerp(SpritePosition, Position, SpriteInfo.SpriteLerp * deltaTime);
     }
 
     public void Tick(Client client, float deltaTime)
     {
-        if (client.IsLocal(Id))
+        if (ShouldUpdateLocally(client))
         {
             client.SendToServer(new PlayerMove { Id = Id, X = Position.X, Z = Position.Z },
                 DeliveryMethod.Unreliable);
@@ -132,6 +133,6 @@ public class ClientPlayer : Player
 
     public void Draw(SpriteRenderer spriteRenderer)
     {
-        spriteRenderer.Add(_spritePosition.X, _spritePosition.Z, Sprite.Player);
+        spriteRenderer.Add(SpritePosition.X, SpritePosition.Z, Sprite.Player);
     }
 }

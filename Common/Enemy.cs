@@ -32,11 +32,10 @@ public class Enemy
         Attacker attacker, int? health = null)
     {
         Stats = EnemyStats.Registry[enemyType];
-        health ??= Stats.MaxHealth;
         Id = id;
         _position = new Vector3(x, 0f, z);
         SpritePosition = _position;
-        Health = health.Value;
+        Health = health ?? Stats.MaxHealth;
         _attacker = attacker;
     }
 

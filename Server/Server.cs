@@ -34,6 +34,7 @@ public class Server
         _netPacketProcessor.RegisterNestedType<NetVector3>();
         _netPacketProcessor.SubscribeNetSerializable<PlayerMove, NetPeer>(OnPlayerMove);
         _netPacketProcessor.SubscribeNetSerializable<PlayerAttack, NetPeer>(OnPlayerAttack);
+        _netPacketProcessor.SubscribeNetSerializable<PlayerTakeDamage, NetPeer>(OnPlayerTakeDamage);
         _netPacketProcessor.SubscribeNetSerializable<RequestPickupWeapon, NetPeer>(OnRequestPickupWeapon);
         _netPacketProcessor.SubscribeNetSerializable<RequestGrabSlot, NetPeer>(OnRequestGrabSlot);
         _netPacketProcessor.SubscribeNetSerializable<RequestGrabEquippedSlot, NetPeer>(OnRequestGrabEquippedSlot);
@@ -90,9 +91,10 @@ public class Server
             {
                 SendToPeer(peer, new PlayerSpawn
                 {
+                    Id = playerId,
                     X = player.Position.X,
                     Z = player.Position.Z,
-                    Id = playerId
+                    Health = player.Health
                 }, DeliveryMethod.ReliableOrdered);
                 SendRefToPeer(peer, CreateUpdateInventoryPacket(playerId, player), DeliveryMethod.ReliableOrdered);
             }
@@ -101,9 +103,10 @@ public class Server
             _players[newPlayerId] = newPlayer;
             SendToAll(new PlayerSpawn
             {
+                Id = newPlayerId,
                 X = newPlayer.Position.X,
                 Z = newPlayer.Position.Z,
-                Id = newPlayerId
+                Health = newPlayer.Health
             }, DeliveryMethod.ReliableOrdered);
             SendRefToAll(CreateUpdateInventoryPacket(newPlayerId, newPlayer), DeliveryMethod.ReliableOrdered);
         };
@@ -414,6 +417,27 @@ public class Server
                 Team = Team.Players
             },
             DeliveryMethod.ReliableOrdered, peer);
+    }
+    
+    private void OnPlayerTakeDamage(PlayerTakeDamage playerTakeDamage, NetPeer peer)
+    {
+        if (!_players.TryGetValue(peer.Id, out var player)) return;
+
+        var playerDied = player.TakeDamage(playerTakeDamage.Damage);
+        
+        SendToAll(playerTakeDamage with { Id = peer.Id }, DeliveryMethod.ReliableOrdered, peer);
+
+        if (!playerDied) return;
+
+        var spawnPosition = _map.GetSpawnPosition() ?? Vector3.Zero;
+        player.Respawn(_map, spawnPosition);
+        
+        SendToAll(new PlayerRespawn
+        {
+            Id = peer.Id,
+            X = spawnPosition.X,
+            Z = spawnPosition.Z
+        }, DeliveryMethod.ReliableOrdered);
     }
 
     private void OnRequestPickupWeapon(RequestPickupWeapon requestPickupWeapon, NetPeer peer)

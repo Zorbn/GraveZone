@@ -50,6 +50,8 @@ public class GameScene : IScene
         Client.NetPacketProcessor.SubscribeNetSerializable<PlayerSpawn>(OnPlayerSpawn);
         Client.NetPacketProcessor.SubscribeNetSerializable<PlayerDespawn>(OnPlayerDespawn);
         Client.NetPacketProcessor.SubscribeNetSerializable<PlayerMove>(OnPlayerMove);
+        Client.NetPacketProcessor.SubscribeNetSerializable<PlayerTakeDamage>(OnPlayerTakeDamage);
+        Client.NetPacketProcessor.SubscribeNetSerializable<PlayerRespawn>(OnPlayerRespawn);
         Client.NetPacketProcessor.SubscribeNetSerializable<ProjectileSpawn>(OnProjectileSpawn);
         Client.NetPacketProcessor.SubscribeNetSerializable<MapGenerate>(OnMapGenerate);
         Client.NetPacketProcessor.SubscribeNetSerializable<DroppedWeaponSpawn>(OnDroppedWeaponSpawn);
@@ -136,9 +138,9 @@ public class GameScene : IScene
         {
             player.Update(input, _map, Client, _camera, deltaTime);
         }
-        
+
         _map.Update(deltaTime);
-        _map.UpdateClient(Client.LocalId, deltaTime);
+        _map.UpdateClient(deltaTime);
 
         if (hasLocalPlayer)
         {
@@ -230,6 +232,21 @@ public class GameScene : IScene
     private void PostUpdateLocal(ClientPlayer localPlayer)
     {
         _camera.SetPosition(localPlayer.Position);
+        
+        // The player checks its own collisions locally to prevent unfair hits
+        // due to lag, this could be run on the server instead if preventing
+        // cheating is more important.
+        foreach (var playerHit in _map.LastUpdateResults.PlayerHits)
+        {
+            if (playerHit.Entity.Id != localPlayer.Id) continue;
+
+            localPlayer.TakeDamage(playerHit.Damage);
+            
+            Client.SendToServer(new PlayerTakeDamage
+            {
+                Damage = playerHit.Damage
+            }, DeliveryMethod.ReliableOrdered);
+        }
     }
 
     private void DrawLocal(ClientPlayer localPlayer)
@@ -248,8 +265,9 @@ public class GameScene : IScene
     private void OnPlayerSpawn(PlayerSpawn playerSpawn)
     {
         _players.Add(playerSpawn.Id,
-            new ClientPlayer(new Attacker(Team.Players, _playerAttackAction), _map, playerSpawn.Id, playerSpawn.X, playerSpawn.Z));
-        
+            new ClientPlayer(new Attacker(Team.Players, _playerAttackAction), _map, playerSpawn.Id, playerSpawn.X,
+                playerSpawn.Z, playerSpawn.Health));
+
         Console.WriteLine($"Player spawned with id: {playerSpawn.Id}");
     }
 
@@ -259,7 +277,7 @@ public class GameScene : IScene
 
         player.Despawn(_map);
         _players.Remove(playerDespawn.Id);
-        
+
         Console.WriteLine($"Player de-spawned with id: {playerDespawn.Id}");
     }
 
@@ -272,6 +290,20 @@ public class GameScene : IScene
         newPosition.X = playerMove.X;
         newPosition.Z = playerMove.Z;
         player.MoveTo(_map, newPosition);
+    }
+    
+    private void OnPlayerTakeDamage(PlayerTakeDamage playerTakeDamage)
+    {
+        if (!_players.TryGetValue(playerTakeDamage.Id, out var player)) return;
+
+        player.TakeDamage(playerTakeDamage.Damage);
+    }
+    
+    private void OnPlayerRespawn(PlayerRespawn playerRespawn)
+    {
+        if (!_players.TryGetValue(playerRespawn.Id, out var player)) return;
+
+        player.Respawn(_map, new Vector3(playerRespawn.X, 0f, playerRespawn.Z));
     }
 
     private void OnSetLocalId(SetLocalId setLocalId)
