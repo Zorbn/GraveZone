@@ -2,6 +2,7 @@
 
 namespace Common;
 
+// TODO: Add speed stat.
 public class EnemyStats
 {
     public static readonly Dictionary<EnemyType, EnemyStats> Registry = new();

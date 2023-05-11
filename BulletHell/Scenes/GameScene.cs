@@ -162,7 +162,7 @@ public class GameScene : IScene
 
     public void Draw()
     {
-        _game.GraphicsDevice.Clear(Color.CornflowerBlue);
+        _game.GraphicsDevice.Clear(Resources.SkyColor);
 
         // Set graphics state to be suitable for 3D models.
         // Using the sprite batch modifies these to different values.

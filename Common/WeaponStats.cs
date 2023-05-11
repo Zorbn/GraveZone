@@ -2,7 +2,8 @@
 
 namespace Common;
 
-// TODO: Consider adding a stat to slow player & enemy move speed when attacking with each weapon.
+// TODO: Add range stat.
+// TODO: Add speed stat (entity's speed multiplier while the weapon is equipped).
 public class WeaponStats
 {
     public static readonly Dictionary<WeaponType, WeaponStats> Registry = new()
@@ -14,20 +15,30 @@ public class WeaponStats
     {
         Register(new WeaponStats(WeaponType.Dagger, 0.2f, Sprite.Dagger, new[]
         {
-            new ProjectileSpawnData { ProjectileType = ProjectileType.ThrownDagger, Angle = -10f, RelativeToForward = true },
-            new ProjectileSpawnData { ProjectileType = ProjectileType.ThrownDagger, Angle = 10f, RelativeToForward = true }
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownDagger, Angle = -10f, RelativeToForward = true },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownDagger, Angle = 10f, RelativeToForward = true }
         }));
-        
+
         Register(new WeaponStats(WeaponType.Sword, 0.5f, Sprite.Sword, new[]
         {
-            new ProjectileSpawnData { ProjectileType = ProjectileType.ThrownSword, Angle = 0f, RelativeToForward = false },
-            new ProjectileSpawnData { ProjectileType = ProjectileType.ThrownSword, Angle = 45f, RelativeToForward = false },
-            new ProjectileSpawnData { ProjectileType = ProjectileType.ThrownSword, Angle = 90f, RelativeToForward = false },
-            new ProjectileSpawnData { ProjectileType = ProjectileType.ThrownSword, Angle = 135f, RelativeToForward = false },
-            new ProjectileSpawnData { ProjectileType = ProjectileType.ThrownSword, Angle = 180f, RelativeToForward = false },
-            new ProjectileSpawnData { ProjectileType = ProjectileType.ThrownSword, Angle = 225f, RelativeToForward = false },
-            new ProjectileSpawnData { ProjectileType = ProjectileType.ThrownSword, Angle = 270f, RelativeToForward = false },
-            new ProjectileSpawnData { ProjectileType = ProjectileType.ThrownSword, Angle = 315f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownSword, Angle = 0f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownSword, Angle = 45f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownSword, Angle = 90f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownSword, Angle = 135f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownSword, Angle = 180f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownSword, Angle = 225f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownSword, Angle = 270f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownSword, Angle = 315f, RelativeToForward = false },
         }));
     }
 

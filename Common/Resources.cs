@@ -14,6 +14,8 @@ public class Resources
     public static readonly Rectangle BlackRectangle = new(1, 19, TileSize, TileSize);
     public static readonly Rectangle WhiteRectangle = new(11, 19, TileSize, TileSize);
 
+    public static readonly Color SkyColor = new(128, 119, 255, 255);
+
     public Resources(GraphicsDevice graphicsDevice)
     {
         MapTexture = Texture2D.FromFile(graphicsDevice, "Content/tiles.png");

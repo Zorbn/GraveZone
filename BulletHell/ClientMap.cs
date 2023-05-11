@@ -15,8 +15,8 @@ public class ClientMap : Map
 
     public ClientMap()
     {
-        _vertices = new ArrayList<VertexPositionColorTexture>();
-        _indices = new ArrayList<ushort>();
+        _vertices = new ArrayList<VertexPositionColorTexture>(10240);
+        _indices = new ArrayList<ushort>(10240);
     }
 
     public void Mesh(GraphicsDevice graphicsDevice)

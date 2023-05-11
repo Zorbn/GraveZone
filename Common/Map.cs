@@ -15,13 +15,29 @@ public class Map
             PlayerHits.Clear();
         }
     }
-    
-    public const int Size = 16;
-    private const int TileCount = Size * Size;
+
+    private const int Exponent = 6;
+    public static readonly int Size = (int)Math.Pow(2, Exponent) + 1;
+    private static readonly int TileCount = Size * Size;
     public const float TileScale = 1f;
     public const float TileHeight = 2f;
     public const float FloorShade = 1.0f;
     public const float WallShade = 0.8f;
+
+    private static readonly Dictionary<MapZone, Tile> FloorTilesPerZone = new()
+    {
+        { MapZone.Beach, Tile.Sand },
+        { MapZone.Grasslands, Tile.Grass },
+        { MapZone.Roads, Tile.Path },
+        { MapZone.CrumblingCity, Tile.Marble },
+    };
+    private static readonly Dictionary<MapZone, Tile> WallTilesPerZone = new()
+    {
+        { MapZone.Beach, Tile.Air },
+        { MapZone.Grasslands, Tile.Flower },
+        { MapZone.Roads, Tile.Air },
+        { MapZone.CrumblingCity, Tile.Marble },
+    };
 
     public readonly Dictionary<int, Weapon> DroppedWeapons = new();
     public readonly Dictionary<int, Enemy> Enemies = new();
@@ -37,30 +53,40 @@ public class Map
     public readonly EntitiesInTiles<Player> PlayersInTiles = new(Size);
 
     public readonly UpdateResults LastUpdateResults = new();
-    
+
+    private readonly MidpointDisplacement _midpointDisplacement = new(Exponent);
     private Random _random;
 
     public void Generate(int seed)
     {
         _random = new Random(seed);
+        _midpointDisplacement.Generate(_random);
         
-        Array.Fill(_floorTiles, Tile.Marble);
-
         for (var z = 0; z < Size; ++z)
         {
             for (var x = 0; x < Size; ++x)
             {
-                if (_random.NextSingle() > 0.3f) continue;
+                var i = x + z * Size;
+                var zone = _midpointDisplacement.Heightmap[i] switch
+                {
+                    < 0.2f => MapZone.Beach,
+                    < 0.4f => MapZone.Grasslands,
+                    < 0.5f => MapZone.Roads,
+                    _ => MapZone.CrumblingCity
+                };
+                
+                _floorTiles[i] = FloorTilesPerZone[zone];
 
-                _wallTiles[x + z * Size] = Tile.Grass;
+                if (_random.NextSingle() > 0.1f) continue;
+                
+                _wallTiles[i] = WallTilesPerZone[zone];
             }
         }
     }
 
     public Vector3? GetSpawnPosition()
     {
-        const int tileCount = Size * Size;
-        for (var i = _random.Next(tileCount); i < tileCount; i = (i + 1) % tileCount)
+        for (var i = _random.Next(TileCount); i < TileCount; i = (i + 1) % TileCount)
         {
             var x = i % Size;
             var z = i / Size;
@@ -129,7 +155,7 @@ public class Map
         var tileX = (int)x;
         var tileZ = (int)z;
 
-        if (tileX is < 0 or >= Size || tileZ is < 0 or >= Size) return null;
+        if (tileX < 0 || tileX >= Size || tileZ < 0 || tileZ >= Size) return null;
         
         var newEnemy = new Enemy(enemyType, x, z, id, attacker, health);
         Enemies.Add(id, newEnemy);
@@ -157,7 +183,7 @@ public class Map
         var tileX = (int)droppedWeapon.Position.X;
         var tileZ = (int)droppedWeapon.Position.Z;
 
-        if (tileX is < 0 or >= Size || tileZ is < 0 or >= Size) return false;
+        if (tileX < 0 || tileX >= Size || tileZ < 0 || tileZ >= Size) return false;
         
         DroppedWeapons.Add(id, droppedWeapon);
         DroppedWeaponsInTiles.Add(droppedWeapon, tileX, tileZ);
@@ -175,7 +201,7 @@ public class Map
         var x = (int)droppedWeapon.Position.X;
         var z = (int)droppedWeapon.Position.Z;
 
-        if (x is < 0 or >= Size || z is < 0 or >= Size) return;
+        if (x < 0 || x >= Size || z < 0 || z >= Size) return;
 
         DroppedWeapons.Remove(id);
         DroppedWeaponsInTiles.Remove(droppedWeapon, x, z);

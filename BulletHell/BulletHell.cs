@@ -35,6 +35,10 @@ public class BulletHell : Game
         IsMouseVisible = true;
         Window.AllowUserResizing = true;
         Window.ClientSizeChanged += OnResize;
+        
+        // Disable Vsync
+        // _graphics.SynchronizeWithVerticalRetrace = false;
+        // IsFixedTimeStep = false;
     }
 
     private static void OnPreparingDeviceSettings(object sender, PreparingDeviceSettingsEventArgs args)

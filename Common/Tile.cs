@@ -6,4 +6,7 @@ public enum Tile
     Marble,
     Grass,
     Barrier,
+    Flower,
+    Path,
+    Sand
 }
