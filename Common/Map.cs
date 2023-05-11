@@ -29,14 +29,14 @@ public class Map
         { MapZone.Beach, Tile.Sand },
         { MapZone.Grasslands, Tile.Grass },
         { MapZone.Roads, Tile.Path },
-        { MapZone.CrumblingCity, Tile.Marble },
+        { MapZone.CrumblingCity, Tile.Marble }
     };
     private static readonly Dictionary<MapZone, Tile> WallTilesPerZone = new()
     {
         { MapZone.Beach, Tile.Air },
         { MapZone.Grasslands, Tile.Flower },
         { MapZone.Roads, Tile.Air },
-        { MapZone.CrumblingCity, Tile.Marble },
+        { MapZone.CrumblingCity, Tile.Marble }
     };
 
     public readonly Dictionary<int, Weapon> DroppedWeapons = new();

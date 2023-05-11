@@ -6,18 +6,20 @@ public class ProjectileStats
 
     static ProjectileStats()
     {
-        Register(new ProjectileStats(ProjectileType.ThrownDagger, 5, Sprite.Dagger));
-        Register(new ProjectileStats(ProjectileType.ThrownSword, 10, Sprite.Sword));
+        Register(new ProjectileStats(ProjectileType.ThrownDagger, 5, 3f, Sprite.Dagger));
+        Register(new ProjectileStats(ProjectileType.ThrownSword, 10, 1.5f, Sprite.Sword));
     }
 
     public readonly Sprite Sprite;
     public readonly int Damage;
+    public readonly float Range;
     public readonly ProjectileType ProjectileType;
 
-    private ProjectileStats(ProjectileType projectileType, int damage, Sprite sprite)
+    private ProjectileStats(ProjectileType projectileType, int damage, float range, Sprite sprite)
     {
         ProjectileType = projectileType;
         Damage = damage;
+        Range = range;
         Sprite = sprite;
     }
 

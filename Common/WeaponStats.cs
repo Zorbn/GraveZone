@@ -2,7 +2,6 @@
 
 namespace Common;
 
-// TODO: Add range stat.
 // TODO: Add speed stat (entity's speed multiplier while the weapon is equipped).
 public class WeaponStats
 {

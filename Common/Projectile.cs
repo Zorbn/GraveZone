@@ -15,6 +15,7 @@ public class Projectile
     public readonly Team Team;
     
     private Vector3 _position;
+    private readonly Vector3 _startPosition;
 
     public Projectile(ProjectileType projectileType, WeaponType weaponType, Team team, Vector3 direction, float x, float z)
     {
@@ -23,6 +24,7 @@ public class Projectile
         Team = team;
         Direction = direction;
         _position = new Vector3(x, 0f, z);
+        _startPosition = _position;
     }
 
     // Returns true if the projectile collided with something.
@@ -54,6 +56,12 @@ public class Projectile
         }
 
         _position.Z = newPosition.Z;
+
+        var distanceTravelled = (_position - _startPosition).Length();
+        if (distanceTravelled > Stats.Range)
+        {
+            hasCollision = true;
+        }
 
         switch (Team)
         {
