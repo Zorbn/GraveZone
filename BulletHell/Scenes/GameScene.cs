@@ -36,7 +36,7 @@ public class GameScene : IScene
 
         _camera = new Camera(game.GraphicsDevice);
         _map = new ClientMap();
-        _spriteRenderer = new SpriteRenderer(500, game.GraphicsDevice);
+        _spriteRenderer = new SpriteRenderer(1024, game.GraphicsDevice);
         _players = new Dictionary<int, ClientPlayer>();
 
         _quitButton = new ImageButton(ClientInventory.X - Resources.TileSize,
@@ -99,10 +99,6 @@ public class GameScene : IScene
             _animationFrameTimer -= AnimationFrameTime;
             ++_animationFrame;
         }
-
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-            input.IsKeyDown(Keys.Escape))
-            _game.Exit();
 
         var cameraAngleMovement = 0f;
 

@@ -14,6 +14,7 @@ public class SpriteRenderer
     private int _vertexI;
     private int _indexI;
     private int _primitives;
+    private int _sprites;
     private readonly int _maxSprites;
 
     public SpriteRenderer(int maxSprites, GraphicsDevice graphicsDevice)
@@ -32,6 +33,9 @@ public class SpriteRenderer
 
     public void Add(float x, float z, Sprite sprite)
     {
+        if (_sprites >= _maxSprites) return;
+        ++_sprites;
+        
         var baseVertexCount = _vertexI;
         foreach (var index in SpriteMesh.Indices)
         {
@@ -69,6 +73,7 @@ public class SpriteRenderer
         _vertexI = 0;
         _indexI = 0;
         _primitives = 0;
+        _sprites = 0;
         _rotationMatrix = rotationMatrix;
     }
     

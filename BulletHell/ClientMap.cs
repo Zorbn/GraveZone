@@ -123,6 +123,9 @@ public class ClientMap : Map
 
     public void DrawSprites(SpriteRenderer spriteRenderer, int animationFrame)
     {
+        foreach (var decorationSprite in DecorationSprites)
+            spriteRenderer.Add(decorationSprite.X, decorationSprite.Z, decorationSprite.Sprite);
+
         foreach (var projectile in Projectiles) projectile.Draw(spriteRenderer);
 
         foreach (var (_, droppedWeapon) in DroppedWeapons) droppedWeapon.Draw(spriteRenderer);

@@ -18,6 +18,13 @@ public class Map
         }
     }
 
+    protected struct DecorationSprite
+    {
+        public Sprite Sprite;
+        public float X;
+        public float Z;
+    }
+
     private const int Exponent = 6;
     public static readonly int Size = (int)Math.Pow(2, Exponent) + 1;
     private static readonly int TileCount = Size * Size;
@@ -41,6 +48,14 @@ public class Map
         { MapZone.Roads, Tile.Air },
         { MapZone.CrumblingCity, Tile.Marble }
     };
+    
+    private static readonly Dictionary<MapZone, Sprite> SpritesPerZone = new()
+    {
+        { MapZone.Beach, Sprite.PalmTree },
+        { MapZone.Grasslands, Sprite.None },
+        { MapZone.Roads, Sprite.None },
+        { MapZone.CrumblingCity, Sprite.None }
+    };
 
     public readonly Dictionary<int, Weapon> DroppedWeapons = new();
 
@@ -52,6 +67,7 @@ public class Map
 
     private readonly Tile[] _floorTiles = new Tile[TileCount];
     private readonly Tile[] _wallTiles = new Tile[TileCount];
+    protected readonly List<DecorationSprite> DecorationSprites = new();
 
     public readonly EntitiesInTiles<Weapon> DroppedWeaponsInTiles = new(Size);
     public readonly EntitiesInTiles<Enemy> EnemiesInTiles = new(Size);
@@ -81,9 +97,23 @@ public class Map
 
             _floorTiles[i] = FloorTilesPerZone[zone];
 
-            if (_random.NextSingle() > 0.1f) continue;
+            var wallTile = WallTilesPerZone[zone];
+            if (wallTile != Tile.Air && _random.NextSingle() < 0.1f)
+            {
+                _wallTiles[i] = WallTilesPerZone[zone];
+                continue;
+            }
 
-            _wallTiles[i] = WallTilesPerZone[zone];
+            var sprite = SpritesPerZone[zone];
+            if (sprite != Sprite.None && _random.NextSingle() < 0.1f)
+            {
+                DecorationSprites.Add(new DecorationSprite
+                {
+                    Sprite = sprite,
+                    X = x + 0.5f,
+                    Z = z + 0.5f
+                });
+            }
         }
     }
 

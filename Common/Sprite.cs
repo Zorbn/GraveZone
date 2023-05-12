@@ -2,11 +2,13 @@
 
 public enum Sprite
 {
-    Player = 0,
-    Projectile = 1,
-    MimicClosed = 2,
-    MimicVampire = 3,
-    MimicShelled = 4,
+    None = 0,
+    Player = 1,
+    Projectile = 2,
+    MimicClosed = 3,
+    MimicVampire = 4,
+    MimicShelled = 5,
+    PalmTree = 7,
     Dagger = 600,
     Sword = 601
 }
