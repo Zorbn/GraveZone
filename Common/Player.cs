@@ -54,7 +54,7 @@ public class Player
         map.PlayersInTiles.Remove(this, (int)Position.X, (int)Position.Z);
     }
 
-    public bool TakeDamage(int damage)
+    public virtual bool TakeDamage(int damage)
     {
         Health -= damage;
 

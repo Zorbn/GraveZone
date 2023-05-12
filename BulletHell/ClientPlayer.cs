@@ -14,12 +14,15 @@ public class ClientPlayer : Player
     private const int HealthBarY = ClientInventory.Y - HealthBarHeight;
 
     private const int HealthRegenAmount = 5;
-    private const float HealthRegenTime = 2.0f;
+    private const float HealthRegenTime = 2f;
+
+    private const float HealthRegenStartTime = 5f;
 
     public readonly ClientInventory ClientInventory;
 
     private readonly Attacker _attacker;
     private float _healthRegenTimer;
+    private float _healthRegenStartTimer;
 
     public ClientPlayer(Attacker attacker, Map map, int id, float x, float z, int? health) : base(map, id, x, z, health)
     {
@@ -96,9 +99,20 @@ public class ClientPlayer : Player
 
         _healthRegenTimer += deltaTime;
 
+        var wasAbleToRegen = _healthRegenStartTimer >= HealthRegenStartTime;
+        
+        _healthRegenStartTimer += deltaTime;
+
         // Health regen is calculated on the client to maintain consistency with
         // the damage calculations that are also done on the client, and prevent
         // a player's health de-syncing across the clients/server.
+        if (_healthRegenStartTimer < HealthRegenStartTime) return;
+
+        if (!wasAbleToRegen)
+        {
+            _healthRegenTimer = 0f;
+        }
+        
         while (_healthRegenTimer > HealthRegenTime)
         {
             _healthRegenTimer -= HealthRegenTime;
@@ -106,10 +120,16 @@ public class ClientPlayer : Player
         }
     }
 
+    public override bool TakeDamage(int damage)
+    {
+        _healthRegenStartTimer = 0f;
+        return base.TakeDamage(damage);
+    }
+
     private void ClientHeal(int amount, Client client)
     {
         Heal(amount);
-        
+
         client.SendToServer(new PlayerHeal
         {
             Amount = amount
