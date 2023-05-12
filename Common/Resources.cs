@@ -6,6 +6,7 @@ namespace Common;
 public class Resources
 {
     public const int TileSize = 8;
+    public const float ShadowAlpha = 0.2f;
 
     public readonly Texture2D MapTexture;
     public readonly Texture2D SpriteTexture;
@@ -13,6 +14,7 @@ public class Resources
 
     public static readonly Rectangle BlackRectangle = new(1, 19, TileSize, TileSize);
     public static readonly Rectangle WhiteRectangle = new(11, 19, TileSize, TileSize);
+    public static readonly Rectangle ShadowRectangle = new(1, 11, TileSize, TileSize);
 
     public static readonly Color SkyColor = new(128, 119, 255, 255);
 

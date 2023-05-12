@@ -15,13 +15,19 @@ public class Camera
     public Matrix ViewMatrix => _effect.View;
     public Matrix ProjectionMatrix => _effect.Projection;
 
+    public float EffectAlpha
+    {
+        get => _effect.Alpha;
+        set => _effect.Alpha = value;
+    }
+
     public Vector3 Forward { get; private set; }
     public Vector3 Right { get; private set; }
     public int Width { get; private set; }
     public int Height { get; private set; }
 
     private AlphaTestEffect _effect;
-    private Vector3 _position = Vector3.Zero;
+    public Vector3 Position { get; set; }
     private float _angle;
 
     public Camera(GraphicsDevice graphicsDevice)
@@ -31,18 +37,13 @@ public class Camera
         _effect.World = Matrix.Identity;
 
         _effect.VertexColorEnabled = true;
-
+        
         Resize(graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height);
     }
 
     public void SetTexture(Texture2D texture)
     {
         _effect.Texture = texture;
-    }
-
-    public void SetPosition(Vector3 position)
-    {
-        _position = position;
     }
 
     public void Resize(int width, int height)
@@ -81,6 +82,6 @@ public class Camera
 
         SpriteMatrix = Matrix.Invert(Matrix.CreateLookAt(Vector3.Zero, flattenedLookOffset, Vector3.Up));
 
-        _effect.View = Matrix.CreateLookAt(_position, _position + lookOffset, Vector3.Up);
+        _effect.View = Matrix.CreateLookAt(Position, Position + lookOffset, Vector3.Up);
     }
 }

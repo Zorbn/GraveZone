@@ -121,15 +121,15 @@ public class ClientMap : Map
         graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, _primitives);
     }
 
-    public void DrawSprites(SpriteRenderer spriteRenderer, int animationFrame)
+    public void AddSprites(SpriteRenderer spriteRenderer, int animationFrame)
     {
         foreach (var decorationSprite in DecorationSprites)
             spriteRenderer.Add(decorationSprite.X, decorationSprite.Z, decorationSprite.Sprite);
 
-        foreach (var projectile in Projectiles) projectile.Draw(spriteRenderer);
+        foreach (var projectile in Projectiles) projectile.AddSprite(spriteRenderer);
 
-        foreach (var (_, droppedWeapon) in DroppedWeapons) droppedWeapon.Draw(spriteRenderer);
+        foreach (var (_, droppedWeapon) in DroppedWeapons) droppedWeapon.AddSprite(spriteRenderer);
 
-        foreach (var (_, enemy) in Enemies) enemy.Draw(spriteRenderer, animationFrame);
+        foreach (var (_, enemy) in Enemies) enemy.AddSprite(spriteRenderer, animationFrame);
     }
 }

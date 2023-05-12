@@ -139,23 +139,19 @@ public class GameScene : IScene
 
     public void Draw()
     {
-        _game.GraphicsDevice.Clear(Resources.SkyColor);
-
-        // Set graphics state to be suitable for 3D models.
-        // Using the sprite batch modifies these to different values.
-        _game.GraphicsDevice.BlendState = BlendState.Opaque;
-        _game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
-        _game.GraphicsDevice.RasterizerState = new RasterizerState { MultiSampleAntiAlias = true };
-        _game.GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
-
-        _camera.UpdateViewMatrices();
-
         _spriteRenderer.Begin(_camera.SpriteMatrix);
-        foreach (var pair in _players) pair.Value.Draw(_spriteRenderer);
+        foreach (var (_, player) in _players) player.AddSprite(_spriteRenderer);
 
-        _map.DrawSprites(_spriteRenderer, _animationFrame);
+        _map.AddSprites(_spriteRenderer, _animationFrame);
 
         _spriteRenderer.End();
+        
+        _spriteRenderer.DrawShadowsToTexture(_camera.Position, _game.GraphicsDevice, _game.Resources, _game.SpriteBatch);
+
+        _game.GraphicsDevice.Clear(Resources.SkyColor);
+        _game.GraphicsDevice.ClearState();
+        
+        _camera.UpdateViewMatrices();
 
         _camera.SetTexture(_game.Resources.MapTexture);
         foreach (var currentPass in _camera.Passes)
@@ -168,9 +164,18 @@ public class GameScene : IScene
         foreach (var currentPass in _camera.Passes)
         {
             currentPass.Apply();
-            _spriteRenderer.Draw(_game.GraphicsDevice);
+            _spriteRenderer.DrawSprites(_game.GraphicsDevice);
         }
-
+        
+        _camera.SetTexture(_spriteRenderer.ShadowTarget);
+        _camera.EffectAlpha = Resources.ShadowAlpha;
+        foreach (var currentPass in _camera.Passes)
+        {
+            currentPass.Apply();
+            _spriteRenderer.DrawShadows(_camera.Position, _game.GraphicsDevice);
+        }
+        _camera.EffectAlpha = 1f;
+        
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
 
         _quitButton.Draw(_game.SpriteBatch, _game.Resources);
@@ -202,7 +207,7 @@ public class GameScene : IScene
 
     private void PostUpdateLocal(ClientPlayer localPlayer)
     {
-        _camera.SetPosition(localPlayer.Position);
+        _camera.Position = localPlayer.Position;
 
         // The player checks its own collisions locally to prevent unfair hits
         // due to lag, this could be run on the server instead if preventing

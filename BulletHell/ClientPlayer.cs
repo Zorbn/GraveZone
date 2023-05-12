@@ -160,7 +160,7 @@ public class ClientPlayer : Player
                 DeliveryMethod.Unreliable);
     }
 
-    public void Draw(SpriteRenderer spriteRenderer)
+    public void AddSprite(SpriteRenderer spriteRenderer)
     {
         spriteRenderer.Add(SpritePosition.X, SpritePosition.Z, Sprite.Player);
     }

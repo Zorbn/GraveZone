@@ -36,9 +36,11 @@ public class BulletHell : Game
         Window.AllowUserResizing = true;
         Window.ClientSizeChanged += OnResize;
 
-        // Disable Vsync
+        // Disable VSYNC:
         // _graphics.SynchronizeWithVerticalRetrace = false;
-        // IsFixedTimeStep = false;
+
+        // Disable FPS cap, separate from VSYNC:
+        IsFixedTimeStep = false;
     }
 
     private static void OnPreparingDeviceSettings(object sender, PreparingDeviceSettingsEventArgs args)
@@ -89,7 +91,7 @@ public class BulletHell : Game
     protected override void Update(GameTime gameTime)
     {
         var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
+        
         _input.Update(IsActive);
         _scene.Update(_input, deltaTime);
 
