@@ -108,7 +108,7 @@ public class GameScene : IScene
 
         _camera.Rotate(cameraAngleMovement * deltaTime);
 
-        if (input.IsKeyDown(Keys.Z)) _camera.ResetAngle();
+        if (input.WasKeyPressed(Keys.Z)) _camera.ResetAngle();
 
         var hasLocalPlayer = _players.TryGetValue(Client.LocalId, out var localPlayer);
         if (hasLocalPlayer)
@@ -137,8 +137,10 @@ public class GameScene : IScene
         }
     }
 
-    public void Draw()
+    private void PreDraw()
     {
+        _camera.UpdateViewMatrices();
+
         _spriteRenderer.Begin(_camera.SpriteMatrix);
         foreach (var (_, player) in _players) player.AddSprite(_spriteRenderer);
 
@@ -147,12 +149,15 @@ public class GameScene : IScene
         _spriteRenderer.End();
         
         _spriteRenderer.DrawShadowsToTexture(_camera.Position, _game.GraphicsDevice, _game.Resources, _game.SpriteBatch);
+    }
+    
+    public void Draw()
+    {
+        PreDraw();
 
         _game.GraphicsDevice.Clear(Resources.SkyColor);
         _game.GraphicsDevice.ClearState();
         
-        _camera.UpdateViewMatrices();
-
         _camera.SetTexture(_game.Resources.MapTexture);
         foreach (var currentPass in _camera.Passes)
         {

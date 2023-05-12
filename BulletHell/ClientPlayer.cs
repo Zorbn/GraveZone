@@ -167,12 +167,12 @@ public class ClientPlayer : Player
 
     public void DrawHud(Resources resources, SpriteBatch spriteBatch)
     {
-        ClientInventory.Draw(resources, spriteBatch);
-
         var healthBarDestination = new Rectangle(HealthBarX, HealthBarY, HealthBarWidth, HealthBarHeight);
         spriteBatch.Draw(resources.UiTexture, healthBarDestination, Resources.BlackRectangle, Color.White);
         var currentHealthBarWidth = (int)(HealthBarWidth * (Health / (float)MaxHealth));
         healthBarDestination.Width = currentHealthBarWidth;
         spriteBatch.Draw(resources.UiTexture, healthBarDestination, Resources.WhiteRectangle, Color.Red);
+        
+        ClientInventory.Draw(resources, spriteBatch);
     }
 }
