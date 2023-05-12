@@ -10,8 +10,10 @@ public class EnemyStats
 
     static EnemyStats()
     {
-        Register(new EnemyStats(EnemyType.VampireMimic, WeaponType.Dagger, 0.2f, 20, new[] { Sprite.MimicClosed, Sprite.MimicVampire }));
-        Register(new EnemyStats(EnemyType.ShelledMimic, WeaponType.Sword, 0.2f, 30, new[] { Sprite.MimicClosed, Sprite.MimicShelled }));
+        Register(new EnemyStats(EnemyType.VampireMimic, WeaponType.Dagger, 0.2f, 20,
+            new[] { Sprite.MimicClosed, Sprite.MimicVampire }));
+        Register(new EnemyStats(EnemyType.ShelledMimic, WeaponType.Sword, 0.2f, 30,
+            new[] { Sprite.MimicClosed, Sprite.MimicShelled }));
 
         EnemyTypes = new ReadOnlyCollection<EnemyType>(Registry.Keys.ToList());
     }
@@ -22,14 +24,14 @@ public class EnemyStats
     public readonly int MaxHealth;
     public readonly ReadOnlyCollection<Sprite> Sprites;
 
-    private EnemyStats(EnemyType enemyType, WeaponType weaponType, float weaponDropRate, int maxHealth, Sprite[] sprites)
+    private EnemyStats(EnemyType enemyType, WeaponType weaponType, float weaponDropRate, int maxHealth,
+        Sprite[] sprites)
     {
         EnemyType = enemyType;
         WeaponType = weaponType;
         WeaponDropRate = weaponDropRate;
         MaxHealth = maxHealth;
         Sprites = new ReadOnlyCollection<Sprite>(sprites);
-        
     }
 
     private static void Register(EnemyStats enemyStats)

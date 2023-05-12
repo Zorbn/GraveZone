@@ -13,11 +13,12 @@ public class Projectile
     public readonly ProjectileStats Stats;
     public readonly WeaponType WeaponType;
     public readonly Team Team;
-    
+
     private Vector3 _position;
     private readonly Vector3 _startPosition;
 
-    public Projectile(ProjectileType projectileType, WeaponType weaponType, Team team, Vector3 direction, float x, float z)
+    public Projectile(ProjectileType projectileType, WeaponType weaponType, Team team, Vector3 direction, float x,
+        float z)
     {
         Stats = ProjectileStats.Registry[projectileType];
         WeaponType = weaponType;
@@ -58,10 +59,7 @@ public class Projectile
         _position.Z = newPosition.Z;
 
         var distanceTravelled = (_position - _startPosition).Length();
-        if (distanceTravelled > Stats.Range)
-        {
-            hasCollision = true;
-        }
+        if (distanceTravelled > Stats.Range) hasCollision = true;
 
         switch (Team)
         {
@@ -95,7 +93,7 @@ public class Projectile
             break;
         }
     }
-    
+
     private void CheckPlayerCollisions(Map map, ref bool hasCollision)
     {
         var nearbyPlayers = map.PlayersInTiles.GetNearby((int)_position.X, (int)_position.Z);

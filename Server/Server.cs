@@ -118,7 +118,7 @@ public class Server
             player.Despawn(_map);
             _players.Remove(peer.Id);
             SendToAll(new PlayerDespawn { Id = peer.Id }, DeliveryMethod.ReliableOrdered);
-            
+
             Console.WriteLine($"Peer disconnected with ID: {peer.Id}");
         };
 
@@ -139,9 +139,7 @@ public class Server
         var weaponSpawnPosition = _map.GetSpawnPosition();
 
         if (weaponSpawnPosition is not null)
-        {
             ServerDropWeapon(WeaponType.Dagger, weaponSpawnPosition.Value.X, weaponSpawnPosition.Value.Z);
-        }
 
         var stopwatch = new Stopwatch();
 
@@ -170,10 +168,7 @@ public class Server
 
         _map.Update(TickTime);
 
-        foreach (var enemyHit in _map.LastUpdateResults.EnemyHits)
-        {
-            ServerDamageEnemy(enemyHit.Entity, enemyHit.Damage);
-        }
+        foreach (var enemyHit in _map.LastUpdateResults.EnemyHits) ServerDamageEnemy(enemyHit.Entity, enemyHit.Damage);
 
         ServerMapUpdate();
 
@@ -221,7 +216,6 @@ public class Server
 
         // Populate the map for the new player.
         foreach (var (droppedWeaponId, droppedWeapon) in _map.DroppedWeapons)
-        {
             SendToPeer(peer, new DroppedWeaponSpawn
             {
                 WeaponType = droppedWeapon.Stats.WeaponType,
@@ -229,10 +223,8 @@ public class Server
                 Z = droppedWeapon.Position.Z,
                 Id = droppedWeaponId
             }, DeliveryMethod.ReliableOrdered);
-        }
 
         foreach (var (enemyId, enemy) in _map.Enemies)
-        {
             SendToPeer(peer, new EnemySpawn
             {
                 Id = enemyId,
@@ -241,10 +233,8 @@ public class Server
                 Z = enemy.Position.Z,
                 Health = enemy.Health
             }, DeliveryMethod.ReliableOrdered);
-        }
 
         foreach (var projectile in _map.Projectiles)
-        {
             SendToPeer(peer, new ProjectileSpawn
             {
                 Direction = new NetVector3(projectile.Direction),
@@ -253,7 +243,6 @@ public class Server
                 WeaponType = projectile.WeaponType,
                 Team = projectile.Team
             }, DeliveryMethod.ReliableOrdered);
-        }
     }
 
     private void TrySpawnEnemy()
@@ -270,7 +259,8 @@ public class Server
     private void ServerSpawnEnemy(Vector3 position)
     {
         var enemyId = _nextEnemyId++;
-        var enemy = _map.SpawnRandomEnemy(position.X, position.Z, enemyId, new Attacker(Team.Enemies, _enemyAttackAction));
+        var enemy = _map.SpawnRandomEnemy(position.X, position.Z, enemyId,
+            new Attacker(Team.Enemies, _enemyAttackAction));
 
         if (enemy is null) return;
 
@@ -291,10 +281,8 @@ public class Server
         if (enemyDied)
         {
             if (_random.NextSingle() < enemy.Stats.WeaponDropRate)
-            {
                 ServerDropWeapon(enemy.Stats.WeaponType, enemy.Position.X, enemy.Position.Z);
-            }
-            
+
             _map.DespawnEnemy(enemy.Id);
         }
 
@@ -306,13 +294,11 @@ public class Server
         var updateInventory = new UpdateInventory
         {
             PlayerId = playerId,
-            Weapons = new int[Inventory.SlotCount],
+            Weapons = new int[Inventory.SlotCount]
         };
 
         for (var i = 0; i < Inventory.SlotCount; i++)
-        {
             updateInventory.Weapons[i] = (int)(player.Inventory.Weapons[i]?.WeaponType ?? WeaponType.None);
-        }
 
         updateInventory.EquippedWeapon = (int)(player.Inventory.EquippedWeaponStats?.WeaponType ?? WeaponType.None);
         updateInventory.GrabbedWeapon = (int)(player.Inventory.GrabbedWeaponStats?.WeaponType ?? WeaponType.None);
@@ -407,7 +393,8 @@ public class Server
 
     private void OnPlayerAttack(PlayerAttack playerAttack, NetPeer peer)
     {
-        _map.AddAttackProjectiles(playerAttack.WeaponType, Team.Players, playerAttack.Direction.ToVector3(), playerAttack.X,
+        _map.AddAttackProjectiles(playerAttack.WeaponType, Team.Players, playerAttack.Direction.ToVector3(),
+            playerAttack.X,
             playerAttack.Z);
 
         // Send the new projectile to all players except the player who created the projectile.
@@ -422,20 +409,20 @@ public class Server
             },
             DeliveryMethod.ReliableOrdered, peer);
     }
-    
+
     private void OnPlayerTakeDamage(PlayerTakeDamage playerTakeDamage, NetPeer peer)
     {
         if (!_players.TryGetValue(peer.Id, out var player)) return;
 
         var playerDied = player.TakeDamage(playerTakeDamage.Damage);
-        
+
         SendToAll(playerTakeDamage with { Id = peer.Id }, DeliveryMethod.ReliableOrdered, peer);
 
         if (!playerDied) return;
 
         var spawnPosition = _map.GetSpawnPosition() ?? Vector3.Zero;
         player.Respawn(_map, spawnPosition);
-        
+
         SendToAll(new PlayerRespawn
         {
             Id = peer.Id,
@@ -450,9 +437,7 @@ public class Server
         if (!_map.DroppedWeapons.TryGetValue(requestPickupWeapon.DroppedWeaponId, out var droppedWeapon)) return;
 
         if (player.Inventory.AddWeapon(droppedWeapon.Stats.WeaponType))
-        {
             ServerPickupWeapon(peer.Id, droppedWeapon.Id, droppedWeapon.Stats.WeaponType);
-        }
     }
 
     private void OnRequestGrabSlot(RequestGrabSlot requestGrabSlot, NetPeer peer)
@@ -474,7 +459,7 @@ public class Server
         player.Inventory.GrabEquippedSlot();
         SendToAll(new GrabEquippedSlot
         {
-            PlayerId = peer.Id,
+            PlayerId = peer.Id
         }, DeliveryMethod.ReliableOrdered);
     }
 

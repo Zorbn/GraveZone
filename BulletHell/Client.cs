@@ -11,10 +11,12 @@ public class Client
     public int LocalId { get; set; } = -1;
 
     public delegate void OnConnection();
+
     public delegate void OnDisconnection();
+
     public event OnConnection ConnectedEvent;
     public event OnDisconnection DisconnectedEvent;
-    
+
     private readonly EventBasedNetListener _listener;
     private readonly NetManager _manager;
     private readonly NetDataWriter _writer;
@@ -29,27 +31,21 @@ public class Client
             AutoRecycle = true
         };
         _manager.Start();
-        
+
         _listener.NetworkReceiveEvent += (fromPeer, dataReader, _, _) =>
         {
             NetPacketProcessor.ReadAllPackets(dataReader, fromPeer);
         };
-        
-        _listener.PeerConnectedEvent += _ =>
-        {
-            ConnectedEvent?.Invoke();
-        };
 
-        _listener.PeerDisconnectedEvent += (_, _) =>
-        {
-            DisconnectedEvent?.Invoke();
-        };
+        _listener.PeerConnectedEvent += _ => { ConnectedEvent?.Invoke(); };
+
+        _listener.PeerDisconnectedEvent += (_, _) => { DisconnectedEvent?.Invoke(); };
     }
 
     public void Connect(string ip)
     {
         _manager.Connect(ip, Networking.Port, "");
-    }  
+    }
 
     public void Disconnect()
     {

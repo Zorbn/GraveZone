@@ -3,37 +3,34 @@
 public class ArrayList<T>
 {
     public int Count { get; private set; }
-    public T[] Array { get; private set; }
+    public T[] Array => _array;
     public readonly int ChunkSize;
+
+    private T[] _array;
 
     public ArrayList(int chunkSize = 1024)
     {
         ChunkSize = chunkSize;
-        Array = new T[chunkSize];
+        _array = new T[chunkSize];
     }
 
     public T this[int i]
     {
-        get => Array[i];
-        set => Array[i] = value;
+        get => _array[i];
+        set => _array[i] = value;
     }
 
     public void Add(T element)
     {
-        while (Count >= Array.Length)
-        {
-            Expand();
-        }
+        while (Count >= _array.Length) Expand();
 
-        Array[Count] = element;
+        _array[Count] = element;
         ++Count;
     }
 
     private void Expand()
     {
-        var newArray = new T[Array.Length + ChunkSize];
-        System.Array.Copy(Array, newArray, Count);
-        Array = newArray;
+        System.Array.Resize(ref _array, _array.Length + ChunkSize);
     }
 
     public void Clear()

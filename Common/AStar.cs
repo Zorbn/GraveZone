@@ -20,11 +20,15 @@ public class AStar
     private void GetNeighbors(Vector3I position, Map map)
     {
         _neighbors.Clear();
-        
-        if (map.GetWallTile(position.X + 1, position.Z) == Tile.Air) _neighbors.Add(new Vector3I(position.X + 1, 0, position.Z));
-        if (map.GetWallTile(position.X - 1, position.Z) == Tile.Air) _neighbors.Add(new Vector3I(position.X - 1, 0, position.Z));
-        if (map.GetWallTile(position.X, position.Z + 1) == Tile.Air) _neighbors.Add(new Vector3I(position.X, 0, position.Z + 1));
-        if (map.GetWallTile(position.X, position.Z - 1) == Tile.Air) _neighbors.Add(new Vector3I(position.X, 0, position.Z - 1));
+
+        if (map.GetWallTile(position.X + 1, position.Z) == Tile.Air)
+            _neighbors.Add(new Vector3I(position.X + 1, 0, position.Z));
+        if (map.GetWallTile(position.X - 1, position.Z) == Tile.Air)
+            _neighbors.Add(new Vector3I(position.X - 1, 0, position.Z));
+        if (map.GetWallTile(position.X, position.Z + 1) == Tile.Air)
+            _neighbors.Add(new Vector3I(position.X, 0, position.Z + 1));
+        if (map.GetWallTile(position.X, position.Z - 1) == Tile.Air)
+            _neighbors.Add(new Vector3I(position.X, 0, position.Z - 1));
     }
 
     private void Search(Map map, Vector3I start, Vector3I goal)
@@ -35,14 +39,14 @@ public class AStar
 
         _neighbors.Clear();
         _frontier.Clear();
-        
+
         _frontier.Enqueue(start, 0);
         _cameFrom.Add(start, start);
 
         while (_frontier.TryDequeue(out var current, out _))
         {
             if (current == goal) break;
-            
+
             GetNeighbors(current, map);
             foreach (var neighbor in _neighbors)
             {
@@ -61,10 +65,7 @@ public class AStar
 
         var current = goal;
 
-        if (!_cameFrom.ContainsKey(goal))
-        {
-            return;
-        }
+        if (!_cameFrom.ContainsKey(goal)) return;
 
         while (current != start)
         {

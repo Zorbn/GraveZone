@@ -64,10 +64,8 @@ public class Enemy
         var distanceToPlayer = (_targetPlayer.Position - _position).Length();
 
         if (distanceToPlayer <= AttackDistance)
-        {
             _attacker.Attack(_weaponStats, directionToPlayer, Position.X, Position.Z, map);
-        }
-        
+
         if (_targetPathNodeI >= _path.Count) return;
 
         var targetNode = _path[_targetPathNodeI].ToVector3();

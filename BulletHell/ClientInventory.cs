@@ -18,7 +18,7 @@ public class ClientInventory
 
     private static readonly Rectangle SlotRectangle = new(1, 1, SlotSize, SlotSize);
     private static readonly Rectangle EquippedSlotRectangle = new(9 * Resources.TileSize + 7, 1, SlotSize, SlotSize);
-    
+
     private readonly Inventory _inventory;
     private Vector2 _mousePosition;
 
@@ -42,18 +42,19 @@ public class ClientInventory
     public bool Update(Client client, Input input, Vector2 mousePosition)
     {
         _mousePosition = mousePosition;
-        
+
         if (!input.WasMouseButtonPressed(MouseButton.Left)) return false;
 
         var i = GetSlotIndexFromPosition(mousePosition);
-        var equippedSlotDestination = new Rectangle(EquippedX, EquippedY, EquippedSlotRectangle.Width, EquippedSlotRectangle.Height);
+        var equippedSlotDestination =
+            new Rectangle(EquippedX, EquippedY, EquippedSlotRectangle.Width, EquippedSlotRectangle.Height);
 
         if (i != -1)
         {
             RequestGrabSlot(client, i);
             return true;
         }
-        
+
         if (equippedSlotDestination.Contains(mousePosition))
         {
             RequestGrabEquippedSlot(client);
@@ -72,22 +73,20 @@ public class ClientInventory
     public void Draw(Resources resources, SpriteBatch spriteBatch)
     {
         for (var y = 0; y < Inventory.Height; y++)
+        for (var x = 0; x < Inventory.Width; x++)
         {
-            for (var x = 0; x < Inventory.Width; x++)
+            var slotPosition = new Vector2(X + x * SlotRectangle.Width, Y + y * SlotRectangle.Height);
+            spriteBatch.Draw(resources.UiTexture, slotPosition, SlotRectangle, Color.White);
+
+            var weapon = _inventory.Weapons[x + y * Inventory.Width];
+
+            if (weapon is not null)
             {
-                var slotPosition = new Vector2(X + x * SlotRectangle.Width, Y + y * SlotRectangle.Height);
-                spriteBatch.Draw(resources.UiTexture, slotPosition, SlotRectangle, Color.White);
-
-                var weapon = _inventory.Weapons[x + y * Inventory.Width];
-
-                if (weapon is not null)
-                {
-                    var itemPosition = slotPosition;
-                    itemPosition.X += ItemSpriteOffset;
-                    itemPosition.Y += ItemSpriteOffset;
-                    var sourceRectangle = SpriteMesh.GetSourceRectangle(weapon.Sprite);
-                    spriteBatch.Draw(resources.SpriteTexture, itemPosition, sourceRectangle, Color.White);
-                }
+                var itemPosition = slotPosition;
+                itemPosition.X += ItemSpriteOffset;
+                itemPosition.Y += ItemSpriteOffset;
+                var sourceRectangle = SpriteMesh.GetSourceRectangle(weapon.Sprite);
+                spriteBatch.Draw(resources.SpriteTexture, itemPosition, sourceRectangle, Color.White);
             }
         }
 
@@ -115,7 +114,7 @@ public class ClientInventory
     {
         client.SendToServer(new RequestGrabSlot
         {
-            SlotIndex = i,
+            SlotIndex = i
         }, DeliveryMethod.ReliableOrdered);
     }
 

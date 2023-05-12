@@ -37,7 +37,7 @@ public class WeaponStats
             new ProjectileSpawnData
                 { ProjectileType = ProjectileType.ThrownSword, Angle = 270f, RelativeToForward = false },
             new ProjectileSpawnData
-                { ProjectileType = ProjectileType.ThrownSword, Angle = 315f, RelativeToForward = false },
+                { ProjectileType = ProjectileType.ThrownSword, Angle = 315f, RelativeToForward = false }
         }));
     }
 

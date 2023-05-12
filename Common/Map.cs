@@ -31,6 +31,7 @@ public class Map
         { MapZone.Roads, Tile.Path },
         { MapZone.CrumblingCity, Tile.Marble }
     };
+
     private static readonly Dictionary<MapZone, Tile> WallTilesPerZone = new()
     {
         { MapZone.Beach, Tile.Air },
@@ -40,7 +41,9 @@ public class Map
     };
 
     public readonly Dictionary<int, Weapon> DroppedWeapons = new();
+
     public readonly Dictionary<int, Enemy> Enemies = new();
+
     // Projectiles don't have an id because the clients simulate projectiles
     // locally to reduce the number of packets sent for each projectile.
     public readonly List<Projectile> Projectiles = new();
@@ -61,26 +64,24 @@ public class Map
     {
         _random = new Random(seed);
         _midpointDisplacement.Generate(_random);
-        
-        for (var z = 0; z < Size; ++z)
-        {
-            for (var x = 0; x < Size; ++x)
-            {
-                var i = x + z * Size;
-                var zone = _midpointDisplacement.Heightmap[i] switch
-                {
-                    < 0.2f => MapZone.Beach,
-                    < 0.4f => MapZone.Grasslands,
-                    < 0.5f => MapZone.Roads,
-                    _ => MapZone.CrumblingCity
-                };
-                
-                _floorTiles[i] = FloorTilesPerZone[zone];
 
-                if (_random.NextSingle() > 0.1f) continue;
-                
-                _wallTiles[i] = WallTilesPerZone[zone];
-            }
+        for (var z = 0; z < Size; ++z)
+        for (var x = 0; x < Size; ++x)
+        {
+            var i = x + z * Size;
+            var zone = _midpointDisplacement.Heightmap[i] switch
+            {
+                < 0.2f => MapZone.Beach,
+                < 0.4f => MapZone.Grasslands,
+                < 0.5f => MapZone.Roads,
+                _ => MapZone.CrumblingCity
+            };
+
+            _floorTiles[i] = FloorTilesPerZone[zone];
+
+            if (_random.NextSingle() > 0.1f) continue;
+
+            _wallTiles[i] = WallTilesPerZone[zone];
         }
     }
 
@@ -90,7 +91,7 @@ public class Map
         {
             var x = i % Size;
             var z = i / Size;
-            
+
             if (GetWallTile(x, z) != Tile.Air) continue;
 
             return new Vector3(x + 0.5f, 0f, z + 0.5f);
@@ -102,15 +103,12 @@ public class Map
     public void Update(float deltaTime)
     {
         LastUpdateResults.Clear();
-        
+
         for (var i = Projectiles.Count - 1; i >= 0; i--)
         {
             var hadCollision = Projectiles[i].Update(this, deltaTime);
 
-            if (hadCollision)
-            {
-                Projectiles.RemoveAt(i);
-            }
+            if (hadCollision) Projectiles.RemoveAt(i);
         }
     }
 
@@ -127,7 +125,7 @@ public class Map
 
         return _wallTiles[x + z * Size];
     }
-    
+
     public Tile GetWallTileF(float x, float z)
     {
         var ix = (int)MathF.Floor(x);
@@ -135,7 +133,7 @@ public class Map
 
         return GetWallTile(ix, iz);
     }
-    
+
     public bool IsCollidingWithBox(Vector3 at, Vector3 size)
     {
         return GetWallTileF(at.X - size.X * 0.5f, at.Z - size.Z * 0.5f) != Tile.Air ||
@@ -149,19 +147,19 @@ public class Map
         var enemyType = EnemyStats.EnemyTypes.Choose(_random);
         return SpawnEnemy(enemyType, x, z, id, attacker);
     }
-    
+
     public Enemy SpawnEnemy(EnemyType enemyType, float x, float z, int id, Attacker attacker, int? health = null)
     {
         var tileX = (int)x;
         var tileZ = (int)z;
 
         if (tileX < 0 || tileX >= Size || tileZ < 0 || tileZ >= Size) return null;
-        
+
         var newEnemy = new Enemy(enemyType, x, z, id, attacker, health);
         Enemies.Add(id, newEnemy);
-        
+
         EnemiesInTiles.Add(newEnemy, tileX, tileZ);
-        
+
         return newEnemy;
     }
 
@@ -171,12 +169,12 @@ public class Map
 
         var enemyTileX = (int)enemy.Position.X;
         var enemyTileZ = (int)enemy.Position.Z;
-        
+
         EnemiesInTiles.Remove(enemy, enemyTileX, enemyTileZ);
-        
+
         Enemies.Remove(id);
     }
-    
+
     public bool DropWeapon(WeaponType weaponType, float x, float z, int id)
     {
         var droppedWeapon = new Weapon(weaponType, x, z, id);
@@ -184,7 +182,7 @@ public class Map
         var tileZ = (int)droppedWeapon.Position.Z;
 
         if (tileX < 0 || tileX >= Size || tileZ < 0 || tileZ >= Size) return false;
-        
+
         DroppedWeapons.Add(id, droppedWeapon);
         DroppedWeaponsInTiles.Add(droppedWeapon, tileX, tileZ);
 
@@ -193,11 +191,8 @@ public class Map
 
     public void PickupWeapon(int id)
     {
-        if (!DroppedWeapons.TryGetValue(id, out var droppedWeapon))
-        {
-            return;
-        }
-        
+        if (!DroppedWeapons.TryGetValue(id, out var droppedWeapon)) return;
+
         var x = (int)droppedWeapon.Position.X;
         var z = (int)droppedWeapon.Position.Z;
 
@@ -215,7 +210,8 @@ public class Map
             var rotation = Matrix.CreateRotationY(MathHelper.ToRadians(projectileSpawn.Angle));
             var forward = projectileSpawn.RelativeToForward ? direction : Vector3.Forward;
             var projectileDirection = Vector3.Transform(forward, rotation);
-            Projectiles.Add(new Projectile(projectileSpawn.ProjectileType, weaponType, team, projectileDirection, x, z));
+            Projectiles.Add(new Projectile(projectileSpawn.ProjectileType, weaponType, team, projectileDirection, x,
+                z));
         }
     }
 }

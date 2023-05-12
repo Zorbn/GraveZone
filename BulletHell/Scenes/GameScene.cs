@@ -44,10 +44,7 @@ public class GameScene : IScene
 
         Client = new Client();
 
-        Client.DisconnectedEvent += () =>
-        {
-            _game.SetScene(new MainMenuScene(_game));
-        };
+        Client.DisconnectedEvent += () => { _game.SetScene(new MainMenuScene(_game)); };
 
         Client.NetPacketProcessor.RegisterNestedType<NetVector3>();
         Client.NetPacketProcessor.SubscribeNetSerializable<SetLocalId>(OnSetLocalId);
@@ -107,22 +104,13 @@ public class GameScene : IScene
 
         var cameraAngleMovement = 0f;
 
-        if (input.IsKeyDown(Keys.Q))
-        {
-            cameraAngleMovement += 1f;
-        }
+        if (input.IsKeyDown(Keys.Q)) cameraAngleMovement += 1f;
 
-        if (input.IsKeyDown(Keys.E))
-        {
-            cameraAngleMovement -= 1f;
-        }
+        if (input.IsKeyDown(Keys.E)) cameraAngleMovement -= 1f;
 
         _camera.Rotate(cameraAngleMovement * deltaTime);
 
-        if (input.IsKeyDown(Keys.Z))
-        {
-            _camera.ResetAngle();
-        }
+        if (input.IsKeyDown(Keys.Z)) _camera.ResetAngle();
 
         var hasLocalPlayer = _players.TryGetValue(Client.LocalId, out var localPlayer);
         if (hasLocalPlayer)
@@ -132,24 +120,15 @@ public class GameScene : IScene
             // If the mouse was interacting with the ui that needs to be recorded so that mouse
             // clicks don't have side effects anywhere else (ie: player clicks on the inventory
             // and accidentally attacks at the same time).
-            if (uiCapturedMouse)
-            {
-                input.UiCapturedMouse();
-            }
+            if (uiCapturedMouse) input.UiCapturedMouse();
         }
 
-        foreach (var (_, player) in _players)
-        {
-            player.Update(input, _map, Client, _camera, deltaTime);
-        }
+        foreach (var (_, player) in _players) player.Update(input, _map, Client, _camera, deltaTime);
 
         _map.Update(deltaTime);
         _map.UpdateClient(deltaTime);
 
-        if (hasLocalPlayer)
-        {
-            PostUpdateLocal(localPlayer);
-        }
+        if (hasLocalPlayer) PostUpdateLocal(localPlayer);
 
         _tickTimer += deltaTime;
 
@@ -174,10 +153,7 @@ public class GameScene : IScene
         _camera.UpdateViewMatrices();
 
         _spriteRenderer.Begin(_camera.SpriteMatrix);
-        foreach (var pair in _players)
-        {
-            pair.Value.Draw(_spriteRenderer);
-        }
+        foreach (var pair in _players) pair.Value.Draw(_spriteRenderer);
 
         _map.DrawSprites(_spriteRenderer, _animationFrame);
 
@@ -201,10 +177,7 @@ public class GameScene : IScene
 
         _quitButton.Draw(_game.SpriteBatch, _game.Resources);
 
-        if (_players.TryGetValue(Client.LocalId, out var localPlayer))
-        {
-            DrawLocal(localPlayer);
-        }
+        if (_players.TryGetValue(Client.LocalId, out var localPlayer)) DrawLocal(localPlayer);
 
         _game.SpriteBatch.End();
     }
@@ -221,12 +194,8 @@ public class GameScene : IScene
         var mouseY = (int)mousePosition.Y;
 
         if (input.WasMouseButtonPressed(MouseButton.Left))
-        {
             if (_quitButton.Contains(mouseX, mouseY))
-            {
                 _game.SetScene(new MainMenuScene(_game));
-            }
-        }
 
         var inventoryCapturedMouse = localPlayer.ClientInventory.Update(Client, input, mousePosition);
 
@@ -236,7 +205,7 @@ public class GameScene : IScene
     private void PostUpdateLocal(ClientPlayer localPlayer)
     {
         _camera.SetPosition(localPlayer.Position);
-        
+
         // The player checks its own collisions locally to prevent unfair hits
         // due to lag, this could be run on the server instead if preventing
         // cheating is more important.
@@ -245,7 +214,7 @@ public class GameScene : IScene
             if (playerHit.Entity.Id != localPlayer.Id) continue;
 
             localPlayer.TakeDamage(playerHit.Damage);
-            
+
             Client.SendToServer(new PlayerTakeDamage
             {
                 Damage = playerHit.Damage
@@ -260,10 +229,7 @@ public class GameScene : IScene
 
     private void Tick()
     {
-        foreach (var (_, player) in _players)
-        {
-            player.Tick(Client, TickTime);
-        }
+        foreach (var (_, player) in _players) player.Tick(Client, TickTime);
     }
 
     private void OnPlayerSpawn(PlayerSpawn playerSpawn)
@@ -295,14 +261,14 @@ public class GameScene : IScene
         newPosition.Z = playerMove.Z;
         player.MoveTo(_map, newPosition);
     }
-    
+
     private void OnPlayerTakeDamage(PlayerTakeDamage playerTakeDamage)
     {
         if (!_players.TryGetValue(playerTakeDamage.Id, out var player)) return;
 
         player.TakeDamage(playerTakeDamage.Damage);
     }
-    
+
     private void OnPlayerRespawn(PlayerRespawn playerRespawn)
     {
         if (!_players.TryGetValue(playerRespawn.Id, out var player)) return;
@@ -381,10 +347,7 @@ public class GameScene : IScene
 
         var enemyDied = enemy.TakeDamage(enemyTakeDamage.Damage);
 
-        if (enemyDied)
-        {
-            _map.DespawnEnemy(enemy.Id);
-        }
+        if (enemyDied) _map.DespawnEnemy(enemy.Id);
     }
 
     private void OnEnemyMove(EnemyMove enemyMove)

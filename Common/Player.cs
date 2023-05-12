@@ -16,7 +16,7 @@ public class Player
 
     public readonly int Id;
     public bool IsDead { get; private set; }
-    
+
     public Player(Map map, int id, float x, float z, int? health = null)
     {
         Id = id;

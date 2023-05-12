@@ -13,9 +13,9 @@ public class BulletHell : Game
     public const int UiCenterX = UiWidth / 2;
     public const int UiCenterY = UiHeight / 2;
     public Matrix UiMatrix { get; private set; }
-    
+
     public Resources Resources { get; private set; }
-    
+
     private GraphicsDeviceManager _graphics;
     public SpriteBatch SpriteBatch { get; private set; }
 
@@ -35,7 +35,7 @@ public class BulletHell : Game
         IsMouseVisible = true;
         Window.AllowUserResizing = true;
         Window.ClientSizeChanged += OnResize;
-        
+
         // Disable Vsync
         // _graphics.SynchronizeWithVerticalRetrace = false;
         // IsFixedTimeStep = false;
@@ -68,16 +68,16 @@ public class BulletHell : Game
         mousePosition = Vector3.Transform(mousePosition, Matrix.Invert(UiMatrix));
         return new Vector2(mousePosition.X, mousePosition.Y);
     }
-    
+
     protected override void Initialize()
     {
         UpdateUiScale(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
-        
+
         Resources = new Resources(GraphicsDevice);
         _input = new Input();
 
         _scene = new MainMenuScene(this);
-        
+
         base.Initialize();
     }
 
@@ -85,7 +85,7 @@ public class BulletHell : Game
     {
         SpriteBatch = new SpriteBatch(GraphicsDevice);
     }
-    
+
     protected override void Update(GameTime gameTime)
     {
         var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -99,28 +99,28 @@ public class BulletHell : Game
             _scene = _nextScene;
             _nextScene = null;
         }
-        
+
         base.Update(gameTime);
     }
-    
+
     protected override void Draw(GameTime gameTime)
     {
         _scene.Draw();
-        
+
         base.Draw(gameTime);
     }
 
     public void SetScene(IScene nextScene)
     {
         if (_nextScene is not null) return;
-        
+
         _nextScene = nextScene;
     }
 
     protected override void OnExiting(object sender, EventArgs args)
     {
         _scene.Exit();
-        
+
         base.OnExiting(sender, args);
     }
 }

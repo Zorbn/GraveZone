@@ -33,17 +33,11 @@ public class ClientPlayer : Player
         var newPosition = Position;
         newPosition.X += movement.X * Speed * deltaTime;
 
-        if (map.IsCollidingWithBox(newPosition, Size))
-        {
-            newPosition.X = Position.X;
-        }
+        if (map.IsCollidingWithBox(newPosition, Size)) newPosition.X = Position.X;
 
         newPosition.Z += movement.Z * Speed * deltaTime;
 
-        if (map.IsCollidingWithBox(newPosition, Size))
-        {
-            newPosition.Z = Position.Z;
-        }
+        if (map.IsCollidingWithBox(newPosition, Size)) newPosition.Z = Position.Z;
 
         Teleport(map, newPosition);
     }
@@ -53,28 +47,15 @@ public class ClientPlayer : Player
     {
         var movement = Vector3.Zero;
 
-        if (input.IsKeyDown(Keys.W))
-        {
-            movement.Z += 1f;
-        }
+        if (input.IsKeyDown(Keys.W)) movement.Z += 1f;
 
-        if (input.IsKeyDown(Keys.S))
-        {
-            movement.Z -= 1f;
-        }
+        if (input.IsKeyDown(Keys.S)) movement.Z -= 1f;
 
-        if (input.IsKeyDown(Keys.A))
-        {
-            movement.X -= 1f;
-        }
+        if (input.IsKeyDown(Keys.A)) movement.X -= 1f;
 
-        if (input.IsKeyDown(Keys.D))
-        {
-            movement.X += 1f;
-        }
+        if (input.IsKeyDown(Keys.D)) movement.X += 1f;
 
         if (input.WasKeyPressed(Keys.F))
-        {
             foreach (var nearbyDroppedWeapon in map.DroppedWeaponsInTiles.GetNearby(Position.X, Position.Z))
             {
                 var isColliding =
@@ -82,12 +63,8 @@ public class ClientPlayer : Player
 
                 if (!isColliding) continue;
 
-                if (!Inventory.IsFull())
-                {
-                    map.RequestPickupWeapon(client, nearbyDroppedWeapon.Id);
-                }
+                if (!Inventory.IsFull()) map.RequestPickupWeapon(client, nearbyDroppedWeapon.Id);
             }
-        }
 
         Move(movement, map, camera.Forward, camera.Right, deltaTime);
 
@@ -105,9 +82,7 @@ public class ClientPlayer : Player
         _attacker.Update(deltaTime);
 
         if (input.IsMouseButtonDown(MouseButton.Left) && Inventory.EquippedWeaponStats is not null)
-        {
             _attacker.Attack(Inventory.EquippedWeaponStats, directionToMouse, Position.X, Position.Z, map);
-        }
     }
 
     private bool ShouldUpdateLocally(Client client)
@@ -130,10 +105,8 @@ public class ClientPlayer : Player
     public void Tick(Client client, float deltaTime)
     {
         if (ShouldUpdateLocally(client))
-        {
             client.SendToServer(new PlayerMove { Id = Id, X = Position.X, Z = Position.Z },
                 DeliveryMethod.Unreliable);
-        }
     }
 
     public void Draw(SpriteRenderer spriteRenderer)

@@ -28,7 +28,7 @@ public struct NetVector3 : INetSerializable
     {
         return new Vector3(X, Y, Z);
     }
-    
+
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(X);

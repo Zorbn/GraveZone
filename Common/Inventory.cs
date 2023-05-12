@@ -5,7 +5,7 @@ public class Inventory
     public const int Width = 10;
     public const int Height = 2;
     public const int SlotCount = Width * Height;
-    
+
     public WeaponStats EquippedWeaponStats { get; private set; }
     public readonly WeaponStats[] Weapons = new WeaponStats[Width * Height];
     public WeaponStats GrabbedWeaponStats { get; private set; }
@@ -13,12 +13,8 @@ public class Inventory
     public bool IsFull()
     {
         for (var i = 0; i < Weapons.Length; i++)
-        {
             if (Weapons[i] is null)
-            {
                 return false;
-            }
-        }
 
         return true;
     }
@@ -27,7 +23,7 @@ public class Inventory
     public bool AddWeapon(WeaponType weaponType)
     {
         var weapon = WeaponStats.Registry[weaponType];
-        
+
         for (var i = 0; i < Weapons.Length; i++)
         {
             if (Weapons[i] is not null) continue;
@@ -47,7 +43,7 @@ public class Inventory
 
         return weapon;
     }
-    
+
     public void GrabSlot(int i)
     {
         if (GrabbedWeaponStats is null)
@@ -56,10 +52,10 @@ public class Inventory
             GrabbedWeaponStats = removedWeapon;
             return;
         }
-        
+
         (Weapons[i], GrabbedWeaponStats) = (GrabbedWeaponStats, Weapons[i]);
     }
-    
+
     public void GrabEquippedSlot()
     {
         if (GrabbedWeaponStats is null)
@@ -68,7 +64,7 @@ public class Inventory
             EquippedWeaponStats = null;
             return;
         }
-        
+
         (EquippedWeaponStats, GrabbedWeaponStats) = (GrabbedWeaponStats, EquippedWeaponStats);
     }
 
@@ -82,10 +78,7 @@ public class Inventory
 
     public void UpdateInventory(UpdateInventory updateInventory)
     {
-        for (var i = 0; i < SlotCount; i++)
-        {
-            Weapons[i] = WeaponStats.Registry[(WeaponType)updateInventory.Weapons[i]];
-        }
+        for (var i = 0; i < SlotCount; i++) Weapons[i] = WeaponStats.Registry[(WeaponType)updateInventory.Weapons[i]];
 
         EquippedWeaponStats = WeaponStats.Registry[(WeaponType)updateInventory.EquippedWeapon];
         GrabbedWeaponStats = WeaponStats.Registry[(WeaponType)updateInventory.EquippedWeapon];

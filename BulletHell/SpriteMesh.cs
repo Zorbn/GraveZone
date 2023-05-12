@@ -16,7 +16,8 @@ public static class SpriteMesh
     private const float PaddedUnitX = UnitX + PaddingX * 2;
     private const float PaddedUnitY = UnitY + PaddingY * 2;
 
-    public static readonly VertexPositionColorTexture[] Vertices = {
+    public static readonly VertexPositionColorTexture[] Vertices =
+    {
         new(new Vector3(-0.5f, 0, 0), Color.White, new Vector2(0, UnitY)),
         new(new Vector3(-0.5f, 1, 0), Color.White, new Vector2(0, 0)),
         new(new Vector3(+0.5f, 1, 0), Color.White, new Vector2(UnitX, 0)),
@@ -24,7 +25,7 @@ public static class SpriteMesh
     };
 
     public static readonly ushort[] Indices = { 0, 1, 2, 0, 2, 3 };
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector2 GetTexCoord(Sprite sprite)
     {
@@ -33,7 +34,7 @@ public static class SpriteMesh
         var y = i / TextureWidthTiles;
         return new Vector2(PaddingX + PaddedUnitX * x, PaddingY + PaddedUnitY * y);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Rectangle GetSourceRectangle(Sprite sprite)
     {

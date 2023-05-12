@@ -14,12 +14,12 @@ public class Camera
     public Matrix WorldMatrix => _effect.World;
     public Matrix ViewMatrix => _effect.View;
     public Matrix ProjectionMatrix => _effect.Projection;
-    
+
     public Vector3 Forward { get; private set; }
     public Vector3 Right { get; private set; }
     public int Width { get; private set; }
     public int Height { get; private set; }
-    
+
     private AlphaTestEffect _effect;
     private Vector3 _position = Vector3.Zero;
     private float _angle;
@@ -31,7 +31,7 @@ public class Camera
         _effect.World = Matrix.Identity;
 
         _effect.VertexColorEnabled = true;
-        
+
         Resize(graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height);
     }
 
@@ -49,7 +49,7 @@ public class Camera
     {
         Width = width;
         Height = height;
-        
+
         _effect.Projection = CalculateProjectionMatrix(width, height);
     }
 
@@ -57,7 +57,7 @@ public class Camera
     {
         _angle += delta;
     }
-    
+
     public void ResetAngle()
     {
         _angle = 0f;
@@ -68,14 +68,14 @@ public class Camera
         return Matrix.CreateOrthographic(
             width / (float)height * ViewScale, ViewScale, -20f, 20f);
     }
-    
+
     public void UpdateViewMatrices()
     {
         var cameraRotation = Matrix.CreateRotationY(_angle);
         var lookOffset = Vector3.Transform(CameraLookOffset, cameraRotation);
         var flattenedLookOffset = lookOffset;
         flattenedLookOffset.Y = 0f;
-        
+
         Forward = flattenedLookOffset;
         Right = Vector3.Transform(Forward, Matrix.CreateRotationY(MathF.PI * -0.5f));
 

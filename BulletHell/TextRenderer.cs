@@ -14,9 +14,11 @@ public class TextRenderer
     // Characters have one pixel pixel of padding around them in the texture sheet to prevent texture bleeding.
     private static readonly Rectangle CharRectangle = new(TextureXStart * Resources.TileSize + 1,
         TextureYStart * Resources.TileSize - 1, Resources.TileSize - 1, Resources.TileSize);
+
     private static readonly Rectangle TextBackgroundRectangle = Resources.BlackRectangle;
 
-    public static void Draw(string text, int x, int y, Resources resources, SpriteBatch spriteBatch, Color color, bool withBackground = true, int scale = 1, bool centered = false)
+    public static void Draw(string text, int x, int y, Resources resources, SpriteBatch spriteBatch, Color color,
+        bool withBackground = true, int scale = 1, bool centered = false)
     {
         var sizeX = (text.Length + 1) * scale;
         var sizeY = scale * 2;
@@ -32,7 +34,7 @@ public class TextRenderer
                 Resources.TileSize * sizeY);
             spriteBatch.Draw(resources.UiTexture, destination, TextBackgroundRectangle, Color.White);
         }
-        
+
         var i = 0;
         foreach (var c in text)
         {
@@ -41,7 +43,8 @@ public class TextRenderer
                 var index = Characters.IndexOf(c);
                 var texX = index % TextureCharsPerLine;
                 var texY = index / TextureCharsPerLine;
-                var destination = new Rectangle(x + textOffsetX + Resources.TileSize * scale * i + 1, y, Resources.TileSize - 1,
+                var destination = new Rectangle(x + textOffsetX + Resources.TileSize * scale * i + 1, y,
+                    Resources.TileSize - 1,
                     Resources.TileSize);
                 var source = CharRectangle;
                 source.X += texX * Resources.TileSize;

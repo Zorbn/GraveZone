@@ -11,7 +11,9 @@ public static class CubeMesh
     private const int TextureWidthTiles = 25;
     private const int TextureSize = 256;
     private const float UnitX = Resources.TileSize / (float)TextureSize;
+
     private const float UnitY = Resources.TileSize / (float)TextureSize;
+
     // Texture have padding between them to prevent texture bleeding, where bits
     // of nearby textures are rendered alongside the desired one.
     private const float PaddingX = 1f / TextureSize;

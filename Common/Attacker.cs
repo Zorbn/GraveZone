@@ -7,7 +7,7 @@ public class Attacker
     private float _attackTimer;
     private readonly Team _team;
     private readonly Action<WeaponStats, Vector3, float, float, Map> _action;
-    
+
     public Attacker(Team team, Action<WeaponStats, Vector3, float, float, Map> action)
     {
         _team = team;

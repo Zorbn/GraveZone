@@ -10,6 +10,6 @@ public static class Collision
         var aMax = aPosition + aSize * 0.5f;
         var bMin = bPosition - bSize * 0.5f;
         var bMax = bPosition + bSize * 0.5f;
-        return aMin.X < bMax.X && aMax.X > bMin.X && aMin.Z < bMax.Z && aMax.Z > bMin.Z; 
+        return aMin.X < bMax.X && aMax.X > bMin.X && aMin.Z < bMax.Z && aMax.Z > bMin.Z;
     }
 }

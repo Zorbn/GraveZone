@@ -9,7 +9,7 @@ public class MainMenuScene : IScene
     private readonly BulletHell _game;
     private readonly TextInput _ipInput;
     private readonly TextButton _playButton;
-    
+
     public MainMenuScene(BulletHell game)
     {
         _game = game;
@@ -28,18 +28,16 @@ public class MainMenuScene : IScene
             _ipInput.UpdateFocusWithClick(mouseX, mouseY);
 
             if (_playButton.Contains(mouseX, mouseY))
-            {
                 _game.SetScene(new ConnectingScene(_game, _ipInput.GetTextString()));
-            }
         }
-        
+
         _ipInput.Update(input);
     }
 
     public void Draw()
     {
         _game.GraphicsDevice.Clear(Color.Aqua);
-        
+
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
         _ipInput.Draw(_game.SpriteBatch, _game.Resources);
         _playButton.Draw(_game.SpriteBatch, _game.Resources);
