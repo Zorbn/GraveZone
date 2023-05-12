@@ -6,7 +6,6 @@ public class Enemy
 {
     private const float NodeReachedDistance = 0.1f;
     private const float AttackDistance = 3f;
-    private const float MoveSpeed = 1f;
     public static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
 
     public Vector3 Position => _position;
@@ -73,7 +72,9 @@ public class Enemy
         targetNode.Z += 0.5f;
         var directionToNode = targetNode - _position;
         directionToNode.Normalize();
-        var newPosition = _position + MoveSpeed * deltaTime * directionToNode;
+        
+        var currentSpeed = Stats.Speed * _weaponStats.SpeedMultiplier * deltaTime;
+        var newPosition = _position + directionToNode * currentSpeed;
         MoveTo(map, newPosition.X, newPosition.Z);
         SpritePosition = _position;
 

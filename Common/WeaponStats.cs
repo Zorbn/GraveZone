@@ -2,7 +2,6 @@
 
 namespace Common;
 
-// TODO: Add speed stat (entity's speed multiplier while the weapon is equipped).
 public class WeaponStats
 {
     public static readonly Dictionary<WeaponType, WeaponStats> Registry = new()
@@ -12,7 +11,7 @@ public class WeaponStats
 
     static WeaponStats()
     {
-        Register(new WeaponStats(WeaponType.Dagger, 0.2f, Sprite.Dagger, new[]
+        Register(new WeaponStats(WeaponType.Dagger, 0.2f, 1.5f, Sprite.Dagger, new[]
         {
             new ProjectileSpawnData
                 { ProjectileType = ProjectileType.ThrownDagger, Angle = -10f, RelativeToForward = true },
@@ -20,7 +19,7 @@ public class WeaponStats
                 { ProjectileType = ProjectileType.ThrownDagger, Angle = 10f, RelativeToForward = true }
         }));
 
-        Register(new WeaponStats(WeaponType.Sword, 0.5f, Sprite.Sword, new[]
+        Register(new WeaponStats(WeaponType.Sword, 0.5f, 1f, Sprite.Sword, new[]
         {
             new ProjectileSpawnData
                 { ProjectileType = ProjectileType.ThrownSword, Angle = 0f, RelativeToForward = false },
@@ -43,14 +42,16 @@ public class WeaponStats
 
     public readonly Sprite Sprite;
     public readonly float AttackCooldown;
+    public readonly float SpeedMultiplier;
     public readonly ReadOnlyCollection<ProjectileSpawnData> ProjectileSpawns;
     public readonly WeaponType WeaponType;
 
-    private WeaponStats(WeaponType weaponType, float attackCooldown, Sprite sprite,
+    private WeaponStats(WeaponType weaponType, float attackCooldown, float speedMultiplier, Sprite sprite,
         ProjectileSpawnData[] projectileSpawns)
     {
         WeaponType = weaponType;
         AttackCooldown = attackCooldown;
+        SpeedMultiplier = speedMultiplier;
         Sprite = sprite;
         ProjectileSpawns = new ReadOnlyCollection<ProjectileSpawnData>(projectileSpawns);
     }

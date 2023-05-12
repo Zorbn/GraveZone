@@ -30,12 +30,18 @@ public class ClientPlayer : Player
         movement = movement.Z * cameraForward + movement.X * cameraRight;
         movement.Normalize();
 
+        var currentSpeed = Speed * deltaTime;
+        if (Inventory.EquippedWeaponStats is not null)
+        {
+            currentSpeed *= Inventory.EquippedWeaponStats.SpeedMultiplier;
+        }
+
         var newPosition = Position;
-        newPosition.X += movement.X * Speed * deltaTime;
+        newPosition.X += movement.X * currentSpeed;
 
         if (map.IsCollidingWithBox(newPosition, Size)) newPosition.X = Position.X;
 
-        newPosition.Z += movement.Z * Speed * deltaTime;
+        newPosition.Z += movement.Z * currentSpeed;
 
         if (map.IsCollidingWithBox(newPosition, Size)) newPosition.Z = Position.Z;
 
