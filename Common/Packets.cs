@@ -123,6 +123,25 @@ public struct PlayerTakeDamage : INetSerializable
     }
 }
 
+// Same rules apply for Id as with PlayerTakeDamage.
+public struct PlayerHeal : INetSerializable
+{
+    public int Id { get; set; }
+    public int Amount { get; set; }
+
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(Id);
+        writer.Put(Amount);
+    }
+
+    public void Deserialize(NetDataReader reader)
+    {
+        Id = reader.GetInt();
+        Amount = reader.GetInt();
+    }
+}
+
 public struct PlayerRespawn : INetSerializable
 {
     public int Id { get; set; }

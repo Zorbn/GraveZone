@@ -13,9 +13,13 @@ public class ClientPlayer : Player
     private const int HealthBarX = ClientInventory.X;
     private const int HealthBarY = ClientInventory.Y - HealthBarHeight;
 
+    private const int HealthRegenAmount = 5;
+    private const float HealthRegenTime = 2.0f;
+
     public readonly ClientInventory ClientInventory;
 
     private readonly Attacker _attacker;
+    private float _healthRegenTimer;
 
     public ClientPlayer(Attacker attacker, Map map, int id, float x, float z, int? health) : base(map, id, x, z, health)
     {
@@ -89,6 +93,27 @@ public class ClientPlayer : Player
 
         if (input.IsMouseButtonDown(MouseButton.Left) && Inventory.EquippedWeaponStats is not null)
             _attacker.Attack(Inventory.EquippedWeaponStats, directionToMouse, Position.X, Position.Z, map);
+
+        _healthRegenTimer += deltaTime;
+
+        // Health regen is calculated on the client to maintain consistency with
+        // the damage calculations that are also done on the client, and prevent
+        // a player's health de-syncing across the clients/server.
+        while (_healthRegenTimer > HealthRegenTime)
+        {
+            _healthRegenTimer -= HealthRegenTime;
+            ClientHeal(HealthRegenAmount, client);
+        }
+    }
+
+    private void ClientHeal(int amount, Client client)
+    {
+        Heal(amount);
+        
+        client.SendToServer(new PlayerHeal
+        {
+            Amount = amount
+        }, DeliveryMethod.ReliableOrdered);
     }
 
     private bool ShouldUpdateLocally(Client client)

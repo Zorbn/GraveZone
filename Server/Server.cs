@@ -35,6 +35,7 @@ public class Server
         _netPacketProcessor.SubscribeNetSerializable<PlayerMove, NetPeer>(OnPlayerMove);
         _netPacketProcessor.SubscribeNetSerializable<PlayerAttack, NetPeer>(OnPlayerAttack);
         _netPacketProcessor.SubscribeNetSerializable<PlayerTakeDamage, NetPeer>(OnPlayerTakeDamage);
+        _netPacketProcessor.SubscribeNetSerializable<PlayerHeal, NetPeer>(OnPlayerHeal);
         _netPacketProcessor.SubscribeNetSerializable<RequestPickupWeapon, NetPeer>(OnRequestPickupWeapon);
         _netPacketProcessor.SubscribeNetSerializable<RequestGrabSlot, NetPeer>(OnRequestGrabSlot);
         _netPacketProcessor.SubscribeNetSerializable<RequestGrabEquippedSlot, NetPeer>(OnRequestGrabEquippedSlot);
@@ -429,6 +430,14 @@ public class Server
             X = spawnPosition.X,
             Z = spawnPosition.Z
         }, DeliveryMethod.ReliableOrdered);
+    }
+    
+    private void OnPlayerHeal(PlayerHeal playerHeal, NetPeer peer)
+    {
+        if (!_players.TryGetValue(peer.Id, out var player)) return;
+
+        player.Heal(playerHeal.Amount);
+        SendToAll(playerHeal with { Id = peer.Id }, DeliveryMethod.ReliableOrdered, peer);
     }
 
     private void OnRequestPickupWeapon(RequestPickupWeapon requestPickupWeapon, NetPeer peer)

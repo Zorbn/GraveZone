@@ -52,6 +52,7 @@ public class GameScene : IScene
         Client.NetPacketProcessor.SubscribeNetSerializable<PlayerDespawn>(OnPlayerDespawn);
         Client.NetPacketProcessor.SubscribeNetSerializable<PlayerMove>(OnPlayerMove);
         Client.NetPacketProcessor.SubscribeNetSerializable<PlayerTakeDamage>(OnPlayerTakeDamage);
+        Client.NetPacketProcessor.SubscribeNetSerializable<PlayerHeal>(OnPlayerHeal);
         Client.NetPacketProcessor.SubscribeNetSerializable<PlayerRespawn>(OnPlayerRespawn);
         Client.NetPacketProcessor.SubscribeNetSerializable<ProjectileSpawn>(OnProjectileSpawn);
         Client.NetPacketProcessor.SubscribeNetSerializable<MapGenerate>(OnMapGenerate);
@@ -208,7 +209,9 @@ public class GameScene : IScene
 
         // The player checks its own collisions locally to prevent unfair hits
         // due to lag, this could be run on the server instead if preventing
-        // cheating is more important.
+        // cheating is more important. However, if this code was on the server
+        // other player health calculations such as health regen should also
+        // take place on the server to prevent de-syncs.
         foreach (var playerHit in _map.LastUpdateResults.PlayerHits)
         {
             if (playerHit.Entity.Id != localPlayer.Id) continue;
@@ -267,6 +270,13 @@ public class GameScene : IScene
         if (!_players.TryGetValue(playerTakeDamage.Id, out var player)) return;
 
         player.TakeDamage(playerTakeDamage.Damage);
+    }
+    
+    private void OnPlayerHeal(PlayerHeal playerHeal)
+    {
+        if (!_players.TryGetValue(playerHeal.Id, out var player)) return;
+
+        player.Heal(playerHeal.Amount);
     }
 
     private void OnPlayerRespawn(PlayerRespawn playerRespawn)

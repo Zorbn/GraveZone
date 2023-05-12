@@ -2,6 +2,7 @@
 
 namespace Common;
 
+// TODO: The server should despawn dropped weapons after a certain amount of time.
 public class Weapon
 {
     public static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);

@@ -63,4 +63,13 @@ public class Player
         IsDead = true;
         return true;
     }
+
+    public void Heal(int amount)
+    {
+        Health += amount;
+
+        if (Health <= MaxHealth) return;
+        
+        Health = MaxHealth;
+    }
 }
