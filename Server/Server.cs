@@ -81,6 +81,7 @@ public class Server
             var playerSpawnPosition = _map.GetSpawnPosition() ?? Vector3.Zero;
             var newPlayerId = peer.Id;
             var newPlayer = new Player(_map, newPlayerId, playerSpawnPosition.X, playerSpawnPosition.Z);
+            newPlayer.Inventory.AddWeapon(WeaponType.Dagger);
 
             // Tell the new player their id.
             SendToPeer(peer, new SetLocalId { Id = newPlayerId }, DeliveryMethod.ReliableOrdered);
@@ -135,13 +136,6 @@ public class Server
             }
         };
 
-        // TODO: Replace this initial weapon with another way of getting a weapon
-        // when you start out.
-        var weaponSpawnPosition = _map.GetSpawnPosition();
-
-        if (weaponSpawnPosition is not null)
-            ServerDropWeapon(WeaponType.Dagger, weaponSpawnPosition.Value.X, weaponSpawnPosition.Value.Z);
-
         var stopwatch = new Stopwatch();
 
         while (true)
@@ -170,6 +164,8 @@ public class Server
         _map.Update(TickTime);
 
         foreach (var enemyHit in _map.LastUpdateResults.EnemyHits) ServerDamageEnemy(enemyHit.Entity, enemyHit.Damage);
+        
+        foreach (var weaponToDespawn in _map.LastUpdateResults.WeaponsToDespawn) ServerDespawnWeapon(weaponToDespawn);
 
         ServerMapUpdate();
 
@@ -332,6 +328,16 @@ public class Server
             PlayerId = playerId,
             DroppedWeaponId = droppedWeaponId,
             WeaponType = weaponType
+        }, DeliveryMethod.ReliableOrdered);
+    }
+    
+    private void ServerDespawnWeapon(int droppedWeaponId)
+    {
+        _map.PickupWeapon(droppedWeaponId);
+
+        SendToAll(new DespawnWeapon
+        {
+            DroppedWeaponId = droppedWeaponId
         }, DeliveryMethod.ReliableOrdered);
     }
 

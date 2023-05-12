@@ -8,11 +8,13 @@ public class Map
     {
         public readonly List<EntityHit<Enemy>> EnemyHits = new();
         public readonly List<EntityHit<Player>> PlayerHits = new();
+        public readonly List<int> WeaponsToDespawn = new();
 
         public void Clear()
         {
             EnemyHits.Clear();
             PlayerHits.Clear();
+            WeaponsToDespawn.Clear();
         }
     }
 
@@ -109,6 +111,15 @@ public class Map
             var hadCollision = Projectiles[i].Update(this, deltaTime);
 
             if (hadCollision) Projectiles.RemoveAt(i);
+        }
+
+        foreach (var (droppedWeaponId, droppedWeapon) in DroppedWeapons)
+        {
+            var shouldDespawn = droppedWeapon.Update(deltaTime);
+            
+            if (!shouldDespawn) continue;
+            
+            LastUpdateResults.WeaponsToDespawn.Add(droppedWeaponId);
         }
     }
 

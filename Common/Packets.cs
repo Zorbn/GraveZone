@@ -266,6 +266,21 @@ public struct PickupWeapon : INetSerializable
     }
 }
 
+public struct DespawnWeapon : INetSerializable
+{
+    public int DroppedWeaponId { get; set; }
+
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(DroppedWeaponId);
+    }
+
+    public void Deserialize(NetDataReader reader)
+    {
+        DroppedWeaponId = reader.GetInt();
+    }
+}
+
 public struct RequestGrabSlot : INetSerializable
 {
     public int SlotIndex { get; set; }

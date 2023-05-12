@@ -58,6 +58,7 @@ public class GameScene : IScene
         Client.NetPacketProcessor.SubscribeNetSerializable<MapGenerate>(OnMapGenerate);
         Client.NetPacketProcessor.SubscribeNetSerializable<DroppedWeaponSpawn>(OnDroppedWeaponSpawn);
         Client.NetPacketProcessor.SubscribeNetSerializable<PickupWeapon>(OnPickupWeapon);
+        Client.NetPacketProcessor.SubscribeNetSerializable<DespawnWeapon>(OnDespawnWeapon);
         Client.NetPacketProcessor.SubscribeNetSerializable<GrabSlot>(OnGrabSlot);
         Client.NetPacketProcessor.SubscribeNetSerializable<GrabEquippedSlot>(OnGrabEquippedSlot);
         Client.NetPacketProcessor.SubscribeNetSerializable<DropGrabbed>(OnDropGrabbed);
@@ -312,10 +313,16 @@ public class GameScene : IScene
 
     private void OnPickupWeapon(PickupWeapon pickupWeapon)
     {
+        _map.PickupWeapon(pickupWeapon.DroppedWeaponId);
+     
         if (!_players.TryGetValue(pickupWeapon.PlayerId, out var player)) return;
 
-        _map.PickupWeapon(pickupWeapon.DroppedWeaponId);
         player.Inventory.AddWeapon(pickupWeapon.WeaponType);
+    }
+
+    private void OnDespawnWeapon(DespawnWeapon despawnWeapon)
+    {
+        _map.PickupWeapon(despawnWeapon.DroppedWeaponId);
     }
 
     private void OnGrabSlot(GrabSlot grabSlot)
