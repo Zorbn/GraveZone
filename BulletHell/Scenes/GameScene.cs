@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Common;
 using LiteNetLib;
 using Microsoft.Xna.Framework;
@@ -14,6 +15,11 @@ public class GameScene : IScene
     private const float AnimationFrameTime = 0.25f;
 
     public readonly Client Client;
+    
+    // An internal server may be started alongside the client
+    // if it is requested when this scene is created.
+    private readonly Thread InternalServerThread;
+    private readonly Server.Server InternalServer;
 
     private readonly BulletHell _game;
 
@@ -30,7 +36,7 @@ public class GameScene : IScene
 
     private readonly Action<WeaponStats, Vector3, float, float, Map> _playerAttackAction;
 
-    public GameScene(BulletHell game)
+    public GameScene(BulletHell game, bool startInternalServer)
     {
         _game = game;
 
@@ -41,6 +47,13 @@ public class GameScene : IScene
 
         _quitButton = new ImageButton(ClientInventory.X - Resources.TileSize,
             ClientInventory.Y + Resources.TileSize * 3, ImageButton.QuitRectangle);
+
+        if (startInternalServer)
+        {
+            InternalServer = new Server.Server();
+            InternalServerThread = new Thread(() => InternalServer.Run());
+            InternalServerThread.Start();
+        }
 
         Client = new Client();
 
@@ -86,6 +99,7 @@ public class GameScene : IScene
     {
         Console.WriteLine("Disconnecting...");
         Client.Stop();
+        InternalServer?.Exit();
     }
 
     public void Update(Input input, float deltaTime)
@@ -147,17 +161,18 @@ public class GameScene : IScene
         _map.AddSprites(_spriteRenderer, _animationFrame);
 
         _spriteRenderer.End();
-        
-        _spriteRenderer.DrawShadowsToTexture(_camera.Position, _game.GraphicsDevice, _game.Resources, _game.SpriteBatch);
+
+        _spriteRenderer.DrawShadowsToTexture(_camera.Position, _game.GraphicsDevice, _game.Resources,
+            _game.SpriteBatch);
     }
-    
+
     public void Draw()
     {
         PreDraw();
 
         _game.GraphicsDevice.Clear(Resources.SkyColor);
         _game.GraphicsDevice.ClearState();
-        
+
         _camera.SetTexture(_game.Resources.MapTexture);
         foreach (var currentPass in _camera.Passes)
         {
@@ -171,7 +186,7 @@ public class GameScene : IScene
             currentPass.Apply();
             _spriteRenderer.DrawSprites(_game.GraphicsDevice);
         }
-        
+
         _camera.SetTexture(_spriteRenderer.ShadowTarget);
         _camera.EffectAlpha = Resources.ShadowAlpha;
         foreach (var currentPass in _camera.Passes)
@@ -179,8 +194,9 @@ public class GameScene : IScene
             currentPass.Apply();
             _spriteRenderer.DrawShadows(_camera.Position, _game.GraphicsDevice);
         }
+
         _camera.EffectAlpha = 1f;
-        
+
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
 
         _quitButton.Draw(_game.SpriteBatch, _game.Resources);
@@ -278,7 +294,7 @@ public class GameScene : IScene
 
         player.TakeDamage(playerTakeDamage.Damage);
     }
-    
+
     private void OnPlayerHeal(PlayerHeal playerHeal)
     {
         if (!_players.TryGetValue(playerHeal.Id, out var player)) return;
@@ -320,7 +336,7 @@ public class GameScene : IScene
     private void OnPickupWeapon(PickupWeapon pickupWeapon)
     {
         _map.PickupWeapon(pickupWeapon.DroppedWeaponId);
-     
+
         if (!_players.TryGetValue(pickupWeapon.PlayerId, out var player)) return;
 
         player.Inventory.AddWeapon(pickupWeapon.WeaponType);

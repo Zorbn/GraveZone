@@ -197,7 +197,7 @@ public class Map
         if (tileX < 0 || tileX >= Size || tileZ < 0 || tileZ >= Size) return null;
 
         var newEnemy = new Enemy(enemyType, x, z, id, attacker, health);
-        Enemies.Add(id, newEnemy);
+        Enemies[id] = newEnemy;
 
         EnemiesInTiles.Add(newEnemy, tileX, tileZ);
 
@@ -224,7 +224,7 @@ public class Map
 
         if (tileX < 0 || tileX >= Size || tileZ < 0 || tileZ >= Size) return false;
 
-        DroppedWeapons.Add(id, droppedWeapon);
+        DroppedWeapons[id] = droppedWeapon;
         DroppedWeaponsInTiles.Add(droppedWeapon, tileX, tileZ);
 
         return true;

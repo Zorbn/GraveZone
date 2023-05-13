@@ -26,6 +26,7 @@ public class Server
     private readonly AStar _aStar = new();
     private readonly Action<WeaponStats, Vector3, float, float, Map> _enemyAttackAction;
 
+    private bool _isRunning;
     private int _tickCount;
 
     public Server()
@@ -62,6 +63,8 @@ public class Server
     public void Run()
     {
         Console.WriteLine("Starting server...");
+
+        _isRunning = true;
 
         _mapSeed = _random.Next();
         _map.Generate(_mapSeed);
@@ -138,7 +141,7 @@ public class Server
 
         var stopwatch = new Stopwatch();
 
-        while (true)
+        while (_isRunning)
         {
             stopwatch.Start();
 
@@ -154,6 +157,11 @@ public class Server
         }
 
         _manager.Stop();
+    }
+
+    public void Exit()
+    {
+        _isRunning = false;
     }
 
     private void Tick()

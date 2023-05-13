@@ -8,17 +8,20 @@ public class ConnectingScene : IScene
 {
     private const float TimeoutTime = 30f;
 
-    private BulletHell _game;
+    private readonly BulletHell _game;
     private readonly GameScene _gameScene;
     private bool _hasConnected;
     private bool _transitioningToGame;
-    private TextButton _backButton;
+    private readonly TextButton _backButton;
     private float _timeoutTimer;
+    private readonly string _loadingText;
 
-    public ConnectingScene(BulletHell game, string ip)
+    public ConnectingScene(BulletHell game, string ip, bool startInternalServer)
     {
+        _loadingText = startInternalServer ? "Loading..." : "Trying to connect...";
+        
         _game = game;
-        _gameScene = new GameScene(game);
+        _gameScene = new GameScene(game, startInternalServer);
         _gameScene.Client.ConnectedEvent += () => _hasConnected = true;
         _gameScene.Client.Connect(ip);
 
@@ -64,7 +67,7 @@ public class ConnectingScene : IScene
         _game.GraphicsDevice.Clear(Color.Aqua);
 
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
-        TextRenderer.Draw("Trying to connect...", BulletHell.UiCenterX, BulletHell.UiCenterY, _game.Resources,
+        TextRenderer.Draw(_loadingText, BulletHell.UiCenterX, BulletHell.UiCenterY, _game.Resources,
             _game.SpriteBatch, Color.White, centered: true);
         _backButton.Draw(_game.SpriteBatch, _game.Resources);
         _game.SpriteBatch.End();
