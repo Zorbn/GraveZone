@@ -126,7 +126,7 @@ public class SpriteRenderer
 
     public void DrawSprites(GraphicsDevice graphicsDevice)
     {
-        if (_primitives == 0 || _spriteVertexBuffer is null || _spriteIndexBuffer is null) return;
+        if (_primitives == 0) return;
 
         graphicsDevice.SetVertexBuffer(_spriteVertexBuffer);
         graphicsDevice.Indices = _spriteIndexBuffer;

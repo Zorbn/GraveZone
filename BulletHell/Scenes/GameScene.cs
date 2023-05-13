@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using Common;
 using LiteNetLib;
@@ -18,8 +19,7 @@ public class GameScene : IScene
     
     // An internal server may be started alongside the client
     // if it is requested when this scene is created.
-    private readonly Thread InternalServerThread;
-    private readonly Server.Server InternalServer;
+    private readonly Server.Server? _internalServer;
 
     private readonly BulletHell _game;
 
@@ -50,9 +50,9 @@ public class GameScene : IScene
 
         if (startInternalServer)
         {
-            InternalServer = new Server.Server();
-            InternalServerThread = new Thread(() => InternalServer.Run());
-            InternalServerThread.Start();
+            _internalServer = new Server.Server();
+            var internalServerThread = new Thread(() => _internalServer.Run());
+            internalServerThread.Start();
         }
 
         Client = new Client();
@@ -99,7 +99,7 @@ public class GameScene : IScene
     {
         Console.WriteLine("Disconnecting...");
         Client.Stop();
-        InternalServer?.Exit();
+        _internalServer?.Exit();
     }
 
     public void Update(Input input, float deltaTime)
@@ -127,6 +127,8 @@ public class GameScene : IScene
         var hasLocalPlayer = _players.TryGetValue(Client.LocalId, out var localPlayer);
         if (hasLocalPlayer)
         {
+            Debug.Assert(localPlayer is not null);
+            
             var uiCapturedMouse = PreUpdateLocal(input, localPlayer);
 
             // If the mouse was interacting with the ui that needs to be recorded so that mouse
@@ -140,7 +142,12 @@ public class GameScene : IScene
         _map.Update(deltaTime);
         _map.UpdateClient(deltaTime);
 
-        if (hasLocalPlayer) PostUpdateLocal(localPlayer);
+        if (hasLocalPlayer)
+        {
+            Debug.Assert(localPlayer is not null);
+
+            PostUpdateLocal(localPlayer);
+        }
 
         _tickTimer += deltaTime;
 
@@ -153,6 +160,8 @@ public class GameScene : IScene
 
     private void PreDraw()
     {
+        Debug.Assert(_game.SpriteBatch is not null && _game.Resources is not null);
+
         _camera.UpdateViewMatrices();
 
         _spriteRenderer.Begin(_camera.SpriteMatrix);
@@ -161,13 +170,15 @@ public class GameScene : IScene
         _map.AddSprites(_spriteRenderer, _animationFrame);
 
         _spriteRenderer.End();
-
+        
         _spriteRenderer.DrawShadowsToTexture(_camera.Position, _game.GraphicsDevice, _game.Resources,
             _game.SpriteBatch);
     }
 
     public void Draw()
     {
+        Debug.Assert(_game.SpriteBatch is not null && _game.Resources is not null);
+
         PreDraw();
 
         _game.GraphicsDevice.Clear(Resources.SkyColor);
@@ -250,6 +261,8 @@ public class GameScene : IScene
 
     private void DrawLocal(ClientPlayer localPlayer)
     {
+        Debug.Assert(_game.SpriteBatch is not null && _game.Resources is not null);
+
         localPlayer.DrawHud(_game.Resources, _game.SpriteBatch);
     }
 

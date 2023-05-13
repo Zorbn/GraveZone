@@ -4,12 +4,12 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletHell;
 
-public class TextRenderer
+public static class TextRenderer
 {
-    public const int TextureXStart = 0;
-    public const int TextureYStart = 30;
-    public const int TextureCharsPerLine = 32;
-    public const string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.?!,$:|";
+    private const int TextureXStart = 0;
+    private const int TextureYStart = 30;
+    private const int TextureCharsPerLine = 32;
+    private const string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.?!,$:|";
 
     // Characters have one pixel pixel of padding around them in the texture sheet to prevent texture bleeding.
     private static readonly Rectangle CharRectangle = new(TextureXStart * Resources.TileSize + 1,

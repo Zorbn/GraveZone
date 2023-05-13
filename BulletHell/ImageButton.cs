@@ -10,7 +10,7 @@ public class ImageButton
         new(1, 3 * Resources.TileSize + 5, Resources.TileSize, Resources.TileSize);
 
     private Rectangle _destination;
-    private Rectangle _source;
+    private readonly Rectangle _source;
 
     public ImageButton(int x, int y, Rectangle source)
     {

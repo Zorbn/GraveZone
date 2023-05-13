@@ -1,5 +1,4 @@
-﻿using BulletHell;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 
 namespace Common;
 

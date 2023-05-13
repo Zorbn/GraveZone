@@ -1,5 +1,4 @@
-﻿using System;
-using Common;
+﻿using Common;
 using LiteNetLib;
 using LiteNetLib.Utils;
 
@@ -14,10 +13,9 @@ public class Client
 
     public delegate void OnDisconnection();
 
-    public event OnConnection ConnectedEvent;
-    public event OnDisconnection DisconnectedEvent;
+    public event OnConnection? ConnectedEvent;
+    public event OnDisconnection? DisconnectedEvent;
 
-    private readonly EventBasedNetListener _listener;
     private readonly NetManager _manager;
     private readonly NetDataWriter _writer;
 
@@ -25,21 +23,21 @@ public class Client
     {
         _writer = new NetDataWriter();
         NetPacketProcessor = new NetPacketProcessor();
-        _listener = new EventBasedNetListener();
-        _manager = new NetManager(_listener)
+        var listener = new EventBasedNetListener();
+        _manager = new NetManager(listener)
         {
             AutoRecycle = true
         };
         _manager.Start();
 
-        _listener.NetworkReceiveEvent += (fromPeer, dataReader, _, _) =>
+        listener.NetworkReceiveEvent += (fromPeer, dataReader, _, _) =>
         {
             NetPacketProcessor.ReadAllPackets(dataReader, fromPeer);
         };
 
-        _listener.PeerConnectedEvent += _ => { ConnectedEvent?.Invoke(); };
+        listener.PeerConnectedEvent += _ => { ConnectedEvent?.Invoke(); };
 
-        _listener.PeerDisconnectedEvent += (_, _) => { DisconnectedEvent?.Invoke(); };
+        listener.PeerDisconnectedEvent += (_, _) => { DisconnectedEvent?.Invoke(); };
     }
 
     public void Connect(string ip)

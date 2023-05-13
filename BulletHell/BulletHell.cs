@@ -14,22 +14,21 @@ public class BulletHell : Game
     public const int UiCenterY = UiHeight / 2;
     public Matrix UiMatrix { get; private set; }
 
-    public Resources Resources { get; private set; }
+    public Resources? Resources { get; private set; }
 
-    private GraphicsDeviceManager _graphics;
-    public SpriteBatch SpriteBatch { get; private set; }
+    public SpriteBatch? SpriteBatch { get; private set; }
 
-    private Input _input;
+    private readonly Input _input = new();
 
     private IScene _scene;
-    private IScene _nextScene;
+    private IScene? _nextScene;
 
     public BulletHell()
     {
-        _graphics = new GraphicsDeviceManager(this);
-        _graphics.PreferMultiSampling = true;
-        _graphics.GraphicsProfile = GraphicsProfile.HiDef;
-        _graphics.PreparingDeviceSettings += OnPreparingDeviceSettings;
+        var graphics = new GraphicsDeviceManager(this);
+        graphics.PreferMultiSampling = true;
+        graphics.GraphicsProfile = GraphicsProfile.HiDef;
+        graphics.PreparingDeviceSettings += OnPreparingDeviceSettings;
         Content.RootDirectory = "Content";
         InactiveSleepTime = TimeSpan.Zero;
         IsMouseVisible = true;
@@ -41,14 +40,16 @@ public class BulletHell : Game
 
         // Disable FPS cap, separate from VSYNC:
         IsFixedTimeStep = false;
+        
+        _scene = new MainMenuScene(this);
     }
 
-    private static void OnPreparingDeviceSettings(object sender, PreparingDeviceSettingsEventArgs args)
+    private static void OnPreparingDeviceSettings(object? sender, PreparingDeviceSettingsEventArgs? args)
     {
-        args.GraphicsDeviceInformation.PresentationParameters.MultiSampleCount = 4;
+        args!.GraphicsDeviceInformation.PresentationParameters.MultiSampleCount = 4;
     }
 
-    private void OnResize(object sender, EventArgs eventArgs)
+    private void OnResize(object? sender, EventArgs? eventArgs)
     {
         var width = GraphicsDevice.Viewport.Width;
         var height = GraphicsDevice.Viewport.Height;
@@ -76,10 +77,7 @@ public class BulletHell : Game
         UpdateUiScale(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
         Resources = new Resources(GraphicsDevice);
-        _input = new Input();
-
-        _scene = new MainMenuScene(this);
-
+        
         base.Initialize();
     }
 

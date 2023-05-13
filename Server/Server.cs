@@ -189,7 +189,7 @@ public class Server
         {
             if (shouldRepath)
             {
-                Player nearestPlayer = null;
+                Player? nearestPlayer = null;
                 var nearestPlayerDistance = float.PositiveInfinity;
                 foreach (var (_, player) in _players)
                 {
@@ -349,7 +349,7 @@ public class Server
         }, DeliveryMethod.ReliableOrdered);
     }
 
-    public void SendToPeer<T>(NetPeer peer, T packet, DeliveryMethod deliveryMethod)
+    private void SendToPeer<T>(NetPeer peer, T packet, DeliveryMethod deliveryMethod)
         where T : INetSerializable
     {
         _writer.Reset();
@@ -357,7 +357,7 @@ public class Server
         peer.Send(_writer, deliveryMethod);
     }
 
-    public void SendToAll<T>(T packet, DeliveryMethod deliveryMethod)
+    private void SendToAll<T>(T packet, DeliveryMethod deliveryMethod)
         where T : INetSerializable
     {
         _writer.Reset();
@@ -365,7 +365,7 @@ public class Server
         _manager.SendToAll(_writer, deliveryMethod);
     }
 
-    public void SendToAll<T>(T packet, DeliveryMethod deliveryMethod, NetPeer excludePeer)
+    private void SendToAll<T>(T packet, DeliveryMethod deliveryMethod, NetPeer excludePeer)
         where T : INetSerializable
     {
         _writer.Reset();
@@ -373,7 +373,7 @@ public class Server
         _manager.SendToAll(_writer, deliveryMethod, excludePeer);
     }
 
-    public void SendRefToPeer<T>(NetPeer peer, T packet, DeliveryMethod deliveryMethod)
+    private void SendRefToPeer<T>(NetPeer peer, T packet, DeliveryMethod deliveryMethod)
         where T : class, new()
     {
         _writer.Reset();
@@ -381,7 +381,7 @@ public class Server
         peer.Send(_writer, deliveryMethod);
     }
 
-    public void SendRefToAll<T>(T packet, DeliveryMethod deliveryMethod)
+    private void SendRefToAll<T>(T packet, DeliveryMethod deliveryMethod)
         where T : class, new()
     {
         _writer.Reset();

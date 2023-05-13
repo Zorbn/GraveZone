@@ -6,14 +6,14 @@ public class Inventory
     public const int Height = 2;
     public const int SlotCount = Width * Height;
 
-    public WeaponStats EquippedWeaponStats { get; private set; }
-    public readonly WeaponStats[] Weapons = new WeaponStats[Width * Height];
-    public WeaponStats GrabbedWeaponStats { get; private set; }
+    public WeaponStats? EquippedWeaponStats { get; private set; }
+    public readonly WeaponStats?[] Weapons = new WeaponStats[Width * Height];
+    public WeaponStats? GrabbedWeaponStats { get; private set; }
 
     public bool IsFull()
     {
-        for (var i = 0; i < Weapons.Length; i++)
-            if (Weapons[i] is null)
+        foreach (var weapon in Weapons)
+            if (weapon is null)
                 return false;
 
         return true;
@@ -36,7 +36,7 @@ public class Inventory
         return false;
     }
 
-    public WeaponStats RemoveWeapon(int i)
+    private WeaponStats? RemoveWeapon(int i)
     {
         var weapon = Weapons[i];
         Weapons[i] = null;
@@ -78,6 +78,8 @@ public class Inventory
 
     public void UpdateInventory(UpdateInventory updateInventory)
     {
+        if (updateInventory.Weapons is null) return;
+        
         for (var i = 0; i < SlotCount; i++) Weapons[i] = WeaponStats.Registry[(WeaponType)updateInventory.Weapons[i]];
 
         EquippedWeaponStats = WeaponStats.Registry[(WeaponType)updateInventory.EquippedWeapon];

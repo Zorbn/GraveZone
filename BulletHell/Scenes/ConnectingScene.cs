@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using System.Diagnostics;
+using Common;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -66,6 +67,8 @@ public class ConnectingScene : IScene
     {
         _game.GraphicsDevice.Clear(Color.Aqua);
 
+        Debug.Assert(_game.SpriteBatch is not null && _game.Resources is not null);
+        
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
         TextRenderer.Draw(_loadingText, BulletHell.UiCenterX, BulletHell.UiCenterY, _game.Resources,
             _game.SpriteBatch, Color.White, centered: true);

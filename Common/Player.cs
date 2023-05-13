@@ -4,8 +4,8 @@ namespace Common;
 
 public class Player
 {
-    public const int MaxHealth = 100;
-    public const float Speed = 2f;
+    protected const int MaxHealth = 100;
+    protected const float Speed = 2f;
     public static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
 
     public readonly Inventory Inventory;
@@ -15,7 +15,7 @@ public class Player
     protected Vector3 SpritePosition;
 
     public readonly int Id;
-    public bool IsDead { get; private set; }
+    protected bool IsDead { get; private set; }
 
     public Player(Map map, int id, float x, float z, int? health = null)
     {
@@ -36,7 +36,7 @@ public class Player
     }
 
     // Move and also update the sprite position.
-    public void Teleport(Map map, Vector3 position)
+    protected void Teleport(Map map, Vector3 position)
     {
         MoveTo(map, position);
         SpritePosition = Position;

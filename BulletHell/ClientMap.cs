@@ -1,5 +1,4 @@
-﻿using System;
-using Common;
+﻿using Common;
 using LiteNetLib;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -7,8 +6,8 @@ namespace BulletHell;
 
 public class ClientMap : Map
 {
-    private VertexBuffer _vertexBuffer;
-    private IndexBuffer _indexBuffer;
+    private VertexBuffer? _vertexBuffer;
+    private IndexBuffer? _indexBuffer;
     private readonly ArrayList<VertexPositionColorTexture> _vertices;
     private readonly ArrayList<ushort> _indices;
     private int _primitives;

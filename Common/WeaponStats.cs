@@ -4,7 +4,7 @@ namespace Common;
 
 public class WeaponStats
 {
-    public static readonly Dictionary<WeaponType, WeaponStats> Registry = new()
+    public static readonly Dictionary<WeaponType, WeaponStats?> Registry = new()
     {
         { WeaponType.None, null }
     };

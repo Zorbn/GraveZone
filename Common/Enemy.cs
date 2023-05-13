@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Diagnostics;
+using Microsoft.Xna.Framework;
 
 namespace Common;
 
@@ -20,12 +21,12 @@ public class Enemy
     private readonly List<Vector3I> _path = new();
     private int _targetPathNodeI;
 
-    private Player _targetPlayer;
-    private readonly Attacker _attacker;
-    private readonly WeaponStats _weaponStats;
+    private Player? _targetPlayer;
+    private readonly Attacker? _attacker;
+    private readonly WeaponStats? _weaponStats;
 
     public Enemy(EnemyType enemyType, float x, float z, int id,
-        Attacker attacker, int? health = null)
+        Attacker? attacker, int? health = null)
     {
         Stats = EnemyStats.Registry[enemyType];
         _weaponStats = WeaponStats.Registry[Stats.WeaponType];
@@ -36,7 +37,7 @@ public class Enemy
         _attacker = attacker;
     }
 
-    public void CalculatePath(AStar aStar, Map map, Player targetPlayer)
+    public void CalculatePath(AStar aStar, Map map, Player? targetPlayer)
     {
         if (targetPlayer is null) return;
 
@@ -54,6 +55,8 @@ public class Enemy
 
     public void UpdateServer(Map map, float deltaTime)
     {
+        Debug.Assert(_attacker is not null);
+        
         _attacker.Update(deltaTime);
 
         if (_targetPlayer is null) return;
@@ -72,8 +75,9 @@ public class Enemy
         targetNode.Z += 0.5f;
         var directionToNode = targetNode - _position;
         directionToNode.Normalize();
-        
-        var currentSpeed = Stats.Speed * _weaponStats.SpeedMultiplier * deltaTime;
+
+        var weaponSpeedMultiplier = _weaponStats?.SpeedMultiplier ?? 1f;
+        var currentSpeed = Stats.Speed * weaponSpeedMultiplier * deltaTime;
         var newPosition = _position + directionToNode * currentSpeed;
         MoveTo(map, newPosition.X, newPosition.Z);
         SpritePosition = _position;

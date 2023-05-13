@@ -39,7 +39,7 @@ public struct Vector3I : IEquatable<Vector3I>
         return X == other.X && Y == other.Y && Z == other.Z;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is Vector3I other && Equals(other);
     }

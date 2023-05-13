@@ -26,12 +26,12 @@ public class Map
     }
 
     private const int Exponent = 6;
-    public static readonly int Size = (int)Math.Pow(2, Exponent) + 1;
+    protected static readonly int Size = (int)Math.Pow(2, Exponent) + 1;
     private static readonly int TileCount = Size * Size;
-    public const float TileScale = 1f;
-    public const float TileHeight = 2f;
-    public const float FloorShade = 1.0f;
-    public const float WallShade = 0.8f;
+    protected const float TileScale = 1f;
+    protected const float TileHeight = 2f;
+    protected const float FloorShade = 1.0f;
+    protected const float WallShade = 0.8f;
 
     private static readonly Dictionary<MapZone, Tile> FloorTilesPerZone = new()
     {
@@ -76,7 +76,7 @@ public class Map
     public readonly UpdateResults LastUpdateResults = new();
 
     private readonly MidpointDisplacement _midpointDisplacement = new(Exponent);
-    private Random _random;
+    private Random? _random;
 
     public void Generate(int seed)
     {
@@ -119,6 +119,8 @@ public class Map
 
     public Vector3? GetSpawnPosition()
     {
+        if (_random is null) return null;
+        
         for (var i = _random.Next(TileCount); i < TileCount; i = (i + 1) % TileCount)
         {
             var x = i % Size;
@@ -153,7 +155,7 @@ public class Map
         }
     }
 
-    public Tile GetFloorTile(int x, int z)
+    protected Tile GetFloorTile(int x, int z)
     {
         if (x < 0 || z < 0 || x >= Size || z >= Size) return Tile.Barrier;
 
@@ -167,7 +169,7 @@ public class Map
         return _wallTiles[x + z * Size];
     }
 
-    public Tile GetWallTileF(float x, float z)
+    private Tile GetWallTileF(float x, float z)
     {
         var ix = (int)MathF.Floor(x);
         var iz = (int)MathF.Floor(z);
@@ -183,13 +185,15 @@ public class Map
                GetWallTileF(at.X + size.X * 0.5f, at.Z + size.Z * 0.5f) != Tile.Air;
     }
 
-    public Enemy SpawnRandomEnemy(float x, float z, int id, Attacker attacker)
+    public Enemy? SpawnRandomEnemy(float x, float z, int id, Attacker attacker)
     {
+        if (_random is null) return null;
+        
         var enemyType = EnemyStats.EnemyTypes.Choose(_random);
         return SpawnEnemy(enemyType, x, z, id, attacker);
     }
 
-    public Enemy SpawnEnemy(EnemyType enemyType, float x, float z, int id, Attacker attacker, int? health = null)
+    public Enemy? SpawnEnemy(EnemyType enemyType, float x, float z, int id, Attacker? attacker, int? health = null)
     {
         var tileX = (int)x;
         var tileZ = (int)z;
@@ -245,7 +249,7 @@ public class Map
 
     public void AddAttackProjectiles(WeaponType weaponType, Team team, Vector3 direction, float x, float z)
     {
-        var weaponStats = WeaponStats.Registry[weaponType];
+        var weaponStats = WeaponStats.Registry[weaponType]!;
         foreach (var projectileSpawn in weaponStats.ProjectileSpawns)
         {
             var rotation = Matrix.CreateRotationY(MathHelper.ToRadians(projectileSpawn.Angle));

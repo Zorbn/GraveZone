@@ -4,13 +4,13 @@ public class ArrayList<T>
 {
     public int Count { get; private set; }
     public T[] Array => _array;
-    public readonly int ChunkSize;
+    private readonly int _chunkSize;
 
     private T[] _array;
 
     public ArrayList(int chunkSize = 1024)
     {
-        ChunkSize = chunkSize;
+        _chunkSize = chunkSize;
         _array = new T[chunkSize];
     }
 
@@ -30,7 +30,7 @@ public class ArrayList<T>
 
     private void Expand()
     {
-        System.Array.Resize(ref _array, _array.Length + ChunkSize);
+        System.Array.Resize(ref _array, _array.Length + _chunkSize);
     }
 
     public void Clear()

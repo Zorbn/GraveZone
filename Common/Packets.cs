@@ -378,7 +378,7 @@ public struct DropGrabbed : INetSerializable
 public class UpdateInventory
 {
     public int PlayerId { get; set; }
-    public int[] Weapons { get; set; }
+    public int[]? Weapons { get; set; }
     public int EquippedWeapon { get; set; }
     public int GrabbedWeapon { get; set; }
 }

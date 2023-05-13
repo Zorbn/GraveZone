@@ -1,4 +1,4 @@
-﻿using System.Threading;
+﻿using System.Diagnostics;
 using Common;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,7 +10,7 @@ public class MainMenuScene : IScene
     private readonly BulletHell _game;
     private readonly TextInput _ipInput;
     private readonly TextButton _playButton;
-    private readonly TextButton _singeplayerButton;
+    private readonly TextButton _singlePlayerButton;
 
     public MainMenuScene(BulletHell game)
     {
@@ -18,7 +18,7 @@ public class MainMenuScene : IScene
         const int ipInputWidth = 18;
         _ipInput = new TextInput(BulletHell.UiCenterX, BulletHell.UiCenterY, ipInputWidth, true, "localhost");
         _playButton = new TextButton(BulletHell.UiCenterX, BulletHell.UiCenterY + Resources.TileSize * 3, "play", true);
-        _singeplayerButton = new TextButton(BulletHell.UiCenterX, BulletHell.UiCenterY + Resources.TileSize * 6, "play single player", true);
+        _singlePlayerButton = new TextButton(BulletHell.UiCenterX, BulletHell.UiCenterY + Resources.TileSize * 6, "play single player", true);
     }
 
     public void Update(Input input, float deltaTime)
@@ -33,7 +33,7 @@ public class MainMenuScene : IScene
             if (_playButton.Contains(mouseX, mouseY))
                 _game.SetScene(new ConnectingScene(_game, _ipInput.GetTextString(), false));
 
-            if (_singeplayerButton.Contains(mouseX, mouseY))
+            if (_singlePlayerButton.Contains(mouseX, mouseY))
                 _game.SetScene(new ConnectingScene(_game, "localhost", true));
         }
 
@@ -42,12 +42,14 @@ public class MainMenuScene : IScene
 
     public void Draw()
     {
+        Debug.Assert(_game.SpriteBatch is not null && _game.Resources is not null);
+        
         _game.GraphicsDevice.Clear(Color.Aqua);
 
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
         _ipInput.Draw(_game.SpriteBatch, _game.Resources);
         _playButton.Draw(_game.SpriteBatch, _game.Resources);
-        _singeplayerButton.Draw(_game.SpriteBatch, _game.Resources);
+        _singlePlayerButton.Draw(_game.SpriteBatch, _game.Resources);
         _game.SpriteBatch.End();
     }
 }
