@@ -9,7 +9,7 @@ namespace BulletHell;
 
 public class TextInput
 {
-    private const int Height = Resources.TileSize * 2;
+    public const int Height = Resources.TileSize * 2;
     private const int TextPadding = Resources.TileSize / 2;
 
     private static readonly Rectangle LeftTexture = new(5 * Resources.TileSize + 9, 1, Resources.TileSize, Height);

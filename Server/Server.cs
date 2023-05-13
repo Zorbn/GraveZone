@@ -28,7 +28,7 @@ public class Server
 
     private bool _isRunning;
     private int _tickCount;
-
+   
     public Server()
     {
         _netPacketProcessor = new NetPacketProcessor();
