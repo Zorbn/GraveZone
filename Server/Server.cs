@@ -75,56 +75,24 @@ public class Server
         {
             // TODO: Use AcceptIfKey/Connection keys to make servers password protected.
             request.Accept();
+            
+            // Poll again to make sure PeerConnected is handled before the next server tick,
+            // otherwise the new client may receive duplicate data, one copy sent after an update
+            // during the next tick, and the next copy send during PeerConnected.
+            // This could cause the new client to be told to spawn a new enemy twice, for example.
+            _manager.PollEvents();
         };
-
+        
         _listener.PeerConnectedEvent += peer =>
         {
             Console.WriteLine($"Connection from IP: {peer.EndPoint} with ID: {peer.Id}");
-
-            var playerSpawnPosition = _map.GetSpawnPosition() ?? Vector3.Zero;
-            var newPlayerId = peer.Id;
-            var newPlayer = new Player(_map, newPlayerId, playerSpawnPosition.X, playerSpawnPosition.Z);
-            newPlayer.Inventory.AddWeapon(WeaponType.Dagger);
-
-            // Tell the new player their id.
-            SendToPeer(peer, new SetLocalId { Id = newPlayerId }, DeliveryMethod.ReliableOrdered);
-
-            SendMapStateToPeer(peer);
-
-            // Notify new player of old players.
-            foreach (var (playerId, player) in _players)
-            {
-                SendToPeer(peer, new PlayerSpawn
-                {
-                    Id = playerId,
-                    X = player.Position.X,
-                    Z = player.Position.Z,
-                    Health = player.Health
-                }, DeliveryMethod.ReliableOrdered);
-                SendRefToPeer(peer, CreateUpdateInventoryPacket(playerId, player), DeliveryMethod.ReliableOrdered);
-            }
-
-            // Notify all players of new player.
-            _players[newPlayerId] = newPlayer;
-            SendToAll(new PlayerSpawn
-            {
-                Id = newPlayerId,
-                X = newPlayer.Position.X,
-                Z = newPlayer.Position.Z,
-                Health = newPlayer.Health
-            }, DeliveryMethod.ReliableOrdered);
-            SendRefToAll(CreateUpdateInventoryPacket(newPlayerId, newPlayer), DeliveryMethod.ReliableOrdered);
+            HandlePeerConnection(peer);
         };
 
         _listener.PeerDisconnectedEvent += (peer, _) =>
         {
-            if (!_players.TryGetValue(peer.Id, out var player)) return;
-
-            player.Despawn(_map);
-            _players.Remove(peer.Id);
-            SendToAll(new PlayerDespawn { Id = peer.Id }, DeliveryMethod.ReliableOrdered);
-
             Console.WriteLine($"Peer disconnected with ID: {peer.Id}");
+            HandlePeerDisconnection(peer);
         };
 
         _listener.NetworkReceiveEvent += (fromPeer, dataReader, _, _) =>
@@ -214,6 +182,52 @@ public class Server
         }
     }
 
+    private void HandlePeerConnection(NetPeer peer)
+    {
+        var playerSpawnPosition = _map.GetSpawnPosition() ?? Vector3.Zero;
+        var newPlayerId = peer.Id;
+        var newPlayer = new Player(_map, newPlayerId, playerSpawnPosition.X, playerSpawnPosition.Z);
+        newPlayer.Inventory.AddWeapon(WeaponType.Dagger);
+
+        // Tell the new player their id.
+        SendToPeer(peer, new SetLocalId { Id = newPlayerId }, DeliveryMethod.ReliableOrdered);
+
+        SendMapStateToPeer(peer);
+
+        // Notify new player of old players.
+        foreach (var (playerId, player) in _players)
+        {
+            SendToPeer(peer, new PlayerSpawn
+            {
+                Id = playerId,
+                X = player.Position.X,
+                Z = player.Position.Z,
+                Health = player.Health
+            }, DeliveryMethod.ReliableOrdered);
+            SendRefToPeer(peer, CreateUpdateInventoryPacket(playerId, player), DeliveryMethod.ReliableOrdered);
+        }
+
+        // Notify all players of new player.
+        _players[newPlayerId] = newPlayer;
+        SendToAll(new PlayerSpawn
+        {
+            Id = newPlayerId,
+            X = newPlayer.Position.X,
+            Z = newPlayer.Position.Z,
+            Health = newPlayer.Health
+        }, DeliveryMethod.ReliableOrdered);
+        SendRefToAll(CreateUpdateInventoryPacket(newPlayerId, newPlayer), DeliveryMethod.ReliableOrdered);
+    }
+
+    private void HandlePeerDisconnection(NetPeer peer)
+    {
+        if (!_players.TryGetValue(peer.Id, out var player)) return;
+
+        player.Despawn(_map);
+        _players.Remove(peer.Id);
+        SendToAll(new PlayerDespawn { Id = peer.Id }, DeliveryMethod.ReliableOrdered);
+    }
+
     private void SendMapStateToPeer(NetPeer peer)
     {
         // Tell the new player to generate the map.
@@ -264,6 +278,7 @@ public class Server
     private void ServerSpawnEnemy(Vector3 position)
     {
         var enemyId = _nextEnemyId++;
+        Console.WriteLine($"Server creating enemy with id: {enemyId}");
         var enemy = _map.SpawnRandomEnemy(position.X, position.Z, enemyId,
             new Attacker(Team.Enemies, _enemyAttackAction));
 
