@@ -53,7 +53,7 @@ public class Inventory
             return;
         }
 
-        (Weapons[i], GrabbedWeaponStats) = (GrabbedWeaponStats, Weapons[i]);
+        (Weapons[i], GrabbedWeaponStats) = SwapOrEvolve(Weapons[i], GrabbedWeaponStats);
     }
 
     public void GrabEquippedSlot()
@@ -65,7 +65,20 @@ public class Inventory
             return;
         }
 
-        (EquippedWeaponStats, GrabbedWeaponStats) = (GrabbedWeaponStats, EquippedWeaponStats);
+        (EquippedWeaponStats, GrabbedWeaponStats) = SwapOrEvolve(EquippedWeaponStats, GrabbedWeaponStats);
+    }
+
+    private static ValueTuple<WeaponStats?, WeaponStats?> SwapOrEvolve(WeaponStats? inSlot, WeaponStats? grabbed)
+    {
+        // The weapons can merge into an evolved version if they have the same type, and have
+        // an evolution available. Otherwise just swap the two weapons.
+        if (inSlot is null || grabbed is null || inSlot.Evolution == WeaponType.None ||
+            inSlot.WeaponType != grabbed.WeaponType) return (grabbed, inSlot);
+        
+        inSlot = WeaponStats.Registry[inSlot.Evolution];
+        grabbed = null;
+
+        return (inSlot, grabbed);
     }
 
     public void DropGrabbed(Map map, float x, float z, int id)

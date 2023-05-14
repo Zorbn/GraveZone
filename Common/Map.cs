@@ -201,6 +201,8 @@ public class Map
         if (tileX < 0 || tileX >= Size || tileZ < 0 || tileZ >= Size) return null;
 
         var newEnemy = new Enemy(enemyType, x, z, id, attacker, health);
+        // TODO: Change this (and DropWeapon) to use .Add for the dictionary, currently there is a bug causing an immediate crash in that case
+        // but not using .Add doesn't fix it, instead it causes a ghost enemy to silently be created (which the player can still find and hit).
         Enemies[id] = newEnemy;
 
         EnemiesInTiles.Add(newEnemy, tileX, tileZ);

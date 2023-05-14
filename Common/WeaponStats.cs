@@ -11,7 +11,7 @@ public class WeaponStats
 
     static WeaponStats()
     {
-        Register(new WeaponStats(WeaponType.Dagger, 0.2f, 1.5f, Sprite.Dagger, new[]
+        Register(new WeaponStats(WeaponType.Dagger, WeaponType.Sword, 0.2f, 1.5f, Sprite.Dagger, new[]
         {
             new ProjectileSpawnData
                 { ProjectileType = ProjectileType.ThrownDagger, Angle = -10f, RelativeToForward = true },
@@ -19,7 +19,7 @@ public class WeaponStats
                 { ProjectileType = ProjectileType.ThrownDagger, Angle = 10f, RelativeToForward = true }
         }));
 
-        Register(new WeaponStats(WeaponType.Sword, 0.5f, 1f, Sprite.Sword, new[]
+        Register(new WeaponStats(WeaponType.Sword, WeaponType.None, 0.5f, 1f, Sprite.Sword, new[]
         {
             new ProjectileSpawnData
                 { ProjectileType = ProjectileType.ThrownSword, Angle = 0f, RelativeToForward = false },
@@ -40,16 +40,18 @@ public class WeaponStats
         }));
     }
 
-    public readonly Sprite Sprite;
+    public readonly WeaponType WeaponType;
+    public readonly WeaponType Evolution;
     public readonly float AttackCooldown;
     public readonly float SpeedMultiplier;
+    public readonly Sprite Sprite;
     public readonly ReadOnlyCollection<ProjectileSpawnData> ProjectileSpawns;
-    public readonly WeaponType WeaponType;
 
-    private WeaponStats(WeaponType weaponType, float attackCooldown, float speedMultiplier, Sprite sprite,
-        ProjectileSpawnData[] projectileSpawns)
+    private WeaponStats(WeaponType weaponType, WeaponType evolution, float attackCooldown, float speedMultiplier,
+        Sprite sprite, ProjectileSpawnData[] projectileSpawns)
     {
         WeaponType = weaponType;
+        Evolution = evolution;
         AttackCooldown = attackCooldown;
         SpeedMultiplier = speedMultiplier;
         Sprite = sprite;
