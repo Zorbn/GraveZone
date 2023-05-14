@@ -9,7 +9,9 @@ public enum Sprite
     MimicVampire = 4,
     MimicShelled = 5,
     PalmTree = 7,
-    Shadow = 25,
+    LargeShadow = 25,
+    SmallShadow = 26,
+    Hit = 27,
     Dagger = 600,
     Sword = 601
 }

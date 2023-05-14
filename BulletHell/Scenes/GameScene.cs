@@ -15,7 +15,7 @@ public class GameScene : IScene
     private const float TickTime = 0.05f;
     private const float AnimationFrameTime = 0.25f;
 
-    public readonly Client Client;
+    public readonly Client Client = new();
     
     // An internal server may be started alongside the client
     // if it is requested when this scene is created.
@@ -23,10 +23,11 @@ public class GameScene : IScene
 
     private readonly BulletHell _game;
 
-    private readonly ClientMap _map;
+    private readonly ClientMap _map = new();
     private readonly SpriteRenderer _spriteRenderer;
-    private readonly Dictionary<int, ClientPlayer> _players;
+    private readonly Dictionary<int, ClientPlayer> _players = new();
     private readonly Camera _camera;
+    private readonly ParticlePool _particlePool = new();
 
     private readonly ImageButton _quitButton;
 
@@ -41,9 +42,7 @@ public class GameScene : IScene
         _game = game;
 
         _camera = new Camera(game.GraphicsDevice);
-        _map = new ClientMap();
         _spriteRenderer = new SpriteRenderer(1024, game.GraphicsDevice);
-        _players = new Dictionary<int, ClientPlayer>();
 
         _quitButton = new ImageButton(ClientInventory.X - Resources.TileSize,
             ClientInventory.Y + Resources.TileSize * 3, ImageButton.QuitRectangle);
@@ -54,8 +53,6 @@ public class GameScene : IScene
             var internalServerThread = new Thread(() => _internalServer.Run());
             internalServerThread.Start();
         }
-
-        Client = new Client();
 
         Client.DisconnectedEvent += () => { _game.SetScene(new MainMenuScene(_game)); };
 
@@ -139,8 +136,19 @@ public class GameScene : IScene
 
         foreach (var (_, player) in _players) player.Update(input, _map, Client, _camera, deltaTime);
 
+        for (var i = _particlePool.ParticleEffects.Count - 1; i >= 0; i--)
+        {
+            var particleExceededLifeTime = _particlePool.ParticleEffects[i].Update(_map, deltaTime);
+            
+            if (!particleExceededLifeTime) continue;
+            
+            _particlePool.DespawnParticle(i);
+        }
+
         _map.Update(deltaTime);
         _map.UpdateClient(deltaTime);
+
+        PostUpdate();
 
         if (hasLocalPlayer)
         {
@@ -165,10 +173,13 @@ public class GameScene : IScene
         _camera.UpdateViewMatrices();
 
         _spriteRenderer.Begin(_camera.SpriteMatrix);
+        
         foreach (var (_, player) in _players) player.AddSprite(_spriteRenderer);
 
         _map.AddSprites(_spriteRenderer, _animationFrame);
 
+        foreach (var particleEffect in _particlePool.ParticleEffects) particleEffect.AddSprites(_spriteRenderer);
+        
         _spriteRenderer.End();
         
         _spriteRenderer.DrawShadowsToTexture(_camera.Position, _game.GraphicsDevice, _game.Resources,
@@ -235,6 +246,19 @@ public class GameScene : IScene
         var inventoryCapturedMouse = localPlayer.ClientInventory.Update(Client, input, mousePosition);
 
         return inventoryCapturedMouse;
+    }
+
+    private void PostUpdate()
+    {
+        foreach (var playerHit in _map.LastUpdateResults.PlayerHits)
+        {
+            _particlePool.SpawnParticle(ParticleEffectType.Hit, playerHit.Entity.Position);
+        }
+        
+        foreach (var enemyHit in _map.LastUpdateResults.EnemyHits)
+        {
+            _particlePool.SpawnParticle(ParticleEffectType.Hit, enemyHit.Entity.Position);
+        }
     }
 
     private void PostUpdateLocal(ClientPlayer localPlayer)

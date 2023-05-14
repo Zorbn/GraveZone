@@ -6,6 +6,15 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletHell;
 
+/**
+ * TODO (Goals):
+ * Improved menus,
+ * Weapon evolutions (combine two of the same weapon -> better weapon),
+ * Bosses,
+ * Better monster spawning,
+ * Save files,
+ */
+
 public class BulletHell : Game
 {
     public const int UiWidth = 480;

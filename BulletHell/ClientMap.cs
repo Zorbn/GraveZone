@@ -123,7 +123,7 @@ public class ClientMap : Map
     public void AddSprites(SpriteRenderer spriteRenderer, int animationFrame)
     {
         foreach (var decorationSprite in DecorationSprites)
-            spriteRenderer.Add(decorationSprite.X, decorationSprite.Z, decorationSprite.Sprite);
+            spriteRenderer.Add(decorationSprite.Position, decorationSprite.Sprite);
 
         foreach (var projectile in Projectiles) projectile.AddSprite(spriteRenderer);
 

@@ -6,6 +6,12 @@ namespace BulletHell;
 
 public class SpriteRenderer
 {
+    private struct SpriteShadow
+    {
+        public Vector2 Position;
+        public ShadowType ShadowType;
+    }
+    
     private const int ShadowResolution = 10;
     private const int ShadowRadius = 15;
     private const int ShadowDiameter = 2 * ShadowRadius;
@@ -30,7 +36,7 @@ public class SpriteRenderer
 
     private static readonly ushort[] ShadowMapIndices = { 0, 2, 1, 0, 3, 2 };
 
-    private readonly Vector2[] _shadowPositions;
+    private readonly SpriteShadow[] _spriteShadows;
     private readonly VertexPositionColorTexture[] _shadowMapVertices;
 
     private Matrix _rotationMatrix;
@@ -53,7 +59,7 @@ public class SpriteRenderer
         _maxSprites = maxSprites;
         _spriteVertices = new VertexPositionColorTexture[maxVertices];
         _spriteIndices = new ushort[maxIndices];
-        _shadowPositions = new Vector2[maxSprites];
+        _spriteShadows = new SpriteShadow[maxSprites];
 
         _spriteVertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColorTexture), maxVertices,
             BufferUsage.WriteOnly);
@@ -72,18 +78,22 @@ public class SpriteRenderer
             graphicsDevice.PresentationParameters.BackBufferFormat, DepthFormat.Depth24);
     }
 
-    public void Add(float x, float z, Sprite sprite)
+    public void Add(Vector3 position, Sprite sprite, ShadowType shadowType = ShadowType.Large)
     {
         if (_sprites >= _maxSprites) return;
 
-        _shadowPositions[_sprites] = new Vector2(x - 0.5f, z - 0.5f);
-        AddSprite(x, z, sprite);
+        _spriteShadows[_sprites] = new SpriteShadow
+        {
+            Position = new Vector2(position.X - 0.5f, position.Z - 0.5f),
+            ShadowType = shadowType
+        };
+        AddSprite(position, sprite);
 
         ++_sprites;
         _primitives += 2;
     }
 
-    private void AddSprite(float x, float z, Sprite sprite)
+    private void AddSprite(Vector3 position, Sprite sprite)
     {
         var baseVertexCount = _spriteVertexI;
         foreach (var index in SpriteMesh.Indices)
@@ -98,9 +108,10 @@ public class SpriteRenderer
         {
             var newVertex = vertex;
             newVertex.Position = Vector3.Transform(vertex.Position, _rotationMatrix);
-            newVertex.Position.X = newVertex.Position.X * 0.8f + x;
+            newVertex.Position.X *= 0.8f;
             newVertex.Position.Y *= 1.75f;
-            newVertex.Position.Z = newVertex.Position.Z * 0.8f + z;
+            newVertex.Position.Z *= 0.8f;
+            newVertex.Position += position;
             newVertex.TextureCoordinate += new Vector2(texCoords.X, texCoords.Y);
             _spriteVertices[_spriteVertexI] = newVertex;
             ++_spriteVertexI;
@@ -146,8 +157,11 @@ public class SpriteRenderer
 
         for (var i = 0; i < _sprites; i++)
         {
-            var position =  (_shadowPositions[i] - offset) * positionMultiplier;
-            spriteBatch.Draw(resources.SpriteTexture, position, Resources.ShadowRectangle, Color.White, 0f,
+            var position =  (_spriteShadows[i].Position - offset) * positionMultiplier;
+            var shadowRectangle = _spriteShadows[i].ShadowType == ShadowType.Large
+                ? Resources.ShadowLargeRectangle
+                : Resources.ShadowSmallRectangle;
+            spriteBatch.Draw(resources.SpriteTexture, position, shadowRectangle, Color.White, 0f,
                 Vector2.Zero, scale, SpriteEffects.None, 0f);
         }
 

@@ -162,7 +162,7 @@ public class ClientPlayer : Player
 
     public void AddSprite(SpriteRenderer spriteRenderer)
     {
-        spriteRenderer.Add(SpritePosition.X, SpritePosition.Z, Sprite.Player);
+        spriteRenderer.Add(SpritePosition, Sprite.Player);
     }
 
     public void DrawHud(Resources resources, SpriteBatch spriteBatch)

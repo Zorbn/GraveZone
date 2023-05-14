@@ -2,6 +2,7 @@
 
 namespace Common;
 
+// TODO: Consider if projectiles can be made a struct?
 public class Projectile
 {
     private const float Speed = 8f;

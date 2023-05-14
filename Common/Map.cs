@@ -21,8 +21,7 @@ public class Map
     protected struct DecorationSprite
     {
         public Sprite Sprite;
-        public float X;
-        public float Z;
+        public Vector3 Position;
     }
 
     private const int Exponent = 6;
@@ -110,8 +109,7 @@ public class Map
                 DecorationSprites.Add(new DecorationSprite
                 {
                     Sprite = sprite,
-                    X = x + 0.5f,
-                    Z = z + 0.5f
+                    Position = new Vector3(x + 0.5f, 0f, z + 0.5f)
                 });
             }
         }
