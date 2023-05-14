@@ -2,8 +2,7 @@
 
 namespace Common;
 
-// TODO: Consider if projectiles can be made a struct?
-public class Projectile
+public struct Projectile
 {
     private const float Speed = 8f;
     private static readonly Vector3 Size = new(0.6f, 1.0f, 0.6f);

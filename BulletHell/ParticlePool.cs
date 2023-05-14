@@ -5,9 +5,8 @@ namespace BulletHell;
 
 public class ParticlePool
 {
-    public IReadOnlyList<ParticleEffect> ParticleEffects => _particleEffects;
+    public List<ParticleEffect> ParticleEffects { get; } = new();
 
-    private readonly List<ParticleEffect> _particleEffects = new();
     private readonly Stack<ParticleEffect> _unusedParticleEffects = new();
 
     public void SpawnParticle(ParticleEffectType particleEffectType, Vector3 position)
@@ -21,13 +20,13 @@ public class ParticlePool
             newParticleEffect = new ParticleEffect(particleEffectType, position);
         }
         
-        _particleEffects.Add(newParticleEffect);
+        ParticleEffects.Add(newParticleEffect);
     }
 
     public void DespawnParticle(int i)
     {
-        var particleEffect = _particleEffects[i];
-        _particleEffects.RemoveAt(i);
+        var particleEffect = ParticleEffects[i];
+        ParticleEffects.RemoveAt(i);
         _unusedParticleEffects.Push(particleEffect);
     }
 }

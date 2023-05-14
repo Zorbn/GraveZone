@@ -138,7 +138,9 @@ public class Map
 
         for (var i = Projectiles.Count - 1; i >= 0; i--)
         {
-            var hadCollision = Projectiles[i].Update(this, deltaTime);
+            var projectile = Projectiles[i];
+            var hadCollision = projectile.Update(this, deltaTime);
+            Projectiles[i] = projectile;
 
             if (hadCollision) Projectiles.RemoveAt(i);
         }

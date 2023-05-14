@@ -45,7 +45,7 @@ public class BulletHell : Game
         Window.ClientSizeChanged += OnResize;
 
         // Disable VSYNC:
-        // _graphics.SynchronizeWithVerticalRetrace = false;
+        // graphics.SynchronizeWithVerticalRetrace = false;
 
         // Disable FPS cap, separate from VSYNC:
         IsFixedTimeStep = false;

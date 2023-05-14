@@ -28,7 +28,7 @@ public class EntitiesInTiles<T>
         _entitiesInTiles[x + z * _size].Remove(entity);
     }
 
-    public IReadOnlySet<T> GetNearby(float x, float z)
+    public HashSet<T> GetNearby(float x, float z)
     {
         _entityQueryResults.Clear();
 
