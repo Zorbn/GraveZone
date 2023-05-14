@@ -5,7 +5,7 @@ namespace Common;
 public class Player
 {
     protected const int MaxHealth = 100;
-    protected const float Speed = 2f;
+    protected const float Speed = 2.5f;
     public static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
 
     public readonly Inventory Inventory;

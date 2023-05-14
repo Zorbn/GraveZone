@@ -7,6 +7,7 @@ public class Enemy
 {
     private const float NodeReachedDistance = 0.1f;
     private const float AttackDistance = 3f;
+    private const float ChaseDistance = 10f;
     public static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
 
     public Vector3 Position => _position;
@@ -53,22 +54,25 @@ public class Enemy
         SpritePosition = Vector3.Lerp(SpritePosition, _position, SpriteInfo.SpriteLerp * deltaTime);
     }
 
-    public void UpdateServer(Map map, float deltaTime)
+    // Returns true if the enemy moved.
+    public bool UpdateServer(Map map, float deltaTime)
     {
         Debug.Assert(_attacker is not null);
         
         _attacker.Update(deltaTime);
 
-        if (_targetPlayer is null) return;
+        if (_targetPlayer is null) return false;
 
         var directionToPlayer = _targetPlayer.Position - _position;
         directionToPlayer.Normalize();
         var distanceToPlayer = (_targetPlayer.Position - _position).Length();
 
+        if (distanceToPlayer > ChaseDistance) return false;
+        
         if (distanceToPlayer <= AttackDistance)
             _attacker.Attack(_weaponStats, directionToPlayer, Position.X, Position.Z, map);
 
-        if (_targetPathNodeI >= _path.Count) return;
+        if (_targetPathNodeI >= _path.Count) return false;
 
         var targetNode = _path[_targetPathNodeI].ToVector3();
         targetNode.X += 0.5f;
@@ -83,9 +87,11 @@ public class Enemy
         SpritePosition = _position;
 
         var distanceToNode = (targetNode - _position).Length();
-        if (distanceToNode > NodeReachedDistance) return;
+        if (distanceToNode > NodeReachedDistance) return true;
 
         ++_targetPathNodeI;
+
+        return true;
     }
 
     public void MoveTo(Map map, float x, float z)

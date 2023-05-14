@@ -414,7 +414,6 @@ public class GameScene : IScene
 
     private void OnEnemySpawn(EnemySpawn enemySpawn)
     {
-        Console.WriteLine($"Spawning enemy with id: {enemySpawn.Id}");
         _map.SpawnEnemy(enemySpawn.EnemyType, enemySpawn.X, enemySpawn.Z, enemySpawn.Id, null, enemySpawn.Health);
     }
 

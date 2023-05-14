@@ -9,7 +9,7 @@ namespace Server;
 public class Server
 {
     private const float TickTime = 0.05f;
-    private const int MaxSpawnedEnemies = 3;
+    private const int MaxSpawnedEnemies = 10;
     private const int TicksPerRepath = 2;
 
     private readonly NetPacketProcessor _netPacketProcessor;
@@ -172,7 +172,10 @@ public class Server
                 enemy.CalculatePath(_aStar, _map, nearestPlayer);
             }
 
-            enemy.UpdateServer(_map, TickTime);
+            var enemyMoved = enemy.UpdateServer(_map, TickTime);
+            
+            if (!enemyMoved) continue;
+            
             SendToAll(new EnemyMove
             {
                 Id = enemyId,
@@ -278,7 +281,6 @@ public class Server
     private void ServerSpawnEnemy(Vector3 position)
     {
         var enemyId = _nextEnemyId++;
-        Console.WriteLine($"Server creating enemy with id: {enemyId}");
         var enemy = _map.SpawnRandomEnemy(position.X, position.Z, enemyId,
             new Attacker(Team.Enemies, _enemyAttackAction));
 
