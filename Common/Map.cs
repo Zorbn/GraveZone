@@ -37,7 +37,7 @@ public class Map
         { MapZone.Beach, Tile.Sand },
         { MapZone.Grasslands, Tile.Grass },
         { MapZone.Roads, Tile.Path },
-        { MapZone.CrumblingCity, Tile.Marble }
+        { MapZone.Ruins, Tile.Marble }
     };
 
     private static readonly Dictionary<MapZone, Tile> WallTilesPerZone = new()
@@ -45,7 +45,7 @@ public class Map
         { MapZone.Beach, Tile.Air },
         { MapZone.Grasslands, Tile.Flower },
         { MapZone.Roads, Tile.Air },
-        { MapZone.CrumblingCity, Tile.Marble }
+        { MapZone.Ruins, Tile.Marble }
     };
     
     private static readonly Dictionary<MapZone, Sprite> SpritesPerZone = new()
@@ -53,7 +53,7 @@ public class Map
         { MapZone.Beach, Sprite.PalmTree },
         { MapZone.Grasslands, Sprite.None },
         { MapZone.Roads, Sprite.None },
-        { MapZone.CrumblingCity, Sprite.None }
+        { MapZone.Ruins, Sprite.None }
     };
 
     public readonly Dictionary<int, Weapon> DroppedWeapons = new();
@@ -88,10 +88,10 @@ public class Map
             var i = x + z * Size;
             var zone = _midpointDisplacement.Heightmap[i] switch
             {
-                < 0.2f => MapZone.Beach,
-                < 0.4f => MapZone.Grasslands,
-                < 0.5f => MapZone.Roads,
-                _ => MapZone.CrumblingCity
+                < 0.3f => MapZone.Beach,
+                < 0.6f => MapZone.Grasslands,
+                < 0.7f => MapZone.Roads,
+                _ => MapZone.Ruins
             };
 
             _floorTiles[i] = FloorTilesPerZone[zone];
