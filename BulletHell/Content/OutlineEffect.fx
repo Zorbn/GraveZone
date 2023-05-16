@@ -66,7 +66,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
             
             if (alpha > textureColor.a)
             {
-                return float4(0.0, 0.0, 0.0, 1.0);
+                return float4(0.1, 0.1, 0.1, 1.0);
             }
         }
     

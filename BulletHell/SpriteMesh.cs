@@ -15,7 +15,7 @@ public static class SpriteMesh
     private const float PaddingY = 1f / TextureSize;
     private const float PaddedUnitX = UnitX + PaddingX * 2;
     private const float PaddedUnitY = UnitY + PaddingY * 2;
-    public const float OutlineWidth = 1f / TextureSize * 0.25f;
+    public const float OutlineWidth = 1f / TextureSize * 0.3f;
 
     public static readonly VertexPositionColorTexture[] Vertices =
     {

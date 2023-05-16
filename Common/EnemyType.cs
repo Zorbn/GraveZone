@@ -3,5 +3,7 @@
 public enum EnemyType
 {
     VampireMimic,
-    ShelledMimic
+    ShelledMimic,
+    Solider,
+    Dragon
 }

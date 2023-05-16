@@ -6,8 +6,7 @@ namespace Common;
 public class Enemy
 {
     private const float NodeReachedDistance = 0.1f;
-    private const float AttackDistance = 3f;
-    private const float ChaseDistance = 10f;
+    private const float ChaseDistance = 15f;
     public static readonly Vector3 Size = new(0.8f, 1.0f, 0.8f);
 
     public Vector3 Position => _position;
@@ -69,7 +68,7 @@ public class Enemy
 
         if (distanceToPlayer > ChaseDistance) return false;
         
-        if (distanceToPlayer <= AttackDistance)
+        if (_weaponStats is not null && distanceToPlayer <= _weaponStats.AttackRange)
             _attacker.Attack(_weaponStats, directionToPlayer, Position.X, Position.Z, map);
 
         if (_targetPathNodeI >= _path.Count) return false;

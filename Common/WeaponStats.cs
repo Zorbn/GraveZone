@@ -38,6 +38,12 @@ public class WeaponStats
             new ProjectileSpawnData
                 { ProjectileType = ProjectileType.ThrownSword, Angle = 315f, RelativeToForward = false }
         }));
+        
+        Register(new WeaponStats(WeaponType.FireWand, WeaponType.None, 0.5f, 1.0f, Sprite.FireWand, new[]
+        {
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.Fireball, Angle = 0f, RelativeToForward = true }
+        }));
     }
 
     public readonly WeaponType WeaponType;
@@ -46,6 +52,7 @@ public class WeaponStats
     public readonly float SpeedMultiplier;
     public readonly Sprite Sprite;
     public readonly ReadOnlyCollection<ProjectileSpawnData> ProjectileSpawns;
+    public readonly float AttackRange;
 
     private WeaponStats(WeaponType weaponType, WeaponType evolution, float attackCooldown, float speedMultiplier,
         Sprite sprite, ProjectileSpawnData[] projectileSpawns)
@@ -56,6 +63,11 @@ public class WeaponStats
         SpeedMultiplier = speedMultiplier;
         Sprite = sprite;
         ProjectileSpawns = new ReadOnlyCollection<ProjectileSpawnData>(projectileSpawns);
+
+        foreach (var projectileSpawn in ProjectileSpawns)
+        {
+            AttackRange = Math.Max(AttackRange, ProjectileStats.Registry[projectileSpawn.ProjectileType].Range);
+        }
     }
 
     private static void Register(WeaponStats weaponStats)

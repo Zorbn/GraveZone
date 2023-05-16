@@ -3,5 +3,6 @@
 public enum ProjectileType
 {
     ThrownDagger,
-    ThrownSword
+    ThrownSword,
+    Fireball
 }
