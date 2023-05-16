@@ -35,9 +35,7 @@ public class BulletHell : Game
     public BulletHell()
     {
         var graphics = new GraphicsDeviceManager(this);
-        graphics.PreferMultiSampling = true;
         graphics.GraphicsProfile = GraphicsProfile.HiDef;
-        graphics.PreparingDeviceSettings += OnPreparingDeviceSettings;
         Content.RootDirectory = "Content";
         InactiveSleepTime = TimeSpan.Zero;
         IsMouseVisible = true;
@@ -51,11 +49,6 @@ public class BulletHell : Game
         IsFixedTimeStep = false;
         
         _scene = new MainMenuScene(this);
-    }
-
-    private static void OnPreparingDeviceSettings(object? sender, PreparingDeviceSettingsEventArgs? args)
-    {
-        args!.GraphicsDeviceInformation.PresentationParameters.MultiSampleCount = 4;
     }
 
     private void OnResize(object? sender, EventArgs? eventArgs)
@@ -85,7 +78,7 @@ public class BulletHell : Game
     {
         UpdateUiScale(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
-        Resources = new Resources(GraphicsDevice);
+        Resources = new Resources(Content);
         
         base.Initialize();
     }

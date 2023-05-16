@@ -41,7 +41,7 @@ public class GameScene : IScene
     {
         _game = game;
 
-        _camera = new Camera(game.GraphicsDevice);
+        _camera = new Camera(game.GraphicsDevice, _game.Content);
         _spriteRenderer = new SpriteRenderer(1024, game.GraphicsDevice);
 
         _quitButton = new ImageButton(ClientInventory.X - Resources.TileSize,
@@ -195,21 +195,23 @@ public class GameScene : IScene
         _game.GraphicsDevice.Clear(Resources.SkyColor);
         _game.GraphicsDevice.ClearState();
 
-        _camera.SetTexture(_game.Resources.MapTexture);
+        _camera.Texture = _game.Resources.MapTexture;
         foreach (var currentPass in _camera.Passes)
         {
             currentPass.Apply();
             _map.Draw(_game.GraphicsDevice);
         }
 
-        _camera.SetTexture(_game.Resources.SpriteTexture);
+        _camera.Texture = _game.Resources.SpriteTexture;
+        _camera.UseOutline = true;
         foreach (var currentPass in _camera.Passes)
         {
             currentPass.Apply();
             _spriteRenderer.DrawSprites(_game.GraphicsDevice);
         }
+        _camera.UseOutline = false;
 
-        _camera.SetTexture(_spriteRenderer.ShadowTarget);
+        _camera.Texture = _spriteRenderer.ShadowTarget;
         _camera.EffectAlpha = Resources.ShadowAlpha;
         foreach (var currentPass in _camera.Passes)
         {

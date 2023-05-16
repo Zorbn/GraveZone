@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Common;
@@ -19,10 +20,10 @@ public class Resources
 
     public static readonly Color SkyColor = new(128, 119, 255, 255);
 
-    public Resources(GraphicsDevice graphicsDevice)
+    public Resources(ContentManager contentManager)
     {
-        MapTexture = Texture2D.FromFile(graphicsDevice, "Content/tiles.png");
-        SpriteTexture = Texture2D.FromFile(graphicsDevice, "Content/sprites.png");
-        UiTexture = Texture2D.FromFile(graphicsDevice, "Content/ui.png");
+        MapTexture = contentManager.Load<Texture2D>("tiles");
+        SpriteTexture = contentManager.Load<Texture2D>("sprites");
+        UiTexture = contentManager.Load<Texture2D>("ui");
     }
 }
