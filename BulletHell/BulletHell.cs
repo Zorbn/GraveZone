@@ -3,6 +3,7 @@ using BulletHell.Scenes;
 using Common;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace BulletHell;
 
@@ -26,15 +27,21 @@ public class BulletHell : Game
 
     public SpriteBatch? SpriteBatch { get; private set; }
 
+    private readonly GraphicsDeviceManager _graphics;
+
     private readonly Input _input = new();
 
     private IScene _scene;
     private IScene? _nextScene;
 
+    private bool _isFullscreen;
+    private int _windowedWidth;
+    private int _windowedHeight;
+
     public BulletHell()
     {
-        var graphics = new GraphicsDeviceManager(this);
-        graphics.GraphicsProfile = GraphicsProfile.HiDef;
+        _graphics = new GraphicsDeviceManager(this);
+        _graphics.GraphicsProfile = GraphicsProfile.HiDef;
         Content.RootDirectory = "Content";
         InactiveSleepTime = TimeSpan.Zero;
         IsMouseVisible = true;
@@ -42,7 +49,7 @@ public class BulletHell : Game
         Window.ClientSizeChanged += OnResize;
 
         // Disable VSYNC:
-        // graphics.SynchronizeWithVerticalRetrace = false;
+        // _graphics.SynchronizeWithVerticalRetrace = false;
 
         // Disable FPS cap, separate from VSYNC:
         IsFixedTimeStep = false;
@@ -93,6 +100,8 @@ public class BulletHell : Game
 
         _input.Update(IsActive);
         _scene.Update(_input, deltaTime);
+        
+        if (_input.WasKeyPressed(Keys.F11)) ToggleFullscreen();
 
         if (_nextScene is not null)
         {
@@ -123,5 +132,40 @@ public class BulletHell : Game
         _scene.Exit();
 
         base.OnExiting(sender, args);
+    }
+
+    private void ToggleFullscreen()
+    {
+        if (_isFullscreen)
+        {
+            DisableFullscreen();
+            return;
+        }
+        
+        EnableFullscreen();
+    }
+
+    private void EnableFullscreen()
+    {
+        _isFullscreen = true;
+        
+        _windowedWidth = Window.ClientBounds.Width;
+        _windowedHeight = Window.ClientBounds.Height;
+
+        _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+        _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+        _graphics.HardwareModeSwitch = true;
+        _graphics.IsFullScreen = true;
+        _graphics.ApplyChanges();
+    }
+
+    private void DisableFullscreen()
+    {
+        _isFullscreen = false;
+        
+        _graphics.PreferredBackBufferWidth = _windowedWidth;
+        _graphics.PreferredBackBufferHeight = _windowedHeight;
+        _graphics.IsFullScreen = false;
+        _graphics.ApplyChanges();
     }
 }
