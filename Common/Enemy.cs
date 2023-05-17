@@ -57,7 +57,7 @@ public class Enemy
     public bool UpdateServer(Map map, float deltaTime)
     {
         Debug.Assert(_attacker is not null);
-        
+
         _attacker.Update(deltaTime);
 
         if (_targetPlayer is null) return false;
@@ -67,7 +67,7 @@ public class Enemy
         var distanceToPlayer = (_targetPlayer.Position - _position).Length();
 
         if (distanceToPlayer > ChaseDistance) return false;
-        
+
         if (_weaponStats is not null && distanceToPlayer <= _weaponStats.AttackRange)
             _attacker.Attack(_weaponStats, directionToPlayer, Position.X, Position.Z, map);
 

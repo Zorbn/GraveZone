@@ -14,7 +14,6 @@ namespace BulletHell;
  * Better monster spawning,
  * Save files,
  */
-
 public class BulletHell : Game
 {
     public const int UiWidth = 480;
@@ -47,7 +46,7 @@ public class BulletHell : Game
 
         // Disable FPS cap, separate from VSYNC:
         IsFixedTimeStep = false;
-        
+
         _scene = new MainMenuScene(this);
     }
 
@@ -79,7 +78,7 @@ public class BulletHell : Game
         UpdateUiScale(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
         Resources = new Resources(Content);
-        
+
         base.Initialize();
     }
 
@@ -91,7 +90,7 @@ public class BulletHell : Game
     protected override void Update(GameTime gameTime)
     {
         var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        
+
         _input.Update(IsActive);
         _scene.Update(_input, deltaTime);
 

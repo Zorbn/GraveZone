@@ -12,14 +12,10 @@ public class ParticlePool
     public void SpawnParticle(ParticleEffectType particleEffectType, Vector3 position)
     {
         if (_unusedParticleEffects.TryPop(out var newParticleEffect))
-        {
             newParticleEffect.Init(particleEffectType, position);
-        }
         else
-        {
             newParticleEffect = new ParticleEffect(particleEffectType, position);
-        }
-        
+
         ParticleEffects.Add(newParticleEffect);
     }
 

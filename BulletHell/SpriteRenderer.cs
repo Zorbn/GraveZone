@@ -1,5 +1,6 @@
 ﻿using Common;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletHell;
@@ -11,10 +12,13 @@ public class SpriteRenderer
         public Vector2 Position;
         public ShadowType ShadowType;
     }
-    
+
     private const int ShadowResolution = 10;
     private const int ShadowRadius = 15;
     private const int ShadowDiameter = 2 * ShadowRadius;
+
+    public readonly RenderTarget2D ShadowTarget;
+    public readonly Effect ScreenEffect;
 
     private readonly VertexBuffer _spriteVertexBuffer;
 
@@ -49,9 +53,11 @@ public class SpriteRenderer
     private int _sprites;
     private readonly int _maxSprites;
 
-    public readonly RenderTarget2D ShadowTarget;
+    private RenderTarget2D? _spriteTarget;
+    private readonly VertexBuffer _screenVertexBuffer;
+    private readonly IndexBuffer _screenIndexBuffer;
 
-    public SpriteRenderer(int maxSprites, GraphicsDevice graphicsDevice)
+    public SpriteRenderer(int maxSprites, GraphicsDevice graphicsDevice, ContentManager contentManager)
     {
         var maxVertices = maxSprites * 4;
         var maxIndices = maxSprites * 6;
@@ -76,6 +82,28 @@ public class SpriteRenderer
         const int targetSize = ShadowResolution * Resources.TileSize * ShadowDiameter;
         ShadowTarget = new RenderTarget2D(graphicsDevice, targetSize, targetSize, false,
             graphicsDevice.PresentationParameters.BackBufferFormat, DepthFormat.Depth24);
+
+        ScreenEffect = contentManager.Load<Effect>("ScreenEffect");
+        Resize(graphicsDevice);
+
+        _screenVertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionTexture),
+            ScreenMesh.Vertices.Length,
+            BufferUsage.WriteOnly);
+        _screenIndexBuffer = new IndexBuffer(graphicsDevice, typeof(ushort), ScreenMesh.Indices.Length,
+            BufferUsage.WriteOnly);
+        _screenVertexBuffer.SetData(ScreenMesh.Vertices, 0, ScreenMesh.Vertices.Length);
+        _screenIndexBuffer.SetData(ScreenMesh.Indices, 0, ScreenMesh.Indices.Length);
+    }
+
+    public void Resize(GraphicsDevice graphicsDevice)
+    {
+        var width = graphicsDevice.Viewport.Width;
+        var height = graphicsDevice.Viewport.Height;
+
+        _spriteTarget = new RenderTarget2D(graphicsDevice, width, height, false,
+            graphicsDevice.PresentationParameters.BackBufferFormat, DepthFormat.Depth24);
+        ScreenEffect.Parameters["ModelTexture"].SetValue(_spriteTarget);
+        ScreenEffect.Parameters["OutlineWidth"].SetValue(new Vector2(1f / width, 1f / height));
     }
 
     public void Add(Vector3 position, Sprite sprite, ShadowType shadowType = ShadowType.Large)
@@ -135,29 +163,60 @@ public class SpriteRenderer
         _rotationMatrix = rotationMatrix;
     }
 
-    public void DrawSprites(GraphicsDevice graphicsDevice)
+    public void DrawSpritesToTexture(GraphicsDevice graphicsDevice, Resources resources, Camera camera, ClientMap map)
     {
         if (_primitives == 0) return;
 
-        graphicsDevice.SetVertexBuffer(_spriteVertexBuffer);
-        graphicsDevice.Indices = _spriteIndexBuffer;
-        graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, _primitives);
+        graphicsDevice.SetRenderTarget(_spriteTarget);
+
+        graphicsDevice.Clear(Color.Transparent);
+        graphicsDevice.ClearState();
+
+        camera.Texture = resources.MapTexture;
+        foreach (var currentPass in camera.Passes)
+        {
+            currentPass.Apply();
+            map.Draw(graphicsDevice);
+        }
+
+        graphicsDevice.Clear(ClearOptions.Target, Color.Transparent, 0f, 0);
+
+        camera.Texture = resources.SpriteTexture;
+        foreach (var currentPass in camera.Passes)
+        {
+            currentPass.Apply();
+            graphicsDevice.SetVertexBuffer(_spriteVertexBuffer);
+            graphicsDevice.Indices = _spriteIndexBuffer;
+            graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, _primitives);
+        }
+
+        graphicsDevice.SetRenderTarget(null);
     }
 
-    public void DrawShadowsToTexture(Vector3 viewPosition, GraphicsDevice graphicsDevice, Resources resources, SpriteBatch spriteBatch)
+    public void DrawSprites(GraphicsDevice graphicsDevice)
+    {
+        graphicsDevice.BlendState = BlendState.AlphaBlend;
+        graphicsDevice.SetVertexBuffer(_screenVertexBuffer);
+        graphicsDevice.Indices = _screenIndexBuffer;
+        graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
+        graphicsDevice.BlendState = BlendState.Opaque;
+    }
+
+    public void DrawShadowsToTexture(Vector3 viewPosition, GraphicsDevice graphicsDevice, Resources resources,
+        SpriteBatch spriteBatch)
     {
         graphicsDevice.SetRenderTarget(ShadowTarget);
         graphicsDevice.Clear(Color.Transparent);
 
         spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-        
+
         const int positionMultiplier = ShadowResolution * Resources.TileSize;
         var scale = new Vector2(ShadowResolution);
         var offset = new Vector2(viewPosition.X - ShadowRadius, viewPosition.Z - ShadowRadius);
 
         for (var i = 0; i < _sprites; i++)
         {
-            var position =  (_spriteShadows[i].Position - offset) * positionMultiplier;
+            var position = (_spriteShadows[i].Position - offset) * positionMultiplier;
             var shadowRectangle = _spriteShadows[i].ShadowType == ShadowType.Large
                 ? Resources.ShadowLargeRectangle
                 : Resources.ShadowSmallRectangle;
@@ -174,15 +233,14 @@ public class SpriteRenderer
     {
         var offset = new Vector3(viewPosition.X - ShadowRadius, 0f, viewPosition.Z - ShadowRadius);
 
-        
         for (var i = 0; i < ShadowMapVertices.Length; i++)
         {
             _shadowMapVertices[i] = ShadowMapVertices[i];
             _shadowMapVertices[i].Position += offset;
         }
-        
+
         _shadowVertexBuffer.SetData(_shadowMapVertices, 0, ShadowMapVertices.Length);
-        
+
         graphicsDevice.BlendState = BlendState.AlphaBlend;
         graphicsDevice.SetVertexBuffer(_shadowVertexBuffer);
         graphicsDevice.Indices = _shadowIndexBuffer;

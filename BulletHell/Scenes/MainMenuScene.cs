@@ -11,7 +11,7 @@ public class MainMenuScene : IScene
     private const float IpInputX = BulletHell.UiCenterX - Resources.TileSize * 3.25f;
     private const int IpInputY = BulletHell.UiCenterY + Resources.TileSize * 4;
     private const float PlayerButtonX = IpInputX + Resources.TileSize * 13;
-    
+
     private readonly BulletHell _game;
     private readonly TextInput _ipInput;
     private readonly TextButton _playButton;

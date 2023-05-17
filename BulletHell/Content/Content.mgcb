@@ -13,11 +13,11 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin OutlineEffect.fx
+#begin ScreenEffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
-/build:OutlineEffect.fx
+/build:ScreenEffect.fx
 
 #begin sprites.png
 /importer:TextureImporter
@@ -54,4 +54,10 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:ui.png
+
+#begin WorldEffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:WorldEffect.fx
 

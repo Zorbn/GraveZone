@@ -16,7 +16,7 @@ public class GameScene : IScene
     private const float AnimationFrameTime = 0.25f;
 
     public readonly Client Client = new();
-    
+
     // An internal server may be started alongside the client
     // if it is requested when this scene is created.
     private readonly Server.Server? _internalServer;
@@ -42,7 +42,7 @@ public class GameScene : IScene
         _game = game;
 
         _camera = new Camera(game.GraphicsDevice, _game.Content);
-        _spriteRenderer = new SpriteRenderer(1024, game.GraphicsDevice);
+        _spriteRenderer = new SpriteRenderer(1024, game.GraphicsDevice, _game.Content);
 
         _quitButton = new ImageButton(ClientInventory.X - Resources.TileSize,
             ClientInventory.Y + Resources.TileSize * 3, ImageButton.QuitRectangle);
@@ -125,7 +125,7 @@ public class GameScene : IScene
         if (hasLocalPlayer)
         {
             Debug.Assert(localPlayer is not null);
-            
+
             var uiCapturedMouse = PreUpdateLocal(input, localPlayer);
 
             // If the mouse was interacting with the ui that needs to be recorded so that mouse
@@ -139,9 +139,9 @@ public class GameScene : IScene
         for (var i = _particlePool.ParticleEffects.Count - 1; i >= 0; i--)
         {
             var particleExceededLifeTime = _particlePool.ParticleEffects[i].Update(_map, deltaTime);
-            
+
             if (!particleExceededLifeTime) continue;
-            
+
             _particlePool.DespawnParticle(i);
         }
 
@@ -173,17 +173,19 @@ public class GameScene : IScene
         _camera.UpdateViewMatrices();
 
         _spriteRenderer.Begin(_camera.SpriteMatrix);
-        
+
         foreach (var (_, player) in _players) player.AddSprite(_spriteRenderer);
 
         _map.AddSprites(_spriteRenderer, _animationFrame);
 
         foreach (var particleEffect in _particlePool.ParticleEffects) particleEffect.AddSprites(_spriteRenderer);
-        
+
         _spriteRenderer.End();
-        
+
         _spriteRenderer.DrawShadowsToTexture(_camera.Position, _game.GraphicsDevice, _game.Resources,
             _game.SpriteBatch);
+
+        _spriteRenderer.DrawSpritesToTexture(_game.GraphicsDevice, _game.Resources, _camera, _map);
     }
 
     public void Draw()
@@ -202,15 +204,6 @@ public class GameScene : IScene
             _map.Draw(_game.GraphicsDevice);
         }
 
-        _camera.Texture = _game.Resources.SpriteTexture;
-        _camera.UseOutline = true;
-        foreach (var currentPass in _camera.Passes)
-        {
-            currentPass.Apply();
-            _spriteRenderer.DrawSprites(_game.GraphicsDevice);
-        }
-        _camera.UseOutline = false;
-
         _camera.Texture = _spriteRenderer.ShadowTarget;
         _camera.EffectAlpha = Resources.ShadowAlpha;
         foreach (var currentPass in _camera.Passes)
@@ -220,6 +213,12 @@ public class GameScene : IScene
         }
 
         _camera.EffectAlpha = 1f;
+
+        foreach (var currentPass in _spriteRenderer.ScreenEffect.CurrentTechnique.Passes)
+        {
+            currentPass.Apply();
+            _spriteRenderer.DrawSprites(_game.GraphicsDevice);
+        }
 
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
 
@@ -233,6 +232,7 @@ public class GameScene : IScene
     public void Resize(int width, int height)
     {
         _camera.Resize(width, height);
+        _spriteRenderer.Resize(_game.GraphicsDevice);
     }
 
     private bool PreUpdateLocal(Input input, ClientPlayer localPlayer)
@@ -253,14 +253,10 @@ public class GameScene : IScene
     private void PostUpdate()
     {
         foreach (var playerHit in _map.LastUpdateResults.PlayerHits)
-        {
             _particlePool.SpawnParticle(ParticleEffectType.Hit, playerHit.Entity.Position);
-        }
-        
+
         foreach (var enemyHit in _map.LastUpdateResults.EnemyHits)
-        {
             _particlePool.SpawnParticle(ParticleEffectType.Hit, enemyHit.Entity.Position);
-        }
     }
 
     private void PostUpdateLocal(ClientPlayer localPlayer)

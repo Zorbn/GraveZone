@@ -38,7 +38,7 @@ public class WeaponStats
             new ProjectileSpawnData
                 { ProjectileType = ProjectileType.ThrownSword, Angle = 315f, RelativeToForward = false }
         }));
-        
+
         Register(new WeaponStats(WeaponType.FireWand, WeaponType.None, 0.5f, 1.0f, Sprite.FireWand, new[]
         {
             new ProjectileSpawnData
@@ -65,9 +65,7 @@ public class WeaponStats
         ProjectileSpawns = new ReadOnlyCollection<ProjectileSpawnData>(projectileSpawns);
 
         foreach (var projectileSpawn in ProjectileSpawns)
-        {
             AttackRange = Math.Max(AttackRange, ProjectileStats.Registry[projectileSpawn.ProjectileType].Range);
-        }
     }
 
     private static void Register(WeaponStats weaponStats)

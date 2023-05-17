@@ -38,10 +38,7 @@ public class ClientPlayer : Player
         movement.Normalize();
 
         var currentSpeed = Speed * deltaTime;
-        if (Inventory.EquippedWeaponStats is not null)
-        {
-            currentSpeed *= Inventory.EquippedWeaponStats.SpeedMultiplier;
-        }
+        if (Inventory.EquippedWeaponStats is not null) currentSpeed *= Inventory.EquippedWeaponStats.SpeedMultiplier;
 
         var newPosition = Position;
         newPosition.X += movement.X * currentSpeed;
@@ -100,7 +97,7 @@ public class ClientPlayer : Player
         _healthRegenTimer += deltaTime;
 
         var wasAbleToRegen = _healthRegenStartTimer >= HealthRegenStartTime;
-        
+
         _healthRegenStartTimer += deltaTime;
 
         // Health regen is calculated on the client to maintain consistency with
@@ -108,11 +105,8 @@ public class ClientPlayer : Player
         // a player's health de-syncing across the clients/server.
         if (_healthRegenStartTimer < HealthRegenStartTime) return;
 
-        if (!wasAbleToRegen)
-        {
-            _healthRegenTimer = 0f;
-        }
-        
+        if (!wasAbleToRegen) _healthRegenTimer = 0f;
+
         while (_healthRegenTimer > HealthRegenTime)
         {
             _healthRegenTimer -= HealthRegenTime;
@@ -172,7 +166,7 @@ public class ClientPlayer : Player
         var currentHealthBarWidth = (int)(HealthBarWidth * (Health / (float)MaxHealth));
         healthBarDestination.Width = currentHealthBarWidth;
         spriteBatch.Draw(resources.UiTexture, healthBarDestination, Resources.WhiteRectangle, Color.Red);
-        
+
         ClientInventory.Draw(resources, spriteBatch);
     }
 }

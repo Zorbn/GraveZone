@@ -14,8 +14,7 @@ public class Camera
     private const int WorldMatrixUpdated = 0b000100;
     private const int ViewMatrixUpdated = 0b001000;
     private const int ProjectionMatrixUpdated = 0b010000;
-    private const int UseOutlineUpdated = 0b100000;
-    
+
     public EffectPassCollection Passes
     {
         get
@@ -30,11 +29,9 @@ public class Camera
                 _effect.Parameters["View"].SetValue(ViewMatrix);
             if ((_updateMask & ProjectionMatrixUpdated) > 0)
                 _effect.Parameters["Projection"].SetValue(ProjectionMatrix);
-            if ((_updateMask & UseOutlineUpdated) > 0)
-                _effect.Parameters["UseOutline"].SetValue(UseOutline);
 
             _updateMask = 0;
-            
+
             return _effect.CurrentTechnique.Passes;
         }
     }
@@ -50,7 +47,7 @@ public class Camera
             _worldMatrix = value;
         }
     }
-    
+
     public Matrix ViewMatrix
     {
         get => _viewMatrix;
@@ -60,7 +57,7 @@ public class Camera
             _viewMatrix = value;
         }
     }
-    
+
     public Matrix ProjectionMatrix
     {
         get => _projectionMatrix;
@@ -91,16 +88,6 @@ public class Camera
         }
     }
 
-    public bool UseOutline
-    {
-        get => _useOutline;
-        set
-        {
-            _updateMask |= UseOutlineUpdated;
-            _useOutline = value;
-        }
-    }
-    
     public Vector3 Forward { get; private set; }
     public Vector3 Right { get; private set; }
     public int Width { get; private set; }
@@ -108,7 +95,7 @@ public class Camera
 
     private readonly Effect _effect;
     public Vector3 Position { get; set; }
-    
+
     private int _updateMask = int.MaxValue;
     private float _angle;
     private Matrix _worldMatrix;
@@ -116,15 +103,13 @@ public class Camera
     private Matrix _projectionMatrix;
     private float _effectAlpha;
     private Texture2D? _texture;
-    private bool _useOutline;
-    
+
     public Camera(GraphicsDevice graphicsDevice, ContentManager contentManager)
     {
-        _effect = contentManager.Load<Effect>("OutlineEffect");
-        _effect.Parameters["OutlineWidth"].SetValue(SpriteMesh.OutlineWidth);
-        
+        _effect = contentManager.Load<Effect>("WorldEffect");
+
         WorldMatrix = Matrix.Identity;
-        
+
         Resize(graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height);
     }
 
@@ -146,7 +131,7 @@ public class Camera
         _angle = 0f;
     }
 
-    private Matrix CalculateProjectionMatrix(int width, int height)
+    private static Matrix CalculateProjectionMatrix(int width, int height)
     {
         return Matrix.CreateOrthographic(
             width / (float)height * ViewScale, ViewScale, -20f, 20f);

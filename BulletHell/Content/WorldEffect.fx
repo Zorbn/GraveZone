@@ -2,8 +2,6 @@
 float4x4 View;
 float4x4 Projection;
 float Alpha;
-float OutlineWidth;
-bool UseOutline;
 
 texture ModelTexture;
 sampler2D textureSampler = sampler_state {
@@ -46,32 +44,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
     float4 textureColor = tex2D(textureSampler, input.TextureCoordinate);
     
-    if (textureColor.a < 1.0)
-    {
-        if (UseOutline)
-        {
-            float alpha = textureColor.a;
-            
-            // Sides:
-            alpha = max(alpha, tex2D(textureSampler, input.TextureCoordinate + float2(OutlineWidth, 0.0)).a);
-            alpha = max(alpha, tex2D(textureSampler, input.TextureCoordinate - float2(OutlineWidth, 0.0)).a);
-            alpha = max(alpha, tex2D(textureSampler, input.TextureCoordinate + float2(0.0, OutlineWidth)).a);
-            alpha = max(alpha, tex2D(textureSampler, input.TextureCoordinate - float2(0.0, OutlineWidth)).a);
-            
-            // Corners:
-            alpha = max(alpha, tex2D(textureSampler, input.TextureCoordinate + float2(OutlineWidth, OutlineWidth)).a);
-            alpha = max(alpha, tex2D(textureSampler, input.TextureCoordinate - float2(OutlineWidth, -OutlineWidth)).a);
-            alpha = max(alpha, tex2D(textureSampler, input.TextureCoordinate + float2(OutlineWidth, -OutlineWidth)).a);
-            alpha = max(alpha, tex2D(textureSampler, input.TextureCoordinate - float2(OutlineWidth, OutlineWidth)).a);
-            
-            if (alpha > textureColor.a)
-            {
-                return float4(0.1, 0.1, 0.1, 1.0);
-            }
-        }
-    
-        discard;
-    }
+    if (textureColor.a < 1.0) discard;
     
     float4 color = textureColor * input.Color;
     color.a = Alpha;

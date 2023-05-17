@@ -47,7 +47,7 @@ public class Map
         { MapZone.Roads, Tile.Air },
         { MapZone.Ruins, Tile.Marble }
     };
-    
+
     private static readonly Dictionary<MapZone, Sprite> SpritesPerZone = new()
     {
         { MapZone.Beach, Sprite.PalmTree },
@@ -105,20 +105,18 @@ public class Map
 
             var sprite = SpritesPerZone[zone];
             if (sprite != Sprite.None && _random.NextSingle() < 0.1f)
-            {
                 DecorationSprites.Add(new DecorationSprite
                 {
                     Sprite = sprite,
                     Position = new Vector3(x + 0.5f, 0f, z + 0.5f)
                 });
-            }
         }
     }
 
     public Vector3? GetSpawnPosition()
     {
         if (_random is null) return null;
-        
+
         for (var i = _random.Next(TileCount); i < TileCount; i = (i + 1) % TileCount)
         {
             var x = i % Size;
@@ -148,9 +146,9 @@ public class Map
         foreach (var (droppedWeaponId, droppedWeapon) in DroppedWeapons)
         {
             var shouldDespawn = droppedWeapon.Update(deltaTime);
-            
+
             if (!shouldDespawn) continue;
-            
+
             LastUpdateResults.WeaponsToDespawn.Add(droppedWeaponId);
         }
     }
@@ -188,7 +186,7 @@ public class Map
     public Enemy? SpawnRandomEnemy(float x, float z, int id, Attacker attacker)
     {
         if (_random is null) return null;
-        
+
         var enemyType = EnemyStats.EnemyTypes.Choose(_random);
         return SpawnEnemy(enemyType, x, z, id, attacker);
     }
@@ -196,7 +194,7 @@ public class Map
     public Enemy? SpawnEnemy(EnemyType enemyType, float x, float z, int id, Attacker? attacker, int? health = null)
     {
         if (Enemies.ContainsKey(id)) return null;
-        
+
         var tileX = (int)x;
         var tileZ = (int)z;
 
@@ -225,7 +223,7 @@ public class Map
     public bool DropWeapon(WeaponType weaponType, float x, float z, int id)
     {
         if (DroppedWeapons.ContainsKey(id)) return false;
-        
+
         var droppedWeapon = new Weapon(weaponType, x, z, id);
         var tileX = (int)droppedWeapon.Position.X;
         var tileZ = (int)droppedWeapon.Position.Z;

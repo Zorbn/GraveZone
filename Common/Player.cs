@@ -69,7 +69,7 @@ public class Player
         Health += amount;
 
         if (Health <= MaxHealth) return;
-        
+
         Health = MaxHealth;
     }
 }

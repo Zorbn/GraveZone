@@ -10,7 +10,7 @@ public class ParticleEffect
     private const float SpawnRadius = 0.25f;
     private const float SpawnDiameter = 2f * SpawnRadius;
     private static readonly Vector3 Size = new(0.6f, 0.6f, 0.6f);
-    
+
     private struct Particle
     {
         public Vector3 Position;
@@ -71,7 +71,7 @@ public class ParticleEffect
 
             _particles[i].Velocity.Y -= Gravity * deltaTime;
             newParticlePosition.Y += _particles[i].Velocity.Y * deltaTime;
-            
+
             if (newParticlePosition.Y < 0f)
             {
                 newParticlePosition.Y = _particles[i].Position.Y;
@@ -87,8 +87,6 @@ public class ParticleEffect
     public void AddSprites(SpriteRenderer spriteRenderer)
     {
         for (var i = 0; i < _particles!.Length; i++)
-        {
             spriteRenderer.Add(_position + _particles[i].Position, _particleEffectStats!.Sprite, ShadowType.Small);
-        }
     }
 }

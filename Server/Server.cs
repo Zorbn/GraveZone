@@ -28,7 +28,7 @@ public class Server
 
     private bool _isRunning;
     private int _tickCount;
-   
+
     public Server()
     {
         _netPacketProcessor = new NetPacketProcessor();
@@ -75,14 +75,14 @@ public class Server
         {
             // TODO: Use AcceptIfKey/Connection keys to make servers password protected.
             request.Accept();
-            
+
             // Poll again to make sure PeerConnected is handled before the next server tick,
             // otherwise the new client may receive duplicate data, one copy sent after an update
             // during the next tick, and the next copy send during PeerConnected.
             // This could cause the new client to be told to spawn a new enemy twice, for example.
             _manager.PollEvents();
         };
-        
+
         _listener.PeerConnectedEvent += peer =>
         {
             Console.WriteLine($"Connection from IP: {peer.EndPoint} with ID: {peer.Id}");
@@ -140,7 +140,7 @@ public class Server
         _map.Update(TickTime);
 
         foreach (var enemyHit in _map.LastUpdateResults.EnemyHits) ServerDamageEnemy(enemyHit.Entity, enemyHit.Damage);
-        
+
         foreach (var weaponToDespawn in _map.LastUpdateResults.WeaponsToDespawn) ServerDespawnWeapon(weaponToDespawn);
 
         ServerMapUpdate();
@@ -173,9 +173,9 @@ public class Server
             }
 
             var enemyMoved = enemy.UpdateServer(_map, TickTime);
-            
+
             if (!enemyMoved) continue;
-            
+
             SendToAll(new EnemyMove
             {
                 Id = enemyId,
@@ -355,7 +355,7 @@ public class Server
             WeaponType = weaponType
         }, DeliveryMethod.ReliableOrdered);
     }
-    
+
     private void ServerDespawnWeapon(int droppedWeaponId)
     {
         _map.PickupWeapon(droppedWeaponId);
@@ -462,7 +462,7 @@ public class Server
             Z = spawnPosition.Z
         }, DeliveryMethod.ReliableOrdered);
     }
-    
+
     private void OnPlayerHeal(PlayerHeal playerHeal, NetPeer peer)
     {
         if (!_players.TryGetValue(peer.Id, out var player)) return;

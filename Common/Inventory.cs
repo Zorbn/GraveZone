@@ -74,7 +74,7 @@ public class Inventory
         // an evolution available. Otherwise just swap the two weapons.
         if (inSlot is null || grabbed is null || inSlot.Evolution == WeaponType.None ||
             inSlot.WeaponType != grabbed.WeaponType) return (grabbed, inSlot);
-        
+
         inSlot = WeaponStats.Registry[inSlot.Evolution];
         grabbed = null;
 
@@ -92,7 +92,7 @@ public class Inventory
     public void UpdateInventory(UpdateInventory updateInventory)
     {
         if (updateInventory.Weapons is null) return;
-        
+
         for (var i = 0; i < SlotCount; i++) Weapons[i] = WeaponStats.Registry[(WeaponType)updateInventory.Weapons[i]];
 
         EquippedWeaponStats = WeaponStats.Registry[(WeaponType)updateInventory.EquippedWeapon];
