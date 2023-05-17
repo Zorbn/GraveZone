@@ -13,7 +13,7 @@ public class EnemyStats
             new[] { Sprite.MimicClosed, Sprite.MimicVampire }));
         Register(new EnemyStats(EnemyType.ShelledMimic, WeaponType.Sword, 0.2f, 30, 1f,
             new[] { Sprite.MimicClosed, Sprite.MimicShelled }));
-        Register(new EnemyStats(EnemyType.Solider, WeaponType.Sword, 0.2f, 30, 1f,
+        Register(new EnemyStats(EnemyType.Solider, WeaponType.Spear, 0.2f, 30, 1f,
             new[] { Sprite.SoliderStepLeft, Sprite.SoliderIdle, Sprite.SoliderStepRight, Sprite.SoliderIdle }));
         Register(new EnemyStats(EnemyType.Dragon, WeaponType.FireWand, 0.02f, 50, 0.5f,
             new[] { Sprite.DragonStepLeft, Sprite.DragonIdle, Sprite.DragonStepRight, Sprite.DragonIdle }));

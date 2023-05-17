@@ -21,5 +21,6 @@ public enum Sprite
     Dagger = 600,
     Sword = 601,
     FireWand = 602,
-    Fireball = 603
+    Fireball = 603,
+    Spear = 604
 }

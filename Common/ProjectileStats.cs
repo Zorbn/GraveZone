@@ -9,6 +9,7 @@ public class ProjectileStats
         Register(new ProjectileStats(ProjectileType.ThrownDagger, 5, 3f, Sprite.Dagger));
         Register(new ProjectileStats(ProjectileType.ThrownSword, 10, 1.5f, Sprite.Sword));
         Register(new ProjectileStats(ProjectileType.Fireball, 25, 5f, Sprite.Fireball));
+        Register(new ProjectileStats(ProjectileType.Spear, 10, 3f, Sprite.Spear));
     }
 
     public readonly Sprite Sprite;

@@ -5,5 +5,6 @@ public enum WeaponType
     None,
     Dagger,
     Sword,
-    FireWand
+    FireWand,
+    Spear
 }

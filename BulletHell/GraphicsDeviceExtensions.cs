@@ -10,7 +10,6 @@ public static class GraphicsDeviceExtensions
         // Using the sprite batch modifies these to different values.
         graphicsDevice.BlendState = BlendState.Opaque;
         graphicsDevice.DepthStencilState = DepthStencilState.Default;
-        graphicsDevice.RasterizerState = new RasterizerState { MultiSampleAntiAlias = true };
         graphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
     }
 }

@@ -100,7 +100,7 @@ public class BulletHell : Game
 
         _input.Update(IsActive);
         _scene.Update(_input, deltaTime);
-        
+
         if (_input.WasKeyPressed(Keys.F11)) ToggleFullscreen();
 
         if (_nextScene is not null)
@@ -141,14 +141,14 @@ public class BulletHell : Game
             DisableFullscreen();
             return;
         }
-        
+
         EnableFullscreen();
     }
 
     private void EnableFullscreen()
     {
         _isFullscreen = true;
-        
+
         _windowedWidth = Window.ClientBounds.Width;
         _windowedHeight = Window.ClientBounds.Height;
 
@@ -162,7 +162,7 @@ public class BulletHell : Game
     private void DisableFullscreen()
     {
         _isFullscreen = false;
-        
+
         _graphics.PreferredBackBufferWidth = _windowedWidth;
         _graphics.PreferredBackBufferHeight = _windowedHeight;
         _graphics.IsFullScreen = false;

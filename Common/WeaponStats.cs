@@ -11,7 +11,7 @@ public class WeaponStats
 
     static WeaponStats()
     {
-        Register(new WeaponStats(WeaponType.Dagger, WeaponType.Sword, 0.2f, 1.5f, Sprite.Dagger, new[]
+        Register(new WeaponStats(WeaponType.Dagger, WeaponType.None, 0.2f, 1.5f, Sprite.Dagger, new[]
         {
             new ProjectileSpawnData
                 { ProjectileType = ProjectileType.ThrownDagger, Angle = -10f, RelativeToForward = true },
@@ -43,6 +43,12 @@ public class WeaponStats
         {
             new ProjectileSpawnData
                 { ProjectileType = ProjectileType.Fireball, Angle = 0f, RelativeToForward = true }
+        }));
+
+        Register(new WeaponStats(WeaponType.Spear, WeaponType.Dagger, 0.5f, 1f, Sprite.Spear, new[]
+        {
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.Spear, Angle = 0f, RelativeToForward = true }
         }));
     }
 
