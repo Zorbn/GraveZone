@@ -48,7 +48,19 @@ public class WeaponStats
         Register(new WeaponStats(WeaponType.Spear, WeaponType.Dagger, 0.5f, 1f, Sprite.Spear, new[]
         {
             new ProjectileSpawnData
-                { ProjectileType = ProjectileType.Spear, Angle = 0f, RelativeToForward = true }
+                { ProjectileType = ProjectileType.ThrownSpear, Angle = 0f, RelativeToForward = true }
+        }));
+
+        Register(new WeaponStats(WeaponType.Knife, WeaponType.Machete, 0.5f, 1.5f, Sprite.Knife, new[]
+        {
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownKnife, Angle = 0f, RelativeToForward = true }
+        }));
+
+        Register(new WeaponStats(WeaponType.Machete, WeaponType.None, 0.5f, 2f, Sprite.Machete, new[]
+        {
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownMachete, Angle = 0f, RelativeToForward = true }
         }));
     }
 

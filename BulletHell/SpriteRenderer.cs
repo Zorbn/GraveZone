@@ -14,7 +14,7 @@ public class SpriteRenderer
     }
 
     private const int ShadowResolution = 10;
-    private const int ShadowRadius = 15;
+    private const int ShadowRadius = 17;
     private const int ShadowDiameter = 2 * ShadowRadius;
 
     public readonly RenderTarget2D ShadowTarget;

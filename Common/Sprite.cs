@@ -15,6 +15,9 @@ public enum Sprite
     DragonStepLeft = 10,
     DragonIdle = 11,
     DragonStepRight = 12,
+    NinjaStepLeft = 13,
+    NinjaIdle = 14,
+    NinjaStepRight = 15,
     LargeShadow = 25,
     SmallShadow = 26,
     Hit = 27,
@@ -22,5 +25,7 @@ public enum Sprite
     Sword = 601,
     FireWand = 602,
     Fireball = 603,
-    Spear = 604
+    Spear = 604,
+    Knife = 605,
+    Machete = 606
 }
