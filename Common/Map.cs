@@ -26,6 +26,7 @@ public class Map
 
     private const int Exponent = 6;
     protected static readonly int Size = (int)Math.Pow(2, Exponent) + 1;
+    private static readonly int BossArenaRadius = (int)Math.Ceiling(Size * 0.125f);
     private static readonly int TileCount = Size * Size;
     protected const float TileScale = 1f;
     protected const float TileHeight = 2f;
@@ -37,7 +38,8 @@ public class Map
         { MapZone.Beach, Tile.Sand },
         { MapZone.Grasslands, Tile.Grass },
         { MapZone.Roads, Tile.Path },
-        { MapZone.Ruins, Tile.Marble }
+        { MapZone.Ruins, Tile.Marble },
+        { MapZone.BossArena, Tile.Embers }
     };
 
     private static readonly Dictionary<MapZone, Tile> WallTilesPerZone = new()
@@ -45,7 +47,8 @@ public class Map
         { MapZone.Beach, Tile.Air },
         { MapZone.Grasslands, Tile.Flower },
         { MapZone.Roads, Tile.Air },
-        { MapZone.Ruins, Tile.Marble }
+        { MapZone.Ruins, Tile.Marble },
+        { MapZone.BossArena, Tile.Air }
     };
 
     private static readonly Dictionary<MapZone, Sprite> SpritesPerZone = new()
@@ -53,7 +56,8 @@ public class Map
         { MapZone.Beach, Sprite.PalmTree },
         { MapZone.Grasslands, Sprite.None },
         { MapZone.Roads, Sprite.None },
-        { MapZone.Ruins, Sprite.None }
+        { MapZone.Ruins, Sprite.None },
+        { MapZone.BossArena, Sprite.EmberGrave }
     };
 
     public readonly Dictionary<int, Weapon> DroppedWeapons = new();
@@ -86,13 +90,26 @@ public class Map
         for (var x = 0; x < Size; ++x)
         {
             var i = x + z * Size;
-            var zone = _midpointDisplacement.Heightmap[i] switch
+
+            var centeredX = x - Size * 0.5f;
+            var centeredZ = z - Size * 0.5f;
+
+            MapZone zone;
+
+            if (centeredX * centeredX + centeredZ * centeredZ < BossArenaRadius * BossArenaRadius)
             {
-                < 0.3f => MapZone.Beach,
-                < 0.6f => MapZone.Grasslands,
-                < 0.7f => MapZone.Roads,
-                _ => MapZone.Ruins
-            };
+                zone = MapZone.BossArena;
+            }
+            else
+            {
+                zone = _midpointDisplacement.Heightmap[i] switch
+                {
+                    < 0.3f => MapZone.Beach,
+                    < 0.6f => MapZone.Grasslands,
+                    < 0.7f => MapZone.Roads,
+                    _ => MapZone.Ruins
+                };
+            }
 
             _floorTiles[i] = FloorTilesPerZone[zone];
 

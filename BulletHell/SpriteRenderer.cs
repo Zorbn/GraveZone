@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using System;
+using Common;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,7 +11,7 @@ public class SpriteRenderer
     private struct SpriteShadow
     {
         public Vector2 Position;
-        public ShadowType ShadowType;
+        public SpriteSize Size;
     }
 
     private const int ShadowResolution = 10;
@@ -106,22 +107,30 @@ public class SpriteRenderer
         ScreenEffect.Parameters["OutlineWidth"].SetValue(new Vector2(1f / width, 1f / height));
     }
 
-    public void Add(Vector3 position, Sprite sprite, ShadowType shadowType = ShadowType.Large)
+    public void Add(Vector3 position, Sprite sprite, SpriteSize size = SpriteSize.Medium)
     {
         if (_sprites >= _maxSprites) return;
 
+        var scale = size switch
+        {
+            SpriteSize.Large => 2f,
+            SpriteSize.Medium => 1f,
+            SpriteSize.Small => 1f,
+            _ => throw new ArgumentOutOfRangeException(nameof(size), size, null)
+        };
+
         _spriteShadows[_sprites] = new SpriteShadow
         {
-            Position = new Vector2(position.X - 0.5f, position.Z - 0.5f),
-            ShadowType = shadowType
+            Position = new Vector2(position.X - scale * 0.5f, position.Z - scale * 0.5f),
+            Size = size
         };
-        AddSprite(position, sprite);
+        AddSprite(position, sprite, scale);
 
         ++_sprites;
         _primitives += 2;
     }
 
-    private void AddSprite(Vector3 position, Sprite sprite)
+    private void AddSprite(Vector3 position, Sprite sprite, float scale)
     {
         var baseVertexCount = _spriteVertexI;
         foreach (var index in SpriteMesh.Indices)
@@ -136,10 +145,11 @@ public class SpriteRenderer
         {
             var newVertex = vertex;
             newVertex.Position = Vector3.Transform(vertex.Position, _rotationMatrix);
-            newVertex.Position.X *= 0.8f;
-            newVertex.Position.Y *= 1.75f;
-            newVertex.Position.Z *= 0.8f;
+            newVertex.Position.X *= scale * 0.8f;
+            newVertex.Position.Y *= scale * 1.75f;
+            newVertex.Position.Z *= scale * 0.8f;
             newVertex.Position += position;
+            newVertex.TextureCoordinate *= scale;
             newVertex.TextureCoordinate += new Vector2(texCoords.X, texCoords.Y);
             _spriteVertices[_spriteVertexI] = newVertex;
             ++_spriteVertexI;
@@ -217,9 +227,14 @@ public class SpriteRenderer
         for (var i = 0; i < _sprites; i++)
         {
             var position = (_spriteShadows[i].Position - offset) * positionMultiplier;
-            var shadowRectangle = _spriteShadows[i].ShadowType == ShadowType.Large
-                ? Resources.ShadowLargeRectangle
-                : Resources.ShadowSmallRectangle;
+            var shadowRectangle = _spriteShadows[i].Size switch
+            {
+                SpriteSize.Large => Resources.ShadowLargeRectangle,
+                SpriteSize.Medium => Resources.ShadowMediumRectangle,
+                SpriteSize.Small => Resources.ShadowSmallRectangle,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
             spriteBatch.Draw(resources.SpriteTexture, position, shadowRectangle, Color.White, 0f,
                 Vector2.Zero, scale, SpriteEffects.None, 0f);
         }

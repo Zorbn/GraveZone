@@ -87,6 +87,6 @@ public class ParticleEffect
     public void AddSprites(SpriteRenderer spriteRenderer)
     {
         for (var i = 0; i < _particles!.Length; i++)
-            spriteRenderer.Add(_position + _particles[i].Position, _particleEffectStats!.Sprite, ShadowType.Small);
+            spriteRenderer.Add(_position + _particles[i].Position, _particleEffectStats!.Sprite, SpriteSize.Small);
     }
 }

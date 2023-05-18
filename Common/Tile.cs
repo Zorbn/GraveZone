@@ -8,5 +8,6 @@ public enum Tile
     Barrier,
     Flower,
     Path,
-    Sand
+    Sand,
+    Embers
 }

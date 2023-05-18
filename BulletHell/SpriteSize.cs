@@ -1,7 +1,8 @@
 ﻿namespace BulletHell;
 
-public enum ShadowType
+public enum SpriteSize
 {
     Large,
+    Medium,
     Small
 }

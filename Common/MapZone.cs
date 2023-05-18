@@ -5,5 +5,6 @@ public enum MapZone
     Beach,
     Grasslands,
     Roads,
-    Ruins
+    Ruins,
+    BossArena
 }

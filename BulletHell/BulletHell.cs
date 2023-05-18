@@ -14,6 +14,24 @@ namespace BulletHell;
  * Bosses,
  * Better monster spawning,
  * Save files,
+
+ Core loop:
+ 1. Over World: Kill enemies, each enemy is part of one of four factions (4 elements)
+    A counter on the hud keeps track of how many of each faction every player has killed
+    When you reach the max number of one type:
+ 2. Boss spawns, different boss per faction, killing it takes you to a new dimension
+ 3. You go to a dimension representing the element of the boss you killed, you now need to kill a certain number of
+    enemies here
+ 4. A super boss spawns for the area, once you kill it you go back to the normal world.
+
+ On each transition the player's stay in the same spot they were in.
+ (If a wall spawns where the player was, put them at a random location instead)
+ The boss drops persist when the level changes (so that player's have an opportunity to pick them up)
+
+ OR
+
+ On each transition the game waits for X amount of time (10 seconds?) to allow players to pick up drops,
+ then the level changes and all items are cleared or maybe only non-boss items are cleared.
  */
 public class BulletHell : Game
 {

@@ -15,8 +15,9 @@ public class Resources
 
     public static readonly Rectangle BlackRectangle = new(1, 19, TileSize, TileSize);
     public static readonly Rectangle WhiteRectangle = new(11, 19, TileSize, TileSize);
-    public static readonly Rectangle ShadowLargeRectangle = new(1, 11, TileSize, TileSize);
-    public static readonly Rectangle ShadowSmallRectangle = new(11, 11, TileSize, TileSize);
+    public static readonly Rectangle ShadowLargeRectangle = new(1, 11, TileSize * 2, TileSize * 2);
+    public static readonly Rectangle ShadowMediumRectangle = new(21, 11, TileSize, TileSize);
+    public static readonly Rectangle ShadowSmallRectangle = new(31, 11, TileSize, TileSize);
 
     public static readonly Color SkyColor = new(128, 119, 255, 255);
 
