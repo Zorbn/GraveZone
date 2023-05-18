@@ -18,8 +18,7 @@ public class ClientPlayer : Player
 
     private const float HealthRegenStartTime = 5f;
 
-    public readonly ClientInventory ClientInventory;
-
+    private readonly ClientInventory _clientInventory;
     private readonly Attacker _attacker;
     private float _healthRegenTimer;
     private float _healthRegenStartTimer;
@@ -27,7 +26,7 @@ public class ClientPlayer : Player
     public ClientPlayer(Attacker attacker, Map map, int id, float x, float z, int? health) : base(map, id, x, z, health)
     {
         _attacker = attacker;
-        ClientInventory = new ClientInventory(Inventory);
+        _clientInventory = new ClientInventory(Inventory);
     }
 
     private void Move(Vector3 movement, ClientMap map, Vector3 cameraForward, Vector3 cameraRight, float deltaTime)
@@ -147,6 +146,11 @@ public class ClientPlayer : Player
         SpritePosition = Vector3.Lerp(SpritePosition, Position, SpriteInfo.SpriteLerp * deltaTime);
     }
 
+    public bool UpdateInventory(Client client, Camera camera, Input input, Vector2 mousePosition)
+    {
+        return _clientInventory.Update(client, camera, input, mousePosition);
+    }
+
     public void Tick(Client client, float deltaTime)
     {
         if (ShouldUpdateLocally(client))
@@ -167,6 +171,6 @@ public class ClientPlayer : Player
         healthBarDestination.Width = currentHealthBarWidth;
         spriteBatch.Draw(resources.UiTexture, healthBarDestination, Resources.WhiteRectangle, Color.Red);
 
-        ClientInventory.Draw(resources, spriteBatch);
+        _clientInventory.Draw(resources, spriteBatch);
     }
 }

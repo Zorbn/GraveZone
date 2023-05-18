@@ -39,7 +39,8 @@ public class ClientInventory
         return (int)slotX + (int)slotY * Inventory.Width;
     }
 
-    public bool Update(Client client, Input input, Vector2 mousePosition)
+    // Returns true if the mouse input was captured by the inventory.
+    public bool Update(Client client, Camera camera, Input input, Vector2 mousePosition)
     {
         _mousePosition = mousePosition;
 
@@ -63,7 +64,7 @@ public class ClientInventory
 
         if (_inventory.GrabbedWeaponStats is not null)
         {
-            RequestDropGrabbed(client);
+            RequestDropGrabbed(client, camera);
             return true;
         }
 
@@ -123,8 +124,11 @@ public class ClientInventory
         client.SendToServer(new RequestGrabEquippedSlot(), DeliveryMethod.ReliableOrdered);
     }
 
-    private void RequestDropGrabbed(Client client)
+    private void RequestDropGrabbed(Client client, Camera camera)
     {
-        client.SendToServer(new RequestDropGrabbed(), DeliveryMethod.ReliableOrdered);
+        client.SendToServer(new RequestDropGrabbed
+        {
+            PlayerForward = new NetVector3(camera.Forward)
+        }, DeliveryMethod.ReliableOrdered);
     }
 }

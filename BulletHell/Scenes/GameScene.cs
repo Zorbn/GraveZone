@@ -245,7 +245,7 @@ public class GameScene : IScene
             if (_quitButton.Contains(mouseX, mouseY))
                 _game.SetScene(new MainMenuScene(_game));
 
-        var inventoryCapturedMouse = localPlayer.ClientInventory.Update(Client, input, mousePosition);
+        var inventoryCapturedMouse = localPlayer.UpdateInventory(Client, _camera, input, mousePosition);
 
         return inventoryCapturedMouse;
     }

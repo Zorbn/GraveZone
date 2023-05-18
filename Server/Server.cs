@@ -508,11 +508,17 @@ public class Server
         if (!_players.TryGetValue(peer.Id, out var player)) return;
 
         var droppedWeaponId = _nextDroppedWeaponId++;
-        player.Inventory.DropGrabbed(_map, player.Position.X, player.Position.Z, droppedWeaponId);
+
+        // The item should be dropped right behind the player so that it will appear slightly
+        // in-front of the player sprite from the player's camera's perspective.
+        var dropOffset = requestDropGrabbed.PlayerForward.ToVector3() * 0.01f;
+        var dropPosition = player.Position - dropOffset;
+
+        player.Inventory.DropGrabbed(_map, dropPosition.X, dropPosition.Z, droppedWeaponId);
         SendToAll(new DropGrabbed
         {
-            X = player.Position.X,
-            Z = player.Position.Z,
+            X = dropPosition.X,
+            Z = dropPosition.Z,
             DroppedWeaponId = droppedWeaponId,
             PlayerId = peer.Id
         }, DeliveryMethod.ReliableOrdered);

@@ -342,12 +342,16 @@ public struct GrabEquippedSlot : INetSerializable
 
 public struct RequestDropGrabbed : INetSerializable
 {
+    public NetVector3 PlayerForward;
+
     public void Serialize(NetDataWriter writer)
     {
+        writer.Put(PlayerForward);
     }
 
     public void Deserialize(NetDataReader reader)
     {
+        PlayerForward = reader.Get<NetVector3>();
     }
 }
 
