@@ -6,7 +6,7 @@ namespace Server;
 
 public class BossSpawner
 {
-    private const int EnemyKillsToSpawnBoss = 5;
+    private const int EnemyKillsToSpawnBoss = 20;
     private static readonly Vector3 BossSpawnPosition = new Vector3(Map.Size, 0f, Map.Size) * 0.5f;
 
     private int _enemiesKilled;
@@ -14,7 +14,8 @@ public class BossSpawner
 
     public void EnemyDied(Server server, Map map, ref int nextEnemyId)
     {
-        if (_currentBoss is not null) return;
+        // Don't progress towards spawning a new boss if the last one is still alive.
+        if (_currentBoss is not null && _currentBoss.Health > 0) return;
 
         ++_enemiesKilled;
 
