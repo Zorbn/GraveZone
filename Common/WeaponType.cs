@@ -8,5 +8,7 @@ public enum WeaponType
     FireWand,
     Spear,
     Knife,
-    Machete
+    Machete,
+    FireCharm,
+    FireStaff
 }

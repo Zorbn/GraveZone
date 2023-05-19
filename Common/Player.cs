@@ -54,8 +54,12 @@ public class Player
         map.PlayersInTiles.Remove(this, (int)Position.X, (int)Position.Z);
     }
 
+    // Returns true if the enemy died.
     public virtual bool TakeDamage(int damage)
     {
+        // The enemy can't die if it was already dead.
+        if (Health <= 0) return false;
+
         Health -= damage;
 
         if (Health > 0) return false;

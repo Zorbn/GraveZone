@@ -6,5 +6,6 @@ public enum EnemyType
     ShelledMimic,
     Solider,
     Dragon,
-    Ninja
+    Ninja,
+    ElderDragon
 }

@@ -12,6 +12,8 @@ public class Server
     private const int MaxSpawnedEnemies = 10;
     private const int TicksPerRepath = 2;
 
+    public readonly Action<WeaponStats, Vector3, float, float, Map> EnemyAttackAction;
+
     private readonly NetPacketProcessor _netPacketProcessor;
     private readonly EventBasedNetListener _listener = new();
     private readonly NetManager _manager;
@@ -24,7 +26,7 @@ public class Server
     private int _nextEnemyId;
     private readonly Map _map = new();
     private readonly AStar _aStar = new();
-    private readonly Action<WeaponStats, Vector3, float, float, Map> _enemyAttackAction;
+    private readonly BossSpawner _bossSpawner = new();
 
     private bool _isRunning;
     private int _tickCount;
@@ -46,7 +48,7 @@ public class Server
             AutoRecycle = true
         };
 
-        _enemyAttackAction = (weaponStats, direction, attackX, attackZ, _) =>
+        EnemyAttackAction = (weaponStats, direction, attackX, attackZ, _) =>
         {
             var netDirection = new NetVector3(direction);
             SendToAll(new ProjectileSpawn
@@ -282,7 +284,7 @@ public class Server
     {
         var enemyId = _nextEnemyId++;
         var enemy = _map.SpawnRandomEnemy(position.X, position.Z, enemyId,
-            new Attacker(Team.Enemies, _enemyAttackAction));
+            new Attacker(Team.Enemies, EnemyAttackAction));
 
         if (enemy is null) return;
 
@@ -290,8 +292,8 @@ public class Server
         {
             Id = enemyId,
             EnemyType = enemy.Stats.EnemyType,
-            X = position.X,
-            Z = position.Z,
+            X = enemy.Position.X,
+            Z = enemy.Position.Z,
             Health = enemy.Health
         }, DeliveryMethod.ReliableOrdered);
     }
@@ -306,6 +308,7 @@ public class Server
                 ServerDropWeapon(enemy.Stats.WeaponType, enemy.Position.X, enemy.Position.Z);
 
             _map.DespawnEnemy(enemy.Id);
+            _bossSpawner.EnemyDied(this, _map, ref _nextEnemyId);
         }
 
         SendToAll(new EnemyTakeDamage { Id = enemy.Id, Damage = damage }, DeliveryMethod.ReliableOrdered);
@@ -374,7 +377,7 @@ public class Server
         peer.Send(_writer, deliveryMethod);
     }
 
-    private void SendToAll<T>(T packet, DeliveryMethod deliveryMethod)
+    public void SendToAll<T>(T packet, DeliveryMethod deliveryMethod)
         where T : INetSerializable
     {
         _writer.Reset();

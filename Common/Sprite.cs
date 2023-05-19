@@ -30,5 +30,8 @@ public enum Sprite
     Fireball = 603,
     Spear = 604,
     Knife = 605,
-    Machete = 606
+    Machete = 606,
+    FireStaff = 607,
+    FireCharm = 608,
+    FireNova = 609
 }

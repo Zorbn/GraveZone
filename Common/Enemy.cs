@@ -101,8 +101,12 @@ public class Enemy
         map.EnemiesInTiles.Add(this, (int)_position.X, (int)_position.Z);
     }
 
+    // Returns true if the enemy died.
     public bool TakeDamage(int damage)
     {
+        // The enemy can't die if it was already dead.
+        if (Health <= 0) return false;
+
         Health -= damage;
 
         return Health <= 0;

@@ -39,10 +39,24 @@ public class WeaponStats
                 { ProjectileType = ProjectileType.ThrownSword, Angle = 315f, RelativeToForward = false }
         }));
 
-        Register(new WeaponStats(WeaponType.FireWand, WeaponType.None, 0.5f, 1.0f, Sprite.FireWand, new[]
+        Register(new WeaponStats(WeaponType.FireWand, WeaponType.FireStaff, 0.5f, 1.0f, Sprite.FireWand, new[]
         {
             new ProjectileSpawnData
                 { ProjectileType = ProjectileType.Fireball, Angle = 0f, RelativeToForward = true }
+        }));
+
+        Register(new WeaponStats(WeaponType.FireStaff, WeaponType.FireCharm, 0.5f, 1.0f, Sprite.FireStaff, new[]
+        {
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.FireNova, Angle = 0f, RelativeToForward = true }
+        }));
+
+        Register(new WeaponStats(WeaponType.FireCharm, WeaponType.None, 0.25f, 1.0f, Sprite.FireCharm, new[]
+        {
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.FireNova, Angle = -10f, RelativeToForward = true },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.FireNova, Angle = 10f, RelativeToForward = true }
         }));
 
         Register(new WeaponStats(WeaponType.Spear, WeaponType.Dagger, 0.5f, 1f, Sprite.Spear, new[]

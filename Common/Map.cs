@@ -24,8 +24,9 @@ public class Map
         public Vector3 Position;
     }
 
+    public static readonly int Size = (int)Math.Pow(2, Exponent) + 1;
+
     private const int Exponent = 6;
-    protected static readonly int Size = (int)Math.Pow(2, Exponent) + 1;
     private static readonly int BossArenaRadius = (int)Math.Ceiling(Size * 0.125f);
     private static readonly int TileCount = Size * Size;
     protected const float TileScale = 1f;
@@ -204,7 +205,7 @@ public class Map
     {
         if (_random is null) return null;
 
-        var enemyType = EnemyStats.EnemyTypes.Choose(_random);
+        var enemyType = EnemyStats.NormalEnemyTypes.Choose(_random);
         return SpawnEnemy(enemyType, x, z, id, attacker);
     }
 
