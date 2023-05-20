@@ -15,8 +15,14 @@ public class ClientPlayer : Player
 
     private const int HealthRegenAmount = 5;
     private const float HealthRegenTime = 2f;
-
     private const float HealthRegenStartTime = 5f;
+
+    private static readonly float LerpAnimationThreshold = 0.05f;
+
+    private static readonly Sprite[] Sprites =
+        { Sprite.PlayerIdle, Sprite.PlayerStepLeft, Sprite.PlayerIdle, Sprite.PlayerStepRight };
+
+    public bool IsMoving { get; private set; }
 
     private readonly ClientInventory _clientInventory;
     private readonly Attacker _attacker;
@@ -32,6 +38,8 @@ public class ClientPlayer : Player
     private void Move(Vector3 movement, ClientMap map, Vector3 cameraForward, Vector3 cameraRight, float deltaTime)
     {
         if (movement.Length() == 0f) return;
+
+        IsMoving = true;
 
         movement = movement.Z * cameraForward + movement.X * cameraRight;
         movement.Normalize();
@@ -137,12 +145,15 @@ public class ClientPlayer : Player
     public void Update(Input input, ClientMap map, Client client, Camera camera,
         float deltaTime)
     {
+        IsMoving = false;
+
         if (ShouldUpdateLocally(client))
         {
             UpdateLocal(input, map, client, camera, deltaTime);
             return;
         }
 
+        if (Vector3.Distance(SpritePosition, Position) > LerpAnimationThreshold) IsMoving = true;
         SpritePosition = Vector3.Lerp(SpritePosition, Position, SpriteInfo.SpriteLerp * deltaTime);
     }
 
@@ -158,9 +169,16 @@ public class ClientPlayer : Player
                 DeliveryMethod.Unreliable);
     }
 
-    public void AddSprite(SpriteRenderer spriteRenderer)
+    public void AddSprite(SpriteRenderer spriteRenderer, int animationFrame)
     {
-        spriteRenderer.Add(SpritePosition, Sprite.Player);
+        if (!IsMoving)
+        {
+            spriteRenderer.Add(SpritePosition, Sprites[0]);
+            return;
+        }
+
+        var spriteI = animationFrame % Sprites.Length;
+        spriteRenderer.Add(SpritePosition, Sprites[spriteI]);
     }
 
     public void DrawHud(Resources resources, SpriteBatch spriteBatch)

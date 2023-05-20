@@ -58,7 +58,7 @@ public class Map
         { MapZone.Grasslands, Sprite.None },
         { MapZone.Roads, Sprite.None },
         { MapZone.Ruins, Sprite.None },
-        { MapZone.BossArena, Sprite.EmberGrave }
+        { MapZone.BossArena, Sprite.Grave }
     };
 
     public readonly Dictionary<int, Weapon> DroppedWeapons = new();

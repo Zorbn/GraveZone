@@ -10,17 +10,18 @@ public class EnemyStats
     static EnemyStats()
     {
         Register(new EnemyStats(EnemyType.VampireMimic, WeaponType.Dagger, 0.2f, 20, 1.5f,
-            new[] { Sprite.MimicClosed, Sprite.MimicVampire }));
+            new[] { Sprite.ChestMimicClosed, Sprite.ChestMimicVampire }));
         Register(new EnemyStats(EnemyType.ShelledMimic, WeaponType.Sword, 0.2f, 30, 1f,
-            new[] { Sprite.MimicClosed, Sprite.MimicShelled }));
-        Register(new EnemyStats(EnemyType.Solider, WeaponType.Spear, 0.2f, 30, 1f,
-            new[] { Sprite.SoliderStepLeft, Sprite.SoliderIdle, Sprite.SoliderStepRight, Sprite.SoliderIdle }));
-        Register(new EnemyStats(EnemyType.Dragon, WeaponType.FireWand, 0.1f, 50, 0.5f,
-            new[] { Sprite.DragonStepLeft, Sprite.DragonIdle, Sprite.DragonStepRight, Sprite.DragonIdle }));
-        Register(new EnemyStats(EnemyType.Ninja, WeaponType.Knife, 0.1f, 10, 2f,
-            new[] { Sprite.NinjaStepLeft, Sprite.NinjaIdle, Sprite.NinjaStepRight, Sprite.NinjaIdle }));
-        Register(new EnemyStats(EnemyType.ElderDragon, WeaponType.FireCharm, 0.1f, 200, 0f,
-            new[] { Sprite.ElderDragon }, true));
+            new[] { Sprite.ChestMimicClosed, Sprite.ChestMimicShelled }));
+        // TODO: Fix this:
+        // Register(new EnemyStats(EnemyType.Solider, WeaponType.Spear, 0.2f, 30, 1f,
+        //     new[] { Sprite.SoliderStepLeft, Sprite.SoliderIdle, Sprite.SoliderStepRight, Sprite.SoliderIdle }));
+        // Register(new EnemyStats(EnemyType.Dragon, WeaponType.FireWand, 0.1f, 50, 0.5f,
+        //     new[] { Sprite.DragonStepLeft, Sprite.DragonIdle, Sprite.DragonStepRight, Sprite.DragonIdle }));
+        // Register(new EnemyStats(EnemyType.Ninja, WeaponType.Knife, 0.1f, 10, 2f,
+        //     new[] { Sprite.NinjaStepLeft, Sprite.NinjaIdle, Sprite.NinjaStepRight, Sprite.NinjaIdle }));
+        // Register(new EnemyStats(EnemyType.ElderDragon, WeaponType.FireCharm, 0.1f, 200, 0f,
+        //     new[] { Sprite.ElderDragon }, true));
 
         var normalEnemyTypes = new List<EnemyType>();
         foreach (var (enemyType, enemyStats) in Registry)

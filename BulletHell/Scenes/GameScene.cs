@@ -174,7 +174,7 @@ public class GameScene : IScene
 
         _spriteRenderer.Begin(_camera.SpriteMatrix);
 
-        foreach (var (_, player) in _players) player.AddSprite(_spriteRenderer);
+        foreach (var (_, player) in _players) player.AddSprite(_spriteRenderer, _animationFrame);
 
         _map.AddSprites(_spriteRenderer, _animationFrame);
 
