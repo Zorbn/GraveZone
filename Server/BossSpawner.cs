@@ -28,7 +28,7 @@ public class BossSpawner
     private void ServerSpawnBoss(Server server, Map map, ref int nextEnemyId)
     {
         var enemyId = nextEnemyId++;
-        var enemy = map.SpawnEnemy(EnemyType.ElderDragon, BossSpawnPosition.X, BossSpawnPosition.Z, enemyId,
+        var enemy = map.SpawnEnemy(EnemyType.HauntedBonfire, BossSpawnPosition.X, BossSpawnPosition.Z, enemyId,
             new Attacker(Team.Enemies, server.EnemyAttackAction));
 
         if (enemy is null) return;

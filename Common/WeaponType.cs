@@ -10,5 +10,15 @@ public enum WeaponType
     Knife,
     Machete,
     FireCharm,
-    FireStaff
+    FireStaff,
+    Crossbow,
+    Shortbow,
+    Longbow,
+    Scythe,
+    SporeBlaster,
+    Mace,
+    DoubleDagger,
+    TripleDagger,
+    Longsword,
+    DoubleCrossbow
 }

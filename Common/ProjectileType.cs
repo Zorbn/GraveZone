@@ -8,5 +8,10 @@ public enum ProjectileType
     ThrownSpear,
     ThrownKnife,
     ThrownMachete,
-    FireNova
+    FireNova,
+    CrossbowBolt,
+    Arrow,
+    ScytheBlades,
+    Spores,
+    SpikeBall
 }

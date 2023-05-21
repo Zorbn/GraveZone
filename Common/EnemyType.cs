@@ -2,10 +2,16 @@
 
 public enum EnemyType
 {
-    VampireMimic,
-    ShelledMimic,
-    Solider,
-    Dragon,
-    Ninja,
-    ElderDragon
+    ChestMimicVampire,
+    ChestMimicShelled,
+    Zombie,
+    Ghost,
+    Skeleton,
+    HauntedLantern,
+    GraveMimic,
+    GrayMushroom,
+    RedMushroom,
+    SkeletonArcher,
+    GhostArcher,
+    HauntedBonfire
 }
