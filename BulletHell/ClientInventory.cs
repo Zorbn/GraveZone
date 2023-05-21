@@ -11,6 +11,8 @@ public class ClientInventory
     public const int Y = BulletHell.UiHeight - SlotSize * Inventory.Height;
     public const int SlotSize = 2 * Resources.TileSize;
 
+    private const int TooltipX = X + (Inventory.Width - 1) * SlotSize / 2;
+    private const int TooltipY = Y - SlotSize * 5 / 4;
     private const int ItemSpriteOffset = Resources.TileSize / 2;
     private const int EquippedX = X + Inventory.Width * SlotSize;
     private const int EquippedY = Y + SlotSize;
@@ -103,7 +105,17 @@ public class ClientInventory
             spriteBatch.Draw(resources.SpriteTexture, equippedItemPosition, sourceRectangle, Color.White);
         }
 
-        if (_inventory.GrabbedWeaponStats is not null)
+        if (_inventory.GrabbedWeaponStats is null)
+        {
+            var i = GetSlotIndexFromPosition(_mousePosition);
+
+            if (i != -1 && _inventory.Weapons[i] is not null)
+            {
+                TextRenderer.Draw(_inventory.Weapons[i]!.DisplayName, TooltipX,
+                    TooltipY, resources, spriteBatch, Color.White, centered: true);
+            }
+        }
+        else
         {
             var sourceRectangle = SpriteMesh.GetSourceRectangle(_inventory.GrabbedWeaponStats.Sprite);
             spriteBatch.Draw(resources.SpriteTexture, _mousePosition, sourceRectangle, Color.White, 0f,

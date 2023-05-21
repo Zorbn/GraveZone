@@ -6,6 +6,7 @@ namespace BulletHell;
 
 public static class TextRenderer
 {
+    private const int BackgroundOffset = -Resources.TileSize / 2;
     private const int TextureXStart = 0;
     private const int TextureYStart = 30;
     private const int TextureCharsPerLine = 32;
@@ -28,10 +29,9 @@ public static class TextRenderer
 
         if (withBackground)
         {
-            const int bgOffset = -Resources.TileSize / 2;
             var bgStartX = centered ? (sizeX / 2 - scale) * -Resources.TileSize : 0;
-            var destination = new Rectangle(x + bgStartX + bgOffset, y + bgOffset, Resources.TileSize * sizeX,
-                Resources.TileSize * sizeY);
+            var destination = new Rectangle(x + bgStartX + BackgroundOffset, y + BackgroundOffset,
+                Resources.TileSize * sizeX, Resources.TileSize * sizeY);
             spriteBatch.Draw(resources.UiTexture, destination, TextBackgroundRectangle, Color.White);
         }
 
