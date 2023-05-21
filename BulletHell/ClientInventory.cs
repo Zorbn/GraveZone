@@ -19,7 +19,8 @@ public class ClientInventory
     private const int GrabbedItemScale = 2;
 
     private static readonly Rectangle SlotRectangle = new(1, 1, SlotSize, SlotSize);
-    private static readonly Rectangle EquippedSlotRectangle = new(9 * Resources.TileSize + 7, 1, SlotSize, SlotSize);
+    private static readonly Rectangle EquippedSlotSource = new(9 * Resources.TileSize + 7, 1, SlotSize, SlotSize);
+    private static readonly Rectangle EquippedSlotDestination = new(EquippedX, EquippedY, EquippedSlotSource.Width, EquippedSlotSource.Height);
 
     private readonly Inventory _inventory;
     private Vector2 _mousePosition;
@@ -49,8 +50,6 @@ public class ClientInventory
         if (!input.WasMouseButtonPressed(MouseButton.Left)) return false;
 
         var i = GetSlotIndexFromPosition(mousePosition);
-        var equippedSlotDestination =
-            new Rectangle(EquippedX, EquippedY, EquippedSlotRectangle.Width, EquippedSlotRectangle.Height);
 
         if (i != -1)
         {
@@ -58,7 +57,7 @@ public class ClientInventory
             return true;
         }
 
-        if (equippedSlotDestination.Contains(mousePosition))
+        if (EquippedSlotDestination.ReadonlyContains(mousePosition))
         {
             RequestGrabEquippedSlot(client);
             return true;
@@ -94,7 +93,7 @@ public class ClientInventory
         }
 
         var equippedSlotPosition = new Vector2(EquippedX, EquippedY);
-        spriteBatch.Draw(resources.UiTexture, equippedSlotPosition, EquippedSlotRectangle, Color.White);
+        spriteBatch.Draw(resources.UiTexture, equippedSlotPosition, EquippedSlotSource, Color.White);
 
         if (_inventory.EquippedWeaponStats is not null)
         {
@@ -108,10 +107,20 @@ public class ClientInventory
         if (_inventory.GrabbedWeaponStats is null)
         {
             var i = GetSlotIndexFromPosition(_mousePosition);
+            string? hoveredWeaponName = null;
 
-            if (i != -1 && _inventory.Weapons[i] is not null)
+            if (i != -1)
             {
-                TextRenderer.Draw(_inventory.Weapons[i]!.DisplayName, TooltipX,
+                hoveredWeaponName = _inventory.Weapons[i]?.DisplayName;
+            }
+            else if (EquippedSlotDestination.ReadonlyContains(_mousePosition))
+            {
+                hoveredWeaponName = _inventory.EquippedWeaponStats?.DisplayName;
+            }
+
+            if (hoveredWeaponName is not null)
+            {
+                TextRenderer.Draw(hoveredWeaponName, TooltipX,
                     TooltipY, resources, spriteBatch, Color.White, centered: true);
             }
         }
