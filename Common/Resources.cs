@@ -19,7 +19,7 @@ public class Resources
     public static readonly Rectangle ShadowMediumRectangle = new(21, 11, TileSize, TileSize);
     public static readonly Rectangle ShadowSmallRectangle = new(31, 11, TileSize, TileSize);
 
-    public static readonly Color SkyColor = new(128, 119, 255, 255);
+    public static readonly Color SkyColor = new(127, 82, 126, 255);
 
     public Resources(ContentManager contentManager)
     {

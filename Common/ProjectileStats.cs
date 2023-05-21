@@ -22,6 +22,7 @@ public class ProjectileStats
     {
         Register(new ProjectileStats(ProjectileType.ThrownDagger, LowDamageTier1, MediumRange, Sprite.Dagger));
         Register(new ProjectileStats(ProjectileType.ThrownSword, HighDamageTier1, LowRange, Sprite.Sword));
+        Register(new ProjectileStats(ProjectileType.ThrownLongsword, HighDamageTier2, LowRange, Sprite.Longsword));
         Register(new ProjectileStats(ProjectileType.Fireball, HighDamageTier1, HighRange, Sprite.Fireball));
         Register(new ProjectileStats(ProjectileType.FireNova, HighDamageTier2, HighRange, Sprite.FireNova));
         Register(new ProjectileStats(ProjectileType.ThrownSpear, MediumDamageTier1, MediumRange, Sprite.Spear));

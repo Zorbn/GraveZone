@@ -51,6 +51,25 @@ public class WeaponStats
             new ProjectileSpawnData
                 { ProjectileType = ProjectileType.ThrownSword, Angle = 315f, RelativeToForward = false }
         }));
+        Register(new WeaponStats(WeaponType.Longsword, WeaponType.None, HighCooldownTier2, LowSpeedTier2, Sprite.Longsword, new[]
+        {
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownLongsword, Angle = 0f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownLongsword, Angle = 45f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownLongsword, Angle = 90f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownLongsword, Angle = 135f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownLongsword, Angle = 180f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownLongsword, Angle = 225f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownLongsword, Angle = 270f, RelativeToForward = false },
+            new ProjectileSpawnData
+                { ProjectileType = ProjectileType.ThrownLongsword, Angle = 315f, RelativeToForward = false }
+        }));
 
         Register(new WeaponStats(WeaponType.Dagger, WeaponType.DoubleDagger, LowCooldownTier1, HighSpeedTier1, Sprite.Dagger, new[]
         {
