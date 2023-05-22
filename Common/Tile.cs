@@ -3,11 +3,15 @@
 public enum Tile
 {
     Air,
-    Marble,
+    Planks,
     Grass,
     Barrier,
     Flower,
     Path,
+    DryGrass,
+    Embers,
+    Dirt,
     Sand,
-    Embers
+    Marble,
+    Brick,
 }

@@ -36,10 +36,10 @@ public class Map
 
     private static readonly Dictionary<MapZone, Tile> FloorTilesPerZone = new()
     {
-        { MapZone.Beach, Tile.Sand },
+        { MapZone.Beach, Tile.DryGrass },
         { MapZone.Grasslands, Tile.Grass },
         { MapZone.Roads, Tile.Path },
-        { MapZone.Ruins, Tile.Marble },
+        { MapZone.Ruins, Tile.Planks },
         { MapZone.BossArena, Tile.Embers }
     };
 
@@ -48,7 +48,7 @@ public class Map
         { MapZone.Beach, Tile.Air },
         { MapZone.Grasslands, Tile.Flower },
         { MapZone.Roads, Tile.Air },
-        { MapZone.Ruins, Tile.Marble },
+        { MapZone.Ruins, Tile.Brick },
         { MapZone.BossArena, Tile.Air }
     };
 

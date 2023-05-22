@@ -9,7 +9,7 @@ namespace Server;
 public class Server
 {
     private const float TickTime = 0.05f;
-    private const int MaxSpawnedEnemies = 10;
+    private const int MaxSpawnedEnemies = 20;
     private const int TicksPerRepath = 2;
 
     public readonly Action<WeaponStats, Vector3, float, float, Map> EnemyAttackAction;
