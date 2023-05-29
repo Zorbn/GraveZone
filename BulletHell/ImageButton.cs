@@ -8,7 +8,7 @@ public class ImageButton
     public static readonly Rectangle QuitRectangle =
         new(1, 3 * Resources.TileSize + 5, Resources.TileSize, Resources.TileSize);
 
-    private Rectangle _destination;
+    private readonly Rectangle _destination;
     private readonly Rectangle _source;
     private readonly UiAnchor _uiAnchor;
 
@@ -25,8 +25,9 @@ public class ImageButton
         game.SpriteBatch.Draw(game.Resources.UiTexture, anchoredDestination, _source, Color.White);
     }
 
-    public bool Contains(int x, int y)
+    public bool Contains(int x, int y, BulletHell game)
     {
-        return _destination.Contains(x, y);
+        var anchoredRectangle = game.Ui.AnchorRectangle(_destination, _uiAnchor);
+        return anchoredRectangle.Contains(x, y);
     }
 }

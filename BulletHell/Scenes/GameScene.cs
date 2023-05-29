@@ -242,7 +242,7 @@ public class GameScene : IScene
         var mouseY = (int)mousePosition.Y;
 
         if (input.WasMouseButtonPressed(MouseButton.Left))
-            if (_quitButton.Contains(mouseX, mouseY))
+            if (_quitButton.Contains(mouseX, mouseY, _game))
                 _game.SetScene(new MainMenuScene(_game));
 
         var inventoryCapturedMouse = localPlayer.UpdateInventory(_game, Client, _camera, input, mousePosition);
