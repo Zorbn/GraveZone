@@ -4,7 +4,6 @@ namespace Common;
 
 public struct Projectile
 {
-    private const float Speed = 8f;
     private static readonly Vector3 Size = new(0.6f, 1.0f, 0.6f);
 
     public Vector3 Position => _position;
@@ -37,7 +36,7 @@ public struct Projectile
         movement.Normalize();
 
         var newPosition = _position;
-        newPosition.X += movement.X * Speed * deltaTime;
+        newPosition.X += movement.X * Stats.Speed * deltaTime;
 
         if (map.IsCollidingWithBox(newPosition, Size))
         {
@@ -47,7 +46,7 @@ public struct Projectile
 
         _position.X = newPosition.X;
 
-        newPosition.Z += movement.Z * Speed * deltaTime;
+        newPosition.Z += movement.Z * Stats.Speed * deltaTime;
 
         if (map.IsCollidingWithBox(newPosition, Size))
         {

@@ -18,6 +18,8 @@ public static class TextRenderer
 
     private static readonly Rectangle TextBackgroundRectangle = Resources.BlackRectangle;
 
+    private static readonly Color TextBackgroundColor = new(1f, 1f, 1f, 0.2f);
+
     public static void Draw(string text, int x, int y, BulletHell game, Color color, bool withBackground = true,
         float scale = 1f, bool centered = false, UiAnchor uiAnchor = UiAnchor.None)
     {
@@ -35,7 +37,7 @@ public static class TextRenderer
             var destination = new Rectangle((int)(x + bgStartX - BackgroundOffset * scale),
                 (int)(y - BackgroundOffset * scale),
                 (int)(Resources.TileSize * sizeX), (int)(Resources.TileSize * sizeY));
-            game.SpriteBatch.Draw(game.Resources.UiTexture, destination, TextBackgroundRectangle, Color.White);
+            game.SpriteBatch.Draw(game.Resources.UiTexture, destination, TextBackgroundRectangle, TextBackgroundColor);
         }
 
         var i = 0;
