@@ -7,22 +7,26 @@ namespace BulletHell;
 
 public class ClientInventory
 {
-    public const int X = BulletHell.UiCenterX - Inventory.Width * SlotSize / 2;
-    public const int Y = BulletHell.UiHeight - SlotSize * Inventory.Height;
     public const int SlotSize = 2 * Resources.TileSize;
-
-    private const int TooltipX = X + (Inventory.Width - 1) * SlotSize / 2;
-    private const int TooltipY = Y - SlotSize * 5 / 4;
+    private const UiAnchor Anchor = UiAnchor.Bottom;
     private const int ItemSpriteOffset = Resources.TileSize / 2;
-    private const int EquippedX = X + Inventory.Width * SlotSize;
-    private const int EquippedY = Y + SlotSize;
     private const int GrabbedItemScale = 2;
+
+    public static readonly Point RelativePosition =
+        new(Ui.CenterX - Inventory.Width * SlotSize / 2, -SlotSize * Inventory.Height);
+
+    private static readonly Point RelativeTooltipPosition =
+        RelativePosition + new Point((Inventory.Width - 1) * SlotSize / 2, -SlotSize * 5 / 4);
+
+    private static readonly Point RelativeEquippedPosition =
+        RelativePosition + new Point(Inventory.Width * SlotSize, SlotSize);
 
     private static readonly Rectangle SlotRectangle = new(1, 1, SlotSize, SlotSize);
     private static readonly Rectangle EquippedSlotSource = new(9 * Resources.TileSize + 7, 1, SlotSize, SlotSize);
 
-    private static readonly Rectangle EquippedSlotDestination =
-        new(EquippedX, EquippedY, EquippedSlotSource.Width, EquippedSlotSource.Height);
+    private static readonly Rectangle RelativeEquippedSlotDestination =
+        new(RelativeEquippedPosition.X, RelativeEquippedPosition.Y, EquippedSlotSource.Width,
+            EquippedSlotSource.Height);
 
     private readonly Inventory _inventory;
     private Vector2 _mousePosition;
@@ -32,12 +36,14 @@ public class ClientInventory
         _inventory = inventory;
     }
 
-    private int GetSlotIndexFromPosition(Vector2 position)
+    private int GetSlotIndexFromPosition(Vector2 position, BulletHell game)
     {
+        var inventoryPosition = game.Ui.AnchorPoint(RelativePosition, Anchor);
+
         // Use floats to prevent bad results when the mouse is right above
         // or to the left of the inventory slots.
-        var slotX = (position.X - X) / SlotRectangle.Width;
-        var slotY = (position.Y - Y) / SlotRectangle.Height;
+        var slotX = (position.X - inventoryPosition.X) / SlotRectangle.Width;
+        var slotY = (position.Y - inventoryPosition.Y) / SlotRectangle.Height;
 
         if (slotX is < 0 or >= Inventory.Width || slotY is < 0 or >= Inventory.Height) return -1;
 
@@ -45,13 +51,13 @@ public class ClientInventory
     }
 
     // Returns true if the mouse input was captured by the inventory.
-    public bool Update(Client client, Camera camera, Input input, Vector2 mousePosition)
+    public bool Update(BulletHell game, Client client, Camera camera, Input input, Vector2 mousePosition)
     {
         _mousePosition = mousePosition;
 
         if (!input.WasMouseButtonPressed(MouseButton.Left)) return false;
 
-        var i = GetSlotIndexFromPosition(mousePosition);
+        var i = GetSlotIndexFromPosition(mousePosition, game);
 
         if (i != -1)
         {
@@ -59,7 +65,9 @@ public class ClientInventory
             return true;
         }
 
-        if (EquippedSlotDestination.ReadonlyContains(mousePosition))
+        var equippedSlotDestination = game.Ui.AnchorRectangle(RelativeEquippedSlotDestination, Anchor);
+
+        if (equippedSlotDestination.ReadonlyContains(mousePosition))
         {
             RequestGrabEquippedSlot(client);
             return true;
@@ -74,13 +82,17 @@ public class ClientInventory
         return false;
     }
 
-    public void Draw(Resources resources, SpriteBatch spriteBatch)
+    public void Draw(BulletHell game)
     {
+        var inventoryPosition = game.Ui.AnchorPoint(RelativePosition, Anchor);
+        var equippedSlotPosition = game.Ui.AnchorPoint(RelativeEquippedPosition, Anchor).ToVector2();
+
         for (var y = 0; y < Inventory.Height; y++)
         for (var x = 0; x < Inventory.Width; x++)
         {
-            var slotPosition = new Vector2(X + x * SlotRectangle.Width, Y + y * SlotRectangle.Height);
-            spriteBatch.Draw(resources.UiTexture, slotPosition, SlotRectangle, Color.White);
+            var slotPosition = new Vector2(inventoryPosition.X + x * SlotRectangle.Width,
+                inventoryPosition.Y + y * SlotRectangle.Height);
+            game.SpriteBatch.Draw(game.Resources.UiTexture, slotPosition, SlotRectangle, Color.White);
 
             var weapon = _inventory.Weapons[x + y * Inventory.Width];
 
@@ -90,12 +102,11 @@ public class ClientInventory
                 itemPosition.X += ItemSpriteOffset;
                 itemPosition.Y += ItemSpriteOffset;
                 var sourceRectangle = SpriteMesh.GetSourceRectangle(weapon.Sprite);
-                spriteBatch.Draw(resources.SpriteTexture, itemPosition, sourceRectangle, Color.White);
+                game.SpriteBatch.Draw(game.Resources.SpriteTexture, itemPosition, sourceRectangle, Color.White);
             }
         }
 
-        var equippedSlotPosition = new Vector2(EquippedX, EquippedY);
-        spriteBatch.Draw(resources.UiTexture, equippedSlotPosition, EquippedSlotSource, Color.White);
+        game.SpriteBatch.Draw(game.Resources.UiTexture, equippedSlotPosition, EquippedSlotSource, Color.White);
 
         if (_inventory.EquippedWeaponStats is not null)
         {
@@ -103,39 +114,38 @@ public class ClientInventory
             equippedItemPosition.X += ItemSpriteOffset;
             equippedItemPosition.Y += ItemSpriteOffset;
             var sourceRectangle = SpriteMesh.GetSourceRectangle(_inventory.EquippedWeaponStats.Sprite);
-            spriteBatch.Draw(resources.SpriteTexture, equippedItemPosition, sourceRectangle, Color.White);
+            game.SpriteBatch.Draw(game.Resources.SpriteTexture, equippedItemPosition, sourceRectangle, Color.White);
         }
 
         if (_inventory.GrabbedWeaponStats is null)
         {
-            DrawTooltip(resources, spriteBatch);
+            DrawTooltip(game);
         }
         else
         {
             var sourceRectangle = SpriteMesh.GetSourceRectangle(_inventory.GrabbedWeaponStats.Sprite);
-            spriteBatch.Draw(resources.SpriteTexture, _mousePosition, sourceRectangle, Color.White, 0f,
+            game.SpriteBatch.Draw(game.Resources.SpriteTexture, _mousePosition, sourceRectangle, Color.White, 0f,
                 Vector2.Zero, GrabbedItemScale, SpriteEffects.None, 0f);
         }
     }
 
-    private void DrawTooltip(Resources resources, SpriteBatch spriteBatch)
+    private void DrawTooltip(BulletHell game)
     {
-        var i = GetSlotIndexFromPosition(_mousePosition);
+        var tooltipPosition = game.Ui.AnchorPoint(RelativeTooltipPosition, Anchor);
+        var equippedSlotDestination = game.Ui.AnchorRectangle(RelativeEquippedSlotDestination, Anchor);
+
+        var i = GetSlotIndexFromPosition(_mousePosition, game);
         string? hoveredWeaponName = null;
 
         if (i != -1)
-        {
             hoveredWeaponName = _inventory.Weapons[i]?.DisplayName;
-        }
-        else if (EquippedSlotDestination.ReadonlyContains(_mousePosition))
-        {
+        else if (equippedSlotDestination.ReadonlyContains(_mousePosition))
             hoveredWeaponName = _inventory.EquippedWeaponStats?.DisplayName;
-        }
 
         if (hoveredWeaponName is null) return;
 
-        TextRenderer.Draw(hoveredWeaponName, TooltipX,
-            TooltipY, resources, spriteBatch, Color.White, centered: true);
+        TextRenderer.Draw(hoveredWeaponName, tooltipPosition.X,
+            tooltipPosition.Y, game, Color.White, centered: true);
     }
 
     private void RequestGrabSlot(Client client, int i)

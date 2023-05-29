@@ -1,7 +1,6 @@
 ﻿using System;
 using Common;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletHell;
 
@@ -17,11 +16,13 @@ public class TextButton
 
     private readonly int _widthInTiles;
     private readonly string _text;
-    private Rectangle _rectangle;
+    private readonly Rectangle _rectangle;
+    private readonly UiAnchor _uiAnchor;
 
-    public TextButton(int x, int y, string text, bool centered)
+    public TextButton(int x, int y, string text, bool centered, UiAnchor uiAnchor)
     {
         _text = text;
+        _uiAnchor = uiAnchor;
 
         _widthInTiles = text.Length + 1;
 
@@ -36,26 +37,28 @@ public class TextButton
         _rectangle = new Rectangle(x, y, _widthInTiles * Resources.TileSize, Height);
     }
 
-    public void Draw(SpriteBatch spriteBatch, Resources resources)
+    public void Draw(BulletHell game)
     {
-        var offsetRectangle = new Rectangle(_rectangle.X, _rectangle.Y, Resources.TileSize, Height);
-        spriteBatch.Draw(resources.UiTexture, offsetRectangle, LeftTexture, Color.White);
+        var anchoredRectangle = game.Ui.AnchorRectangle(_rectangle, _uiAnchor);
+        var offsetRectangle = new Rectangle(anchoredRectangle.X, anchoredRectangle.Y, Resources.TileSize, Height);
+        game.SpriteBatch.Draw(game.Resources.UiTexture, offsetRectangle, LeftTexture, Color.White);
 
         for (var i = 0; i < _widthInTiles - 2; i++)
         {
             offsetRectangle.X += Resources.TileSize;
-            spriteBatch.Draw(resources.UiTexture, offsetRectangle, MiddleTexture, Color.White);
+            game.SpriteBatch.Draw(game.Resources.UiTexture, offsetRectangle, MiddleTexture, Color.White);
         }
 
         offsetRectangle.X += Resources.TileSize;
-        spriteBatch.Draw(resources.UiTexture, offsetRectangle, RightTexture, Color.White);
+        game.SpriteBatch.Draw(game.Resources.UiTexture, offsetRectangle, RightTexture, Color.White);
 
-        TextRenderer.Draw(_text, _rectangle.X + TextPadding, _rectangle.Y + TextPadding, resources, spriteBatch,
+        TextRenderer.Draw(_text, anchoredRectangle.X + TextPadding, anchoredRectangle.Y + TextPadding, game,
             Color.White, false);
     }
 
-    public bool Contains(int x, int y)
+    public bool Contains(int x, int y, BulletHell game)
     {
-        return _rectangle.Contains(x, y);
+        var anchoredRectangle = game.Ui.AnchorRectangle(_rectangle, _uiAnchor);
+        return anchoredRectangle.Contains(x, y);
     }
 }

@@ -199,7 +199,7 @@ public class Server
         // Tell the new player the current enemy kill count.
         SendToPeer(peer, new SetEnemiesKilled
         {
-            EnemiesKilled = _serverBossSpawner.EnemiesKilled,
+            EnemiesKilled = _serverBossSpawner.EnemiesKilled
         }, DeliveryMethod.ReliableOrdered);
 
         SendMapStateToPeer(peer);

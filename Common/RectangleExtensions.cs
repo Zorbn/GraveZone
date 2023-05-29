@@ -4,11 +4,9 @@ namespace Common;
 
 public static class RectangleExtensions
 {
-    public static bool ReadonlyContains(this Rectangle rectangle, Vector2 value) =>
-        (double)rectangle.X <= (double)value.X &&
-        (double)value.X <
-        (double)(rectangle.X + rectangle.Width) &&
-        (double)rectangle.Y <= (double)value.Y &&
-        (double)value.Y <
-        (double)(rectangle.Y + rectangle.Height);
+    public static bool ReadonlyContains(this Rectangle rectangle, Vector2 value)
+    {
+        return rectangle.X <= value.X && value.X < rectangle.X + rectangle.Width &&
+               rectangle.Y <= value.Y && value.Y < rectangle.Y + rectangle.Height;
+    }
 }

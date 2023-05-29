@@ -98,11 +98,8 @@ public class Map
             MapZone zone;
 
             if (centeredX * centeredX + centeredZ * centeredZ < BossArenaRadius * BossArenaRadius)
-            {
                 zone = MapZone.BossArena;
-            }
             else
-            {
                 zone = _midpointDisplacement.Heightmap[i] switch
                 {
                     < 0.3f => MapZone.Beach,
@@ -110,7 +107,6 @@ public class Map
                     < 0.7f => MapZone.Roads,
                     _ => MapZone.Ruins
                 };
-            }
 
             _floorTiles[i] = FloorTilesPerZone[zone];
 

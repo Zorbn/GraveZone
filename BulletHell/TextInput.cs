@@ -2,7 +2,6 @@
 using System.Text;
 using Common;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace BulletHell;
@@ -20,12 +19,13 @@ public class TextInput
     private string _drawableText;
     private readonly int _widthInTiles;
     private readonly int _maxVisibleChars;
-    private Rectangle _rectangle;
+    private readonly Rectangle _rectangle;
     private readonly string _defaultText;
+    private readonly UiAnchor _uiAnchor;
 
     private bool _isFocused;
 
-    public TextInput(int x, int y, int widthInTiles, bool centered, string defaultText)
+    public TextInput(int x, int y, int widthInTiles, bool centered, string defaultText, UiAnchor uiAnchor)
     {
         _isFocused = false;
 
@@ -34,6 +34,7 @@ public class TextInput
         _drawableText = "";
         _widthInTiles = widthInTiles;
         _maxVisibleChars = widthInTiles - 1;
+        _uiAnchor = uiAnchor;
 
         if (_widthInTiles < 3) throw new ArgumentOutOfRangeException(nameof(widthInTiles));
 
@@ -88,38 +89,39 @@ public class TextInput
         UpdateDrawableText();
     }
 
-    public void Draw(SpriteBatch spriteBatch, Resources resources)
+    public void Draw(BulletHell game)
     {
         var usingDefaultText = _text.Length == 0;
         var color = usingDefaultText ? Color.Gray : Color.White;
 
-        var offsetRectangle = new Rectangle(_rectangle.X, _rectangle.Y, Resources.TileSize, Height);
-        spriteBatch.Draw(resources.UiTexture, offsetRectangle, LeftTexture, Color.White);
+        var anchoredRectangle = game.Ui.AnchorRectangle(_rectangle, _uiAnchor);
+        var offsetRectangle = new Rectangle(anchoredRectangle.X, anchoredRectangle.Y, Resources.TileSize, Height);
+        game.SpriteBatch.Draw(game.Resources.UiTexture, offsetRectangle, LeftTexture, Color.White);
 
         for (var i = 0; i < _widthInTiles - 2; i++)
         {
             offsetRectangle.X += Resources.TileSize;
-            spriteBatch.Draw(resources.UiTexture, offsetRectangle, MiddleTexture, Color.White);
+            game.SpriteBatch.Draw(game.Resources.UiTexture, offsetRectangle, MiddleTexture, Color.White);
         }
 
         offsetRectangle.X += Resources.TileSize;
-        spriteBatch.Draw(resources.UiTexture, offsetRectangle, RightTexture, Color.White);
+        game.SpriteBatch.Draw(game.Resources.UiTexture, offsetRectangle, RightTexture, Color.White);
 
-        TextRenderer.Draw(_drawableText, _rectangle.X + TextPadding, _rectangle.Y + TextPadding, resources, spriteBatch,
+        TextRenderer.Draw(_drawableText, anchoredRectangle.X + TextPadding, anchoredRectangle.Y + TextPadding, game,
             color, false);
 
         if (_isFocused)
         {
             var textLength = Resources.TileSize * _drawableText.Length;
-            TextRenderer.Draw("|", _rectangle.X + TextPadding + textLength, _rectangle.Y + TextPadding, resources,
-                spriteBatch,
-                Color.White, false);
+            TextRenderer.Draw("|", anchoredRectangle.X + TextPadding + textLength, anchoredRectangle.Y + TextPadding,
+                game, Color.White, false);
         }
     }
 
-    public void UpdateFocusWithClick(int x, int y)
+    public void UpdateFocusWithClick(int x, int y, BulletHell game)
     {
-        _isFocused = _rectangle.Contains(x, y);
+        var anchoredRectangle = game.Ui.AnchorRectangle(_rectangle, _uiAnchor);
+        _isFocused = anchoredRectangle.Contains(x, y);
     }
 
     public string GetTextString()

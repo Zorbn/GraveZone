@@ -1,6 +1,5 @@
 ﻿using Common;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletHell;
 
@@ -19,9 +18,11 @@ public static class TextRenderer
 
     private static readonly Rectangle TextBackgroundRectangle = Resources.BlackRectangle;
 
-    public static void Draw(string text, int x, int y, Resources resources, SpriteBatch spriteBatch, Color color,
-        bool withBackground = true, float scale = 1f, bool centered = false)
+    public static void Draw(string text, int x, int y, BulletHell game, Color color, bool withBackground = true,
+        float scale = 1f, bool centered = false, UiAnchor uiAnchor = UiAnchor.None)
     {
+        (x, y) = game.Ui.AnchorPoint(new Point(x, y), uiAnchor);
+
         var sizeX = (text.Length + 1) * scale;
         var sizeY = scale * 2;
         var textOffsetX = centered ? (sizeX / 2 - scale) * -Resources.TileSize : 0;
@@ -31,9 +32,10 @@ public static class TextRenderer
         if (withBackground)
         {
             var bgStartX = centered ? (int)((sizeX / 2 - scale) * -Resources.TileSize) : 0;
-            var destination = new Rectangle((int)(x + bgStartX - BackgroundOffset * scale), (int)(y - BackgroundOffset * scale),
+            var destination = new Rectangle((int)(x + bgStartX - BackgroundOffset * scale),
+                (int)(y - BackgroundOffset * scale),
                 (int)(Resources.TileSize * sizeX), (int)(Resources.TileSize * sizeY));
-            spriteBatch.Draw(resources.UiTexture, destination, TextBackgroundRectangle, Color.White);
+            game.SpriteBatch.Draw(game.Resources.UiTexture, destination, TextBackgroundRectangle, Color.White);
         }
 
         var i = 0;
@@ -51,7 +53,7 @@ public static class TextRenderer
                 source.X += texX * Resources.TileSize;
                 source.Y += texY * (Resources.TileSize + 1);
 
-                spriteBatch.Draw(resources.UiTexture, destination, source, color);
+                game.SpriteBatch.Draw(game.Resources.UiTexture, destination, source, color);
             }
 
             i++;

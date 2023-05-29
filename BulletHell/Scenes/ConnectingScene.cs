@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Common;
+﻿using Common;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -26,7 +25,8 @@ public class ConnectingScene : IScene
         _gameScene.Client.ConnectedEvent += () => _hasConnected = true;
         _gameScene.Client.Connect(ip);
 
-        _backButton = new TextButton(BulletHell.UiCenterX, BulletHell.UiCenterY + Resources.TileSize * 3, "back", true);
+        _backButton = new TextButton(Ui.CenterX, Ui.CenterY + Resources.TileSize * 3, "back", true,
+            UiAnchor.None);
     }
 
     public void Exit()
@@ -50,7 +50,7 @@ public class ConnectingScene : IScene
             var mouseX = (int)mousePosition.X;
             var mouseY = (int)mousePosition.Y;
 
-            if (_backButton.Contains(mouseX, mouseY))
+            if (_backButton.Contains(mouseX, mouseY, _game))
             {
                 _game.SetScene(new MainMenuScene(_game));
                 return;
@@ -67,12 +67,9 @@ public class ConnectingScene : IScene
     {
         _game.GraphicsDevice.Clear(Color.Aqua);
 
-        Debug.Assert(_game.SpriteBatch is not null && _game.Resources is not null);
-
-        _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
-        TextRenderer.Draw(_loadingText, BulletHell.UiCenterX, BulletHell.UiCenterY, _game.Resources,
-            _game.SpriteBatch, Color.White, centered: true);
-        _backButton.Draw(_game.SpriteBatch, _game.Resources);
+        _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.Ui.Matrix);
+        TextRenderer.Draw(_loadingText, Ui.CenterX, Ui.CenterY, _game, Color.White, centered: true);
+        _backButton.Draw(_game);
         _game.SpriteBatch.End();
     }
 }

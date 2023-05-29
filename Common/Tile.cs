@@ -13,5 +13,5 @@ public enum Tile
     Dirt,
     Sand,
     Marble,
-    Brick,
+    Brick
 }

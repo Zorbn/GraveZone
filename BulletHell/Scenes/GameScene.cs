@@ -45,8 +45,8 @@ public class GameScene : IScene
         _camera = new Camera(game.GraphicsDevice, _game.Content);
         _spriteRenderer = new SpriteRenderer(1024, game.GraphicsDevice, _game.Content);
 
-        _quitButton = new ImageButton(ClientInventory.X - Resources.TileSize,
-            ClientInventory.Y + Resources.TileSize * 3, ImageButton.QuitRectangle);
+        _quitButton = new ImageButton(ClientInventory.RelativePosition.X - Resources.TileSize,
+            ClientInventory.RelativePosition.Y + Resources.TileSize * 3, ImageButton.QuitRectangle, UiAnchor.Bottom);
 
         if (startInternalServer)
         {
@@ -170,8 +170,6 @@ public class GameScene : IScene
 
     private void PreDraw()
     {
-        Debug.Assert(_game.SpriteBatch is not null && _game.Resources is not null);
-
         _camera.UpdateViewMatrices();
 
         _spriteRenderer.Begin(_camera.SpriteMatrix);
@@ -192,8 +190,6 @@ public class GameScene : IScene
 
     public void Draw()
     {
-        Debug.Assert(_game.SpriteBatch is not null && _game.Resources is not null);
-
         PreDraw();
 
         _game.GraphicsDevice.Clear(Resources.SkyColor);
@@ -222,13 +218,13 @@ public class GameScene : IScene
             _spriteRenderer.DrawSprites(_game.GraphicsDevice);
         }
 
-        _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
+        _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.Ui.Matrix);
 
-        _quitButton.Draw( _game.Resources, _game.SpriteBatch);
+        _quitButton.Draw(_game);
 
         if (_players.TryGetValue(Client.LocalId, out var localPlayer)) DrawLocal(localPlayer);
 
-        _bossStatus.Draw(_game.Resources, _game.SpriteBatch);
+        _bossStatus.Draw(_game);
 
         _game.SpriteBatch.End();
     }
@@ -249,7 +245,7 @@ public class GameScene : IScene
             if (_quitButton.Contains(mouseX, mouseY))
                 _game.SetScene(new MainMenuScene(_game));
 
-        var inventoryCapturedMouse = localPlayer.UpdateInventory(Client, _camera, input, mousePosition);
+        var inventoryCapturedMouse = localPlayer.UpdateInventory(_game, Client, _camera, input, mousePosition);
 
         return inventoryCapturedMouse;
     }
@@ -287,9 +283,7 @@ public class GameScene : IScene
 
     private void DrawLocal(ClientPlayer localPlayer)
     {
-        Debug.Assert(_game.SpriteBatch is not null && _game.Resources is not null);
-
-        localPlayer.DrawHud(_game.Resources, _game.SpriteBatch);
+        localPlayer.DrawHud(_game);
     }
 
     private void Tick()
@@ -416,7 +410,8 @@ public class GameScene : IScene
 
     private void OnEnemySpawn(EnemySpawn enemySpawn)
     {
-        var enemy = _map.SpawnEnemy(enemySpawn.EnemyType, enemySpawn.X, enemySpawn.Z, enemySpawn.Id, null, enemySpawn.Health);
+        var enemy = _map.SpawnEnemy(enemySpawn.EnemyType, enemySpawn.X, enemySpawn.Z, enemySpawn.Id, null,
+            enemySpawn.Health);
         _bossStatus.EnemySpawned(enemy);
     }
 

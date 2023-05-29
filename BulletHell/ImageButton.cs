@@ -1,6 +1,5 @@
 ﻿using Common;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletHell;
 
@@ -11,16 +10,19 @@ public class ImageButton
 
     private Rectangle _destination;
     private readonly Rectangle _source;
+    private readonly UiAnchor _uiAnchor;
 
-    public ImageButton(int x, int y, Rectangle source)
+    public ImageButton(int x, int y, Rectangle source, UiAnchor uiAnchor)
     {
         _source = source;
         _destination = new Rectangle(x, y, source.Width, source.Height);
+        _uiAnchor = uiAnchor;
     }
 
-    public void Draw(Resources resources, SpriteBatch spriteBatch)
+    public void Draw(BulletHell game)
     {
-        spriteBatch.Draw(resources.UiTexture, _destination, _source, Color.White);
+        var anchoredDestination = game.Ui.AnchorRectangle(_destination, _uiAnchor);
+        game.SpriteBatch.Draw(game.Resources.UiTexture, anchoredDestination, _source, Color.White);
     }
 
     public bool Contains(int x, int y)

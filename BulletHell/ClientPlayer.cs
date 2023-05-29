@@ -1,7 +1,6 @@
 ﻿using Common;
 using LiteNetLib;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace BulletHell;
@@ -10,14 +9,15 @@ public class ClientPlayer : Player
 {
     private const int HealthBarWidth = Inventory.Width * ClientInventory.SlotSize;
     private const int HealthBarHeight = Resources.TileSize / 2;
-    private const int HealthBarX = ClientInventory.X;
-    private const int HealthBarY = ClientInventory.Y - HealthBarHeight;
+
+    private static readonly Point RelativeHealthBarPosition =
+        ClientInventory.RelativePosition - new Point(0, HealthBarHeight);
 
     private const int HealthRegenAmount = 5;
     private const float HealthRegenTime = 2f;
     private const float HealthRegenStartTime = 5f;
 
-    private static readonly float LerpAnimationThreshold = 0.05f;
+    private const float LerpAnimationThreshold = 0.05f;
 
     private static readonly Sprite[] Sprites =
         { Sprite.PlayerIdle, Sprite.PlayerStepLeft, Sprite.PlayerIdle, Sprite.PlayerStepRight };
@@ -29,7 +29,8 @@ public class ClientPlayer : Player
     private float _healthRegenTimer;
     private float _healthRegenStartTimer;
 
-    public ClientPlayer(Attacker attacker, Map map, int id, float x, float z, int health = MaxHealth) : base(map, id, x, z, health)
+    public ClientPlayer(Attacker attacker, Map map, int id, float x, float z, int health = MaxHealth) : base(map, id, x,
+        z, health)
     {
         _attacker = attacker;
         _clientInventory = new ClientInventory(Inventory);
@@ -157,9 +158,9 @@ public class ClientPlayer : Player
         SpritePosition = Vector3.Lerp(SpritePosition, Position, SpriteInfo.SpriteLerp * deltaTime);
     }
 
-    public bool UpdateInventory(Client client, Camera camera, Input input, Vector2 mousePosition)
+    public bool UpdateInventory(BulletHell game, Client client, Camera camera, Input input, Vector2 mousePosition)
     {
-        return _clientInventory.Update(client, camera, input, mousePosition);
+        return _clientInventory.Update(game, client, camera, input, mousePosition);
     }
 
     public void Tick(Client client)
@@ -167,10 +168,8 @@ public class ClientPlayer : Player
         if (!ShouldUpdateLocally(client)) return;
 
         if (IsMoving)
-        {
             client.SendToServer(new PlayerMove { Id = Id, X = Position.X, Z = Position.Z },
                 DeliveryMethod.Unreliable);
-        }
     }
 
     public void AddSprite(SpriteRenderer spriteRenderer, int animationFrame)
@@ -185,14 +184,16 @@ public class ClientPlayer : Player
         spriteRenderer.Add(SpritePosition, Sprites[spriteI]);
     }
 
-    public void DrawHud(Resources resources, SpriteBatch spriteBatch)
+    public void DrawHud(BulletHell game)
     {
-        var healthBarDestination = new Rectangle(HealthBarX, HealthBarY, HealthBarWidth, HealthBarHeight);
-        spriteBatch.Draw(resources.UiTexture, healthBarDestination, Resources.BlackRectangle, Color.White);
+        var healthBarPosition = game.Ui.AnchorPoint(RelativeHealthBarPosition, UiAnchor.Bottom);
+        var healthBarDestination =
+            new Rectangle(healthBarPosition.X, healthBarPosition.Y, HealthBarWidth, HealthBarHeight);
+        game.SpriteBatch.Draw(game.Resources.UiTexture, healthBarDestination, Resources.BlackRectangle, Color.White);
         var currentHealthBarWidth = (int)(HealthBarWidth * (Health / (float)MaxHealth));
         healthBarDestination.Width = currentHealthBarWidth;
-        spriteBatch.Draw(resources.UiTexture, healthBarDestination, Resources.WhiteRectangle, Color.Red);
+        game.SpriteBatch.Draw(game.Resources.UiTexture, healthBarDestination, Resources.WhiteRectangle, Color.Red);
 
-        _clientInventory.Draw(resources, spriteBatch);
+        _clientInventory.Draw(game);
     }
 }

@@ -22,9 +22,11 @@ public class EnemyStats
         Register(new EnemyStats(EnemyType.Zombie, WeaponType.Sword, MediumDropRate, MediumMaxHealth, MediumSpeed,
             new[] { Sprite.ZombieIdle, Sprite.ZombieStepLeft, Sprite.ZombieIdle, Sprite.ZombieStepRight }));
 
-        Register(new EnemyStats(EnemyType.ChestMimicVampire, WeaponType.Dagger, MediumDropRate, MediumMaxHealth, MediumSpeed,
+        Register(new EnemyStats(EnemyType.ChestMimicVampire, WeaponType.Dagger, MediumDropRate, MediumMaxHealth,
+            MediumSpeed,
             new[] { Sprite.ChestMimicClosed, Sprite.ChestMimicVampire }));
-        Register(new EnemyStats(EnemyType.ChestMimicShelled, WeaponType.Mace, MediumDropRate, HighMaxHealth, MediumSpeed,
+        Register(new EnemyStats(EnemyType.ChestMimicShelled, WeaponType.Mace, MediumDropRate, HighMaxHealth,
+            MediumSpeed,
             new[] { Sprite.ChestMimicClosed, Sprite.ChestMimicShelled }));
 
         Register(new EnemyStats(EnemyType.Ghost, WeaponType.Knife, MediumDropRate, LowMaxHealth, MediumSpeed,
@@ -33,21 +35,39 @@ public class EnemyStats
         Register(new EnemyStats(EnemyType.Skeleton, WeaponType.Spear, MediumDropRate, MediumMaxHealth, MediumSpeed,
             new[] { Sprite.SkeletonIdle, Sprite.SkeletonStepLeft, Sprite.SkeletonIdle, Sprite.SkeletonStepRight }));
 
-        Register(new EnemyStats(EnemyType.HauntedLantern, WeaponType.FireWand, MediumDropRate, LowMaxHealth, MediumSpeed,
+        Register(new EnemyStats(EnemyType.HauntedLantern, WeaponType.FireWand, MediumDropRate, LowMaxHealth,
+            MediumSpeed,
             new[] { Sprite.HauntedLantern, Sprite.HauntedLanternHop }));
 
         Register(new EnemyStats(EnemyType.GraveMimic, WeaponType.Scythe, MediumDropRate, HighMaxHealth, 0,
             new[] { Sprite.GraveMimicClosed, Sprite.GraveMimicOpen }));
 
         Register(new EnemyStats(EnemyType.GrayMushroom, WeaponType.SporeBlaster, MediumDropRate, HighMaxHealth, 0,
-            new[] { Sprite.GrayMushroomLookForward, Sprite.GrayMushroomLookDown, Sprite.GrayMushroomLookForward, Sprite.GrayMushroomLookUp }));
+            new[]
+            {
+                Sprite.GrayMushroomLookForward, Sprite.GrayMushroomLookDown, Sprite.GrayMushroomLookForward,
+                Sprite.GrayMushroomLookUp
+            }));
         Register(new EnemyStats(EnemyType.RedMushroom, WeaponType.SporeBlaster, MediumDropRate, HighMaxHealth, 0,
-            new[] { Sprite.RedMushroomLookForward, Sprite.RedMushroomLookDown, Sprite.RedMushroomLookForward, Sprite.RedMushroomLookUp }));
+            new[]
+            {
+                Sprite.RedMushroomLookForward, Sprite.RedMushroomLookDown, Sprite.RedMushroomLookForward,
+                Sprite.RedMushroomLookUp
+            }));
 
-        Register(new EnemyStats(EnemyType.GhostArcher, WeaponType.Crossbow, MediumDropRate, MediumMaxHealth, MediumSpeed,
-            new[] { Sprite.GhostArcherIdle, Sprite.GhostArcherStepLeft, Sprite.GhostArcherIdle, Sprite.GhostArcherStepRight }));
-        Register(new EnemyStats(EnemyType.SkeletonArcher, WeaponType.Shortbow, MediumDropRate, MediumMaxHealth, MediumSpeed,
-            new[] { Sprite.SkeletonArcherIdle, Sprite.SkeletonArcherStepLeft, Sprite.SkeletonArcherIdle, Sprite.SkeletonArcherStepRight }));
+        Register(new EnemyStats(EnemyType.GhostArcher, WeaponType.Crossbow, MediumDropRate, MediumMaxHealth,
+            MediumSpeed,
+            new[]
+            {
+                Sprite.GhostArcherIdle, Sprite.GhostArcherStepLeft, Sprite.GhostArcherIdle, Sprite.GhostArcherStepRight
+            }));
+        Register(new EnemyStats(EnemyType.SkeletonArcher, WeaponType.Shortbow, MediumDropRate, MediumMaxHealth,
+            MediumSpeed,
+            new[]
+            {
+                Sprite.SkeletonArcherIdle, Sprite.SkeletonArcherStepLeft, Sprite.SkeletonArcherIdle,
+                Sprite.SkeletonArcherStepRight
+            }));
 
         // TODO: Make more bosses that favor different weapon types, the bonfire is easiest with long range.
         Register(new EnemyStats(EnemyType.HauntedBonfire, WeaponType.FireCharm, MediumDropRate, BossMediumMaxHealth, 0,

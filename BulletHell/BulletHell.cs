@@ -14,15 +14,16 @@ namespace BulletHell;
  */
 public class BulletHell : Game
 {
-    public const int UiWidth = 480;
-    public const int UiHeight = 270;
-    public const int UiCenterX = UiWidth / 2;
-    public const int UiCenterY = UiHeight / 2;
-    public Matrix UiMatrix { get; private set; }
+    public Ui Ui = new();
 
-    public Resources? Resources { get; private set; }
+    // Resources and SpriteBatch are immediately initialized when
+    // the game starts and should therefore never be null, if they
+    // are null then the game fatally failed to load it's assets.
+    public Resources Resources => _resources!;
+    public SpriteBatch SpriteBatch => _spriteBatch!;
 
-    public SpriteBatch? SpriteBatch { get; private set; }
+    private Resources? _resources;
+    private SpriteBatch? _spriteBatch;
 
     private readonly GraphicsDeviceManager _graphics;
 
@@ -58,38 +59,29 @@ public class BulletHell : Game
     {
         var width = GraphicsDevice.Viewport.Width;
         var height = GraphicsDevice.Viewport.Height;
-        // TODO: Handle UI scale for odd ratios like half-screen.
-        UpdateUiScale(width, height);
+        Ui.UpdateScale(width, height);
         _scene.Resize(width, height);
-    }
-
-    private void UpdateUiScale(int width, int height)
-    {
-        var uiScale = MathF.Min(width / (float)UiWidth, height / (float)UiHeight);
-        var offsetX = (width - UiWidth * uiScale) / 2;
-        var offsetY = (height - UiHeight * uiScale) / 2;
-        UiMatrix = Matrix.CreateScale(uiScale) * Matrix.CreateTranslation(offsetX, offsetY, 0f);
     }
 
     public Vector2 GetMouseUiPosition()
     {
         var mousePosition = new Vector3(_input.MouseX, _input.MouseY, 0f);
-        mousePosition = Vector3.Transform(mousePosition, Matrix.Invert(UiMatrix));
+        mousePosition = Vector3.Transform(mousePosition, Matrix.Invert(Ui.Matrix));
         return new Vector2(mousePosition.X, mousePosition.Y);
     }
 
     protected override void Initialize()
     {
-        UpdateUiScale(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+        Ui.UpdateScale(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
-        Resources = new Resources(Content);
+        _resources = new Resources(Content);
 
         base.Initialize();
     }
 
     protected override void LoadContent()
     {
-        SpriteBatch = new SpriteBatch(GraphicsDevice);
+        _spriteBatch = new SpriteBatch(GraphicsDevice);
     }
 
     protected override void Update(GameTime gameTime)
