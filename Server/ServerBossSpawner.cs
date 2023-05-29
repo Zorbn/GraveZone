@@ -4,24 +4,21 @@ using Microsoft.Xna.Framework;
 
 namespace Server;
 
-public class BossSpawner
+public class ServerBossSpawner
 {
-    private const int EnemyKillsToSpawnBoss = 20;
     private static readonly Vector3 BossSpawnPosition = new Vector3(Map.Size, 0f, Map.Size) * 0.5f;
 
-    private int _enemiesKilled;
+    public int EnemiesKilled => _killTracker.EnemiesKilled;
+
+    private readonly KillTracker _killTracker = new();
     private Enemy? _currentBoss;
 
     public void EnemyDied(Server server, Map map, ref int nextEnemyId)
     {
-        // Don't progress towards spawning a new boss if the last one is still alive.
-        if (_currentBoss is not null && _currentBoss.Health > 0) return;
+        var shouldSpawnBoss = _killTracker.EnemyDied(_currentBoss);
 
-        ++_enemiesKilled;
+        if (!shouldSpawnBoss) return;
 
-        if (_enemiesKilled < EnemyKillsToSpawnBoss) return;
-
-        _enemiesKilled = 0;
         ServerSpawnBoss(server, map, ref nextEnemyId);
     }
 

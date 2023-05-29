@@ -58,6 +58,7 @@ public class BulletHell : Game
     {
         var width = GraphicsDevice.Viewport.Width;
         var height = GraphicsDevice.Viewport.Height;
+        // TODO: Handle UI scale for odd ratios like half-screen.
         UpdateUiScale(width, height);
         _scene.Resize(width, height);
     }

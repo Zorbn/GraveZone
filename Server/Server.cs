@@ -26,7 +26,7 @@ public class Server
     private int _nextEnemyId;
     private readonly Map _map = new();
     private readonly AStar _aStar = new();
-    private readonly BossSpawner _bossSpawner = new();
+    private readonly ServerBossSpawner _serverBossSpawner = new();
 
     private bool _isRunning;
     private int _tickCount;
@@ -196,6 +196,11 @@ public class Server
 
         // Tell the new player their id.
         SendToPeer(peer, new SetLocalId { Id = newPlayerId }, DeliveryMethod.ReliableOrdered);
+        // Tell the new player the current enemy kill count.
+        SendToPeer(peer, new SetEnemiesKilled
+        {
+            EnemiesKilled = _serverBossSpawner.EnemiesKilled,
+        }, DeliveryMethod.ReliableOrdered);
 
         SendMapStateToPeer(peer);
 
@@ -308,7 +313,7 @@ public class Server
                 ServerDropWeapon(enemy.Stats.WeaponType, enemy.Position.X, enemy.Position.Z);
 
             _map.DespawnEnemy(enemy.Id);
-            _bossSpawner.EnemyDied(this, _map, ref _nextEnemyId);
+            _serverBossSpawner.EnemyDied(this, _map, ref _nextEnemyId);
         }
 
         SendToAll(new EnemyTakeDamage { Id = enemy.Id, Damage = damage }, DeliveryMethod.ReliableOrdered);

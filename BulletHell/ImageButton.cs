@@ -18,7 +18,7 @@ public class ImageButton
         _destination = new Rectangle(x, y, source.Width, source.Height);
     }
 
-    public void Draw(SpriteBatch spriteBatch, Resources resources)
+    public void Draw(Resources resources, SpriteBatch spriteBatch)
     {
         spriteBatch.Draw(resources.UiTexture, _destination, _source, Color.White);
     }

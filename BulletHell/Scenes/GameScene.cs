@@ -28,6 +28,7 @@ public class GameScene : IScene
     private readonly Dictionary<int, ClientPlayer> _players = new();
     private readonly Camera _camera;
     private readonly ParticlePool _particlePool = new();
+    private readonly BossStatus _bossStatus = new();
 
     private readonly ImageButton _quitButton;
 
@@ -76,6 +77,7 @@ public class GameScene : IScene
         Client.NetPacketProcessor.SubscribeNetSerializable<EnemySpawn>(OnEnemySpawn);
         Client.NetPacketProcessor.SubscribeNetSerializable<EnemyTakeDamage>(OnEnemyTakeDamage);
         Client.NetPacketProcessor.SubscribeNetSerializable<EnemyMove>(OnEnemyMove);
+        Client.NetPacketProcessor.SubscribeNetSerializable<SetEnemiesKilled>(OnSetEnemiesKilled);
 
         Console.WriteLine("Starting client...");
 
@@ -222,9 +224,11 @@ public class GameScene : IScene
 
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.UiMatrix);
 
-        _quitButton.Draw(_game.SpriteBatch, _game.Resources);
+        _quitButton.Draw( _game.Resources, _game.SpriteBatch);
 
         if (_players.TryGetValue(Client.LocalId, out var localPlayer)) DrawLocal(localPlayer);
+
+        _bossStatus.Draw(_game.Resources, _game.SpriteBatch);
 
         _game.SpriteBatch.End();
     }
@@ -290,7 +294,7 @@ public class GameScene : IScene
 
     private void Tick()
     {
-        foreach (var (_, player) in _players) player.Tick(Client, TickTime);
+        foreach (var (_, player) in _players) player.Tick(Client);
     }
 
     private void OnPlayerSpawn(PlayerSpawn playerSpawn)
@@ -412,7 +416,8 @@ public class GameScene : IScene
 
     private void OnEnemySpawn(EnemySpawn enemySpawn)
     {
-        _map.SpawnEnemy(enemySpawn.EnemyType, enemySpawn.X, enemySpawn.Z, enemySpawn.Id, null, enemySpawn.Health);
+        var enemy = _map.SpawnEnemy(enemySpawn.EnemyType, enemySpawn.X, enemySpawn.Z, enemySpawn.Id, null, enemySpawn.Health);
+        _bossStatus.EnemySpawned(enemy);
     }
 
     private void OnEnemyTakeDamage(EnemyTakeDamage enemyTakeDamage)
@@ -421,7 +426,10 @@ public class GameScene : IScene
 
         var enemyDied = enemy.TakeDamage(enemyTakeDamage.Damage);
 
-        if (enemyDied) _map.DespawnEnemy(enemy.Id);
+        if (!enemyDied) return;
+
+        _map.DespawnEnemy(enemy.Id);
+        _bossStatus.EnemyDied(enemy);
     }
 
     private void OnEnemyMove(EnemyMove enemyMove)
@@ -429,5 +437,10 @@ public class GameScene : IScene
         if (!_map.Enemies.TryGetValue(enemyMove.Id, out var enemy)) return;
 
         enemy.MoveTo(_map, enemyMove.X, enemyMove.Z);
+    }
+
+    private void OnSetEnemiesKilled(SetEnemiesKilled setEnemiesKilled)
+    {
+        _bossStatus.SetEnemiesKilled(setEnemiesKilled.EnemiesKilled);
     }
 }

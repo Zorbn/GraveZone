@@ -49,6 +49,7 @@ public class EnemyStats
         Register(new EnemyStats(EnemyType.SkeletonArcher, WeaponType.Shortbow, MediumDropRate, MediumMaxHealth, MediumSpeed,
             new[] { Sprite.SkeletonArcherIdle, Sprite.SkeletonArcherStepLeft, Sprite.SkeletonArcherIdle, Sprite.SkeletonArcherStepRight }));
 
+        // TODO: Make more bosses that favor different weapon types, the bonfire is easiest with long range.
         Register(new EnemyStats(EnemyType.HauntedBonfire, WeaponType.FireCharm, MediumDropRate, BossMediumMaxHealth, 0,
             new[] { Sprite.HauntedBonfire1, Sprite.HauntedBonfire2, Sprite.HauntedBonfire3 }, true));
 

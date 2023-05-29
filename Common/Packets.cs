@@ -452,3 +452,18 @@ public struct EnemyMove : INetSerializable
         Z = reader.GetFloat();
     }
 }
+
+public struct SetEnemiesKilled : INetSerializable
+{
+    public int EnemiesKilled { get; set; }
+
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(EnemiesKilled);
+    }
+
+    public void Deserialize(NetDataReader reader)
+    {
+        EnemiesKilled = reader.GetInt();
+    }
+}

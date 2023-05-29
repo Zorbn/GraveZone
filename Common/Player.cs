@@ -17,13 +17,13 @@ public class Player
     public readonly int Id;
     protected bool IsDead { get; private set; }
 
-    public Player(Map map, int id, float x, float z, int? health = null)
+    public Player(Map map, int id, float x, float z, int health = MaxHealth)
     {
         Id = id;
         Inventory = new Inventory();
         Position = new Vector3(x, 0f, z);
         SpritePosition = Position;
-        Health = health ?? MaxHealth;
+        Health = health;
         map.PlayersInTiles.Add(this, (int)Position.X, (int)Position.Z);
     }
 
@@ -54,10 +54,10 @@ public class Player
         map.PlayersInTiles.Remove(this, (int)Position.X, (int)Position.Z);
     }
 
-    // Returns true if the enemy died.
+    // Returns true if the player died.
     public virtual bool TakeDamage(int damage)
     {
-        // The enemy can't die if it was already dead.
+        // The player can't die if it was already dead.
         if (Health <= 0) return false;
 
         Health -= damage;

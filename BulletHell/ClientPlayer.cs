@@ -29,7 +29,7 @@ public class ClientPlayer : Player
     private float _healthRegenTimer;
     private float _healthRegenStartTimer;
 
-    public ClientPlayer(Attacker attacker, Map map, int id, float x, float z, int? health) : base(map, id, x, z, health)
+    public ClientPlayer(Attacker attacker, Map map, int id, float x, float z, int health = MaxHealth) : base(map, id, x, z, health)
     {
         _attacker = attacker;
         _clientInventory = new ClientInventory(Inventory);
@@ -162,11 +162,15 @@ public class ClientPlayer : Player
         return _clientInventory.Update(client, camera, input, mousePosition);
     }
 
-    public void Tick(Client client, float deltaTime)
+    public void Tick(Client client)
     {
-        if (ShouldUpdateLocally(client))
+        if (!ShouldUpdateLocally(client)) return;
+
+        if (IsMoving)
+        {
             client.SendToServer(new PlayerMove { Id = Id, X = Position.X, Z = Position.Z },
                 DeliveryMethod.Unreliable);
+        }
     }
 
     public void AddSprite(SpriteRenderer spriteRenderer, int animationFrame)
