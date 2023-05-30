@@ -288,7 +288,7 @@ public class Server
     private void ServerSpawnEnemy(Vector3 position)
     {
         var enemyId = _nextEnemyId++;
-        var enemy = _map.SpawnRandomEnemy(position.X, position.Z, enemyId,
+        var enemy = _map.SpawnRandomNormalEnemy(position.X, position.Z, enemyId,
             new Attacker(Team.Enemies, EnemyAttackAction));
 
         if (enemy is null) return;

@@ -13,5 +13,6 @@ public enum EnemyType
     RedMushroom,
     SkeletonArcher,
     GhostArcher,
-    HauntedBonfire
+    HauntedBonfire,
+    SkeletonGiant
 }

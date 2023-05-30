@@ -6,6 +6,7 @@ public class EnemyStats
 {
     public static readonly Dictionary<EnemyType, EnemyStats> Registry = new();
     public static readonly ReadOnlyCollection<EnemyType> NormalEnemyTypes;
+    public static readonly ReadOnlyCollection<EnemyType> BossEnemyTypes;
 
     private const float MediumDropRate = 0.2f;
 
@@ -16,6 +17,7 @@ public class EnemyStats
     private const int HighMaxHealth = 60;
 
     private const int BossMediumMaxHealth = 200;
+    private const int BossHighMaxHealth = 300;
 
     static EnemyStats()
     {
@@ -69,19 +71,31 @@ public class EnemyStats
                 Sprite.SkeletonArcherStepRight
             }));
 
-        // TODO: Make more bosses that favor different weapon types, the bonfire is easiest with long range.
         Register(new EnemyStats(EnemyType.HauntedBonfire, WeaponType.FireCharm, MediumDropRate, BossMediumMaxHealth, 0,
             new[] { Sprite.HauntedBonfire1, Sprite.HauntedBonfire2, Sprite.HauntedBonfire3 }, true));
+        // TODO: Add evolution for scythe and use it here:
+        Register(new EnemyStats(EnemyType.SkeletonGiant, WeaponType.Scythe, MediumDropRate, BossHighMaxHealth, 0,
+            new[]
+            {
+                Sprite.SkeletonGiantIdle, Sprite.SkeletonGiantPunchLeft, Sprite.SkeletonGiantIdle,
+                Sprite.SkeletonGiantPunchRight
+            }, true));
 
         var normalEnemyTypes = new List<EnemyType>();
+        var bossEnemyTypes = new List<EnemyType>();
         foreach (var (enemyType, enemyStats) in Registry)
         {
-            if (enemyStats.IsBoss) continue;
+            if (enemyStats.IsBoss)
+            {
+                bossEnemyTypes.Add(enemyType);
+                continue;
+            }
 
             normalEnemyTypes.Add(enemyType);
         }
 
         NormalEnemyTypes = new ReadOnlyCollection<EnemyType>(normalEnemyTypes);
+        BossEnemyTypes = new ReadOnlyCollection<EnemyType>(bossEnemyTypes);
     }
 
     public readonly EnemyType EnemyType;

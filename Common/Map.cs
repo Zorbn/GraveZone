@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.ObjectModel;
+using Microsoft.Xna.Framework;
 
 namespace Common;
 
@@ -197,11 +198,21 @@ public class Map
                GetWallTileF(at.X + size.X * 0.5f, at.Z + size.Z * 0.5f) != Tile.Air;
     }
 
-    public Enemy? SpawnRandomEnemy(float x, float z, int id, Attacker attacker)
+    public Enemy? SpawnRandomNormalEnemy(float x, float z, int id, Attacker attacker)
+    {
+        return SpawnRandomEnemy(x, z, id, attacker, EnemyStats.NormalEnemyTypes);
+    }
+
+    public Enemy? SpawnRandomBossEnemy(float x, float z, int id, Attacker attacker)
+    {
+        return SpawnRandomEnemy(x, z, id, attacker, EnemyStats.BossEnemyTypes);
+    }
+
+    private Enemy? SpawnRandomEnemy(float x, float z, int id, Attacker attacker, ReadOnlyCollection<EnemyType> possibleEnemyTypes)
     {
         if (_random is null) return null;
 
-        var enemyType = EnemyStats.NormalEnemyTypes.Choose(_random);
+        var enemyType = possibleEnemyTypes.Choose(_random);
         return SpawnEnemy(enemyType, x, z, id, attacker);
     }
 
