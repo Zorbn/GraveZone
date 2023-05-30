@@ -20,5 +20,7 @@ public enum WeaponType
     DoubleDagger,
     TripleDagger,
     Longsword,
-    DoubleCrossbow
+    DoubleCrossbow,
+    DoubleSpear,
+    QuadSpear,
 }

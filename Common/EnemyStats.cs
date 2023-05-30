@@ -19,6 +19,8 @@ public class EnemyStats
     private const int BossMediumMaxHealth = 200;
     private const int BossHighMaxHealth = 300;
 
+    private const float BossMediumSpeed = 1f;
+
     static EnemyStats()
     {
         Register(new EnemyStats(EnemyType.Zombie, WeaponType.Sword, MediumDropRate, MediumMaxHealth, MediumSpeed,
@@ -72,9 +74,8 @@ public class EnemyStats
             }));
 
         Register(new EnemyStats(EnemyType.HauntedBonfire, WeaponType.FireCharm, MediumDropRate, BossMediumMaxHealth, 0,
-            new[] { Sprite.HauntedBonfire1, Sprite.HauntedBonfire2, Sprite.HauntedBonfire3 }, true));
-        // TODO: Add evolution for scythe and use it here:
-        Register(new EnemyStats(EnemyType.SkeletonGiant, WeaponType.Scythe, MediumDropRate, BossHighMaxHealth, 0,
+        new[] { Sprite.HauntedBonfire1, Sprite.HauntedBonfire2, Sprite.HauntedBonfire3 }, true));
+        Register(new EnemyStats(EnemyType.SkeletonGiant, WeaponType.QuadSpear, MediumDropRate, BossHighMaxHealth, BossMediumSpeed,
             new[]
             {
                 Sprite.SkeletonGiantIdle, Sprite.SkeletonGiantPunchLeft, Sprite.SkeletonGiantIdle,

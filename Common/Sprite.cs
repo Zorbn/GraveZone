@@ -46,6 +46,8 @@ public enum Sprite
     RedMushroomLookDown = 36,
     RedMushroomLookForward = 37,
     RedMushroomLookUp = 38,
+    DoubleSpear = 575,
+    QuadSpear = 576,
     Dagger = 600,
     Sword = 601,
     FireWand = 602,

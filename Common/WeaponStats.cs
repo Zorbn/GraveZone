@@ -114,12 +114,34 @@ public class WeaponStats
                     { ProjectileType = ProjectileType.ThrownMachete, Angle = 0f, RelativeToForward = true }
             }));
 
-        Register(new WeaponStats(WeaponType.Spear, "Spear", WeaponType.None, MediumCooldownTier1, MediumSpeedTier1,
+        Register(new WeaponStats(WeaponType.Spear, "Spear", WeaponType.DoubleSpear, MediumCooldownTier1, MediumSpeedTier1,
             Sprite.Spear,
             new[]
             {
                 new ProjectileSpawnData
                     { ProjectileType = ProjectileType.ThrownSpear, Angle = 0f, RelativeToForward = true }
+            }));
+        Register(new WeaponStats(WeaponType.DoubleSpear, "Double Spear", WeaponType.QuadSpear, MediumCooldownTier2, MediumSpeedTier2,
+            Sprite.DoubleSpear,
+            new[]
+            {
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownDoubleSpear, Angle = 0f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownDoubleSpear, Angle = 180f, RelativeToForward = true }
+            }));
+        Register(new WeaponStats(WeaponType.QuadSpear, "Quad Spear", WeaponType.None, MediumCooldownTier3, MediumSpeedTier3,
+            Sprite.QuadSpear,
+            new[]
+            {
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownQuadSpear, Angle = 0f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownQuadSpear, Angle = 90f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownQuadSpear, Angle = -90f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownQuadSpear, Angle = 180f, RelativeToForward = true }
             }));
 
         Register(new WeaponStats(WeaponType.FireWand, "Fire Wand", WeaponType.FireStaff, HighCooldownTier1,

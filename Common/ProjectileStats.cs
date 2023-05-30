@@ -30,6 +30,8 @@ public class ProjectileStats
         Register(new ProjectileStats(ProjectileType.Fireball, HighDamageTier1, HighRange, LowSpeed, Sprite.Fireball));
         Register(new ProjectileStats(ProjectileType.FireNova, HighDamageTier2, HighRange, LowSpeed, Sprite.FireNova));
         Register(new ProjectileStats(ProjectileType.ThrownSpear, MediumDamageTier1, MediumRange, MediumSpeed, Sprite.Spear));
+        Register(new ProjectileStats(ProjectileType.ThrownDoubleSpear, MediumDamageTier2, MediumRange, MediumSpeed, Sprite.DoubleSpear));
+        Register(new ProjectileStats(ProjectileType.ThrownQuadSpear, MediumDamageTier3, MediumRange, MediumSpeed, Sprite.QuadSpear));
         Register(new ProjectileStats(ProjectileType.ThrownKnife, HighDamageTier1, LowRange, MediumSpeed, Sprite.Knife));
         Register(new ProjectileStats(ProjectileType.ThrownMachete, HighDamageTier2, LowRange, MediumSpeed, Sprite.Machete));
         Register(new ProjectileStats(ProjectileType.CrossbowBolt, MediumDamageTier1, MediumRange, HighSpeed, Sprite.CrossbowBolt));

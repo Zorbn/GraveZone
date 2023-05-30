@@ -7,6 +7,8 @@ public enum ProjectileType
     ThrownLongsword,
     Fireball,
     ThrownSpear,
+    ThrownDoubleSpear,
+    ThrownQuadSpear,
     ThrownKnife,
     ThrownMachete,
     FireNova,
