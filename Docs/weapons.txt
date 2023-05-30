@@ -1,13 +1,13 @@
 Weapons:
-Zombie:         Sword        -> Longsword
-VampireMimic:   Dagger -> DoubleDagger -> TripleDagger
+Zombie:         Sword        -> Longsword    -> War Hammer
+VampireMimic:   Dagger       -> DoubleDagger -> TripleDagger
 ShelledMimic:   Mace
 Ghost:          Knife        -> Machete
-Skeleton:       Spear
+Skeleton:       Spear        -> Double Spear -> Quad Spear
 Lantern:        FireWand     -> FireStaff    -> FireCharm
-Grave:          Scythe
-GrayMushroom:   Spores
-RedMushroom:    Spores
+Grave:          Scythe       -> DoubleScythe -> EnchantedScythe
+GrayMushroom:   SporeBlaster -> AdvancedSB   -> EvolvedSB
+RedMushroom:    SporeBlaster -> AdvancedSB   -> EvolvedSB
 GhostArcher:    Crossbow     -> SplitCrossbow
 SkeletonArcher: Shortbow     -> Longbow
 
@@ -23,3 +23,22 @@ Shortbow:   H damage, L speed, H range, L count, H cooldown    4 points
 Scythe:     H damage, M speed, M range, L count, M cooldown    5 points
 Spores:     L damage, L speed, M range, H count, L cooldown    5 points
 Mace:       H damage, L speed, L range, M count, M cooldown    4 points
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
