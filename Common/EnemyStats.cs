@@ -16,10 +16,13 @@ public class EnemyStats
     private const int MediumMaxHealth = 40;
     private const int HighMaxHealth = 60;
 
-    private const int BossMediumMaxHealth = 200;
-    private const int BossHighMaxHealth = 300;
+    private const int BossLowMaxHealth = 200;
+    private const int BossMediumMaxHealth = 300;
+    private const int BossHighMaxHealth = 400;
 
-    private const float BossMediumSpeed = 1f;
+    private const float BossLowSpeed = 1f;
+    private const float BossMediumSpeed = 1.1f;
+    private const float BossHighSpeed = 1.2f;
 
     static EnemyStats()
     {
@@ -73,13 +76,41 @@ public class EnemyStats
                 Sprite.SkeletonArcherStepRight
             }));
 
-        Register(new EnemyStats(EnemyType.HauntedBonfire, WeaponType.FireCharm, MediumDropRate, BossMediumMaxHealth, 0,
+        Register(new EnemyStats(EnemyType.HauntedBonfire, WeaponType.FireCharm, MediumDropRate, BossLowMaxHealth, 0,
         new[] { Sprite.HauntedBonfire1, Sprite.HauntedBonfire2, Sprite.HauntedBonfire3 }, true));
         Register(new EnemyStats(EnemyType.SkeletonGiant, WeaponType.QuadSpear, MediumDropRate, BossHighMaxHealth, BossMediumSpeed,
             new[]
             {
                 Sprite.SkeletonGiantIdle, Sprite.SkeletonGiantPunchLeft, Sprite.SkeletonGiantIdle,
                 Sprite.SkeletonGiantPunchRight
+            }, true));
+        Register(new EnemyStats(EnemyType.ZombieKing, WeaponType.WarHammer, MediumDropRate, BossMediumMaxHealth, BossMediumSpeed,
+            new[]
+            {
+                Sprite.ZombieKingIdle, Sprite.ZombieKingStepLeft, Sprite.ZombieKingIdle,
+                Sprite.ZombieKingStepRight
+            }, true));
+        Register(new EnemyStats(EnemyType.CoffinMimic, WeaponType.TripleDagger, MediumDropRate, BossMediumMaxHealth, BossLowSpeed,
+            new[]
+            {
+                Sprite.CoffinMimicClosed, Sprite.CoffinMimicHalfOpen, Sprite.CoffinMimicOpen,
+                Sprite.CoffinMimicHalfOpen
+            }, true));
+        Register(new EnemyStats(EnemyType.GhostGiant, WeaponType.Scimitar, MediumDropRate, BossLowMaxHealth, BossHighSpeed,
+            new[]
+            {
+                Sprite.GhostGiant1, Sprite.GhostGiant2, Sprite.GhostGiant3,
+            }, true));
+        Register(new EnemyStats(EnemyType.GraveMimicGiant, WeaponType.EnchantedScythe, MediumDropRate, BossHighMaxHealth, BossLowSpeed,
+            new[]
+            {
+                Sprite.GraveMimicGiantOpen, Sprite.GraveMimicGiantHalfOpen, Sprite.GraveMimicGiantClosed,
+            }, true));
+        Register(new EnemyStats(EnemyType.RedMushroomGiant, WeaponType.EvolvedSporeBlaster, MediumDropRate, BossHighMaxHealth, 0,
+            new[]
+            {
+                Sprite.RedMushroomGiantLookDown, Sprite.RedMushroomGiantLookForward, Sprite.RedMushroomGiantLookUp,
+                Sprite.RedMushroomGiantLookForward
             }, true));
 
         var normalEnemyTypes = new List<EnemyType>();

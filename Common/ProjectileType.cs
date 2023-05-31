@@ -16,5 +16,11 @@ public enum ProjectileType
     Arrow,
     ScytheBlades,
     Spores,
-    SpikeBall
+    SpikeBall,
+    ThrownWarHammer,
+    DoubleScytheBlades,
+    EnchantedScytheBlades,
+    AdvancedSpores,
+    EvolvedSpores,
+    ThrownScimitar
 }

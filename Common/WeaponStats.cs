@@ -53,7 +53,7 @@ public class WeaponStats
                 new ProjectileSpawnData
                     { ProjectileType = ProjectileType.ThrownSword, Angle = 315f, RelativeToForward = false }
             }));
-        Register(new WeaponStats(WeaponType.Longsword, "Longsword", WeaponType.None, HighCooldownTier2, LowSpeedTier2,
+        Register(new WeaponStats(WeaponType.Longsword, "Longsword", WeaponType.WarHammer, HighCooldownTier2, LowSpeedTier2,
             Sprite.Longsword, new[]
             {
                 new ProjectileSpawnData
@@ -73,6 +73,26 @@ public class WeaponStats
                 new ProjectileSpawnData
                     { ProjectileType = ProjectileType.ThrownLongsword, Angle = 315f, RelativeToForward = false }
             }));
+        Register(new WeaponStats(WeaponType.WarHammer, "War Hammer", WeaponType.None, HighCooldownTier3, LowSpeedTier3,
+            Sprite.WarHammer, new[]
+            {
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownWarHammer, Angle = 0f, RelativeToForward = false },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownWarHammer, Angle = 45f, RelativeToForward = false },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownWarHammer, Angle = 90f, RelativeToForward = false },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownWarHammer, Angle = 135f, RelativeToForward = false },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownWarHammer, Angle = 180f, RelativeToForward = false },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownWarHammer, Angle = 225f, RelativeToForward = false },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownWarHammer, Angle = 270f, RelativeToForward = false },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownWarHammer, Angle = 315f, RelativeToForward = false }
+            }));
 
         Register(new WeaponStats(WeaponType.Dagger, "Dagger", WeaponType.DoubleDagger, LowCooldownTier1, HighSpeedTier1,
             Sprite.Dagger, new[]
@@ -89,7 +109,7 @@ public class WeaponStats
                 new ProjectileSpawnData
                     { ProjectileType = ProjectileType.ThrownDagger, Angle = 10f, RelativeToForward = true }
             }));
-        Register(new WeaponStats(WeaponType.TripleDagger, "TripleDagger", WeaponType.None, LowCooldownTier3,
+        Register(new WeaponStats(WeaponType.TripleDagger, "Triple Dagger", WeaponType.None, LowCooldownTier3,
             HighSpeedTier3,
             Sprite.TripleDagger, new[]
             {
@@ -107,11 +127,17 @@ public class WeaponStats
                 new ProjectileSpawnData
                     { ProjectileType = ProjectileType.ThrownKnife, Angle = 0f, RelativeToForward = true }
             }));
-        Register(new WeaponStats(WeaponType.Machete, "Machete", WeaponType.None, MediumCooldownTier2, HighSpeedTier2,
+        Register(new WeaponStats(WeaponType.Machete, "Machete", WeaponType.Scimitar, MediumCooldownTier2, HighSpeedTier2,
             Sprite.Machete, new[]
             {
                 new ProjectileSpawnData
                     { ProjectileType = ProjectileType.ThrownMachete, Angle = 0f, RelativeToForward = true }
+            }));
+        Register(new WeaponStats(WeaponType.Scimitar, "Scimitar", WeaponType.None, MediumCooldownTier3, HighSpeedTier3,
+            Sprite.Scimitar, new[]
+            {
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.ThrownScimitar, Angle = 0f, RelativeToForward = true }
             }));
 
         Register(new WeaponStats(WeaponType.Spear, "Spear", WeaponType.DoubleSpear, MediumCooldownTier1, MediumSpeedTier1,
@@ -198,14 +224,32 @@ public class WeaponStats
                     { ProjectileType = ProjectileType.Arrow, Angle = 0f, RelativeToForward = true }
             }));
 
-        Register(new WeaponStats(WeaponType.Scythe, "Scythe", WeaponType.None, MediumCooldownTier1, MediumSpeedTier1,
+        Register(new WeaponStats(WeaponType.Scythe, "Scythe", WeaponType.DoubleScythe, MediumCooldownTier1, MediumSpeedTier1,
             Sprite.Scythe, new[]
             {
                 new ProjectileSpawnData
                     { ProjectileType = ProjectileType.ScytheBlades, Angle = 0f, RelativeToForward = true }
             }));
+        Register(new WeaponStats(WeaponType.DoubleScythe, "Double Scythe", WeaponType.EnchantedScythe, MediumCooldownTier2, MediumSpeedTier2,
+            Sprite.DoubleScythe, new[]
+            {
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.DoubleScytheBlades, Angle = -10f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.DoubleScytheBlades, Angle = 10f, RelativeToForward = true }
+            }));
+        Register(new WeaponStats(WeaponType.EnchantedScythe, "Enchanted Scythe", WeaponType.None, MediumCooldownTier3, MediumSpeedTier3,
+            Sprite.EnchantedScythe, new[]
+            {
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.EnchantedScytheBlades, Angle = -15f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.EnchantedScytheBlades, Angle = 0f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.EnchantedScytheBlades, Angle = 15f, RelativeToForward = true }
+            }));
 
-        Register(new WeaponStats(WeaponType.SporeBlaster, "Spore Blaster", WeaponType.None, LowCooldownTier1,
+        Register(new WeaponStats(WeaponType.SporeBlaster, "Spore Blaster", WeaponType.AdvancedSporeBlaster, LowCooldownTier1,
             LowSpeedTier1,
             Sprite.SporeBlaster, new[]
             {
@@ -215,6 +259,28 @@ public class WeaponStats
                     { ProjectileType = ProjectileType.Spores, Angle = 0f, RelativeToForward = true },
                 new ProjectileSpawnData
                     { ProjectileType = ProjectileType.Spores, Angle = 15f, RelativeToForward = true }
+            }));
+        Register(new WeaponStats(WeaponType.AdvancedSporeBlaster, "Advanced Spore Blaster", WeaponType.EvolvedSporeBlaster, LowCooldownTier2,
+            LowSpeedTier2,
+            Sprite.AdvancedSporeBlaster, new[]
+            {
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.AdvancedSpores, Angle = -15f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.AdvancedSpores, Angle = 0f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.AdvancedSpores, Angle = 15f, RelativeToForward = true }
+            }));
+        Register(new WeaponStats(WeaponType.EvolvedSporeBlaster, "Evolved Spore Blaster", WeaponType.None, LowCooldownTier3,
+            LowSpeedTier3,
+            Sprite.EvolvedSporeBlaster, new[]
+            {
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.EvolvedSpores, Angle = -15f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.EvolvedSpores, Angle = 0f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.EvolvedSpores, Angle = 15f, RelativeToForward = true }
             }));
 
         Register(new WeaponStats(WeaponType.Mace, "Mace", WeaponType.None, MediumCooldownTier1, LowSpeedTier1,

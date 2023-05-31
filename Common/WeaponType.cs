@@ -23,4 +23,10 @@ public enum WeaponType
     DoubleCrossbow,
     DoubleSpear,
     QuadSpear,
+    WarHammer,
+    DoubleScythe,
+    EnchantedScythe,
+    AdvancedSporeBlaster,
+    EvolvedSporeBlaster,
+    Scimitar
 }

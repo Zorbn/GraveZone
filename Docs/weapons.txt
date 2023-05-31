@@ -23,22 +23,3 @@ Shortbow:   H damage, L speed, H range, L count, H cooldown    4 points
 Scythe:     H damage, M speed, M range, L count, M cooldown    5 points
 Spores:     L damage, L speed, M range, H count, L cooldown    5 points
 Mace:       H damage, L speed, L range, M count, M cooldown    4 points
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

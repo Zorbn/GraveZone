@@ -14,5 +14,10 @@ public enum EnemyType
     SkeletonArcher,
     GhostArcher,
     HauntedBonfire,
-    SkeletonGiant
+    SkeletonGiant,
+    ZombieKing,
+    CoffinMimic,
+    GhostGiant,
+    GraveMimicGiant,
+    RedMushroomGiant,
 }
