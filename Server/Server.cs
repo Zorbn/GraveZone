@@ -313,7 +313,7 @@ public class Server
                 ServerDropWeapon(enemy.Stats.WeaponType, enemy.Position.X, enemy.Position.Z);
 
             _map.DespawnEnemy(enemy.Id);
-            _serverBossSpawner.EnemyDied(this, _map, ref _nextEnemyId);
+            _serverBossSpawner.EnemyDied(this, _map, enemy, ref _nextEnemyId);
         }
 
         SendToAll(new EnemyTakeDamage { Id = enemy.Id, Damage = damage }, DeliveryMethod.ReliableOrdered);

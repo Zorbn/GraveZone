@@ -47,7 +47,7 @@ public class BossStatus
 
     public void EnemyDied(Enemy? enemy)
     {
-        _killTracker.EnemyDied(_currentBoss);
+        _killTracker.EnemyDied(enemy, _currentBoss);
 
         if (_currentBoss is not null && enemy == _currentBoss) _currentBoss = null;
     }

@@ -13,9 +13,9 @@ public class ServerBossSpawner
     private readonly KillTracker _killTracker = new();
     private Enemy? _currentBoss;
 
-    public void EnemyDied(Server server, Map map, ref int nextEnemyId)
+    public void EnemyDied(Server server, Map map, Enemy enemy, ref int nextEnemyId)
     {
-        var shouldSpawnBoss = _killTracker.EnemyDied(_currentBoss);
+        var shouldSpawnBoss = _killTracker.EnemyDied(enemy, _currentBoss);
 
         if (!shouldSpawnBoss) return;
 
