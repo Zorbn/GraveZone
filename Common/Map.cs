@@ -37,30 +37,44 @@ public class Map
 
     private static readonly Dictionary<MapZone, Tile> FloorTilesPerZone = new()
     {
-        { MapZone.Beach, Tile.DryGrass },
+        { MapZone.Forest, Tile.DryGrass },
+        { MapZone.Factory, Tile.Slime },
         { MapZone.Grasslands, Tile.Grass },
+        { MapZone.PumpkinPatch, Tile.GardenDirt },
         { MapZone.Roads, Tile.Path },
+        { MapZone.WheatField, Tile.Field },
         { MapZone.Ruins, Tile.Planks },
         { MapZone.BossArena, Tile.Embers }
     };
 
     private static readonly Dictionary<MapZone, Tile> WallTilesPerZone = new()
     {
-        { MapZone.Beach, Tile.Air },
+        { MapZone.Forest, Tile.Air },
+        { MapZone.Factory, Tile.FactoryWall },
         { MapZone.Grasslands, Tile.Flower },
+        { MapZone.PumpkinPatch, Tile.Air },
         { MapZone.Roads, Tile.Air },
+        { MapZone.WheatField, Tile.Air },
         { MapZone.Ruins, Tile.Brick },
         { MapZone.BossArena, Tile.Air }
     };
 
     private static readonly Dictionary<MapZone, Sprite> SpritesPerZone = new()
     {
-        { MapZone.Beach, Sprite.PalmTree },
+        { MapZone.Forest, Sprite.Tree },
+        { MapZone.Factory, Sprite.None },
         { MapZone.Grasslands, Sprite.None },
+        { MapZone.PumpkinPatch, Sprite.Pumpkin },
         { MapZone.Roads, Sprite.None },
+        { MapZone.WheatField, Sprite.Wheat },
         { MapZone.Ruins, Sprite.None },
         { MapZone.BossArena, Sprite.Grave }
     };
+
+    private static readonly MapZone[] LowlandsZones = { MapZone.Forest, MapZone.WheatField };
+    private static readonly MapZone[] MidlandsZones = { MapZone.Grasslands, MapZone.PumpkinPatch };
+    private static readonly MapZone[] BorderZones = { MapZone.Roads };
+    private static readonly MapZone[] HighlandsZones = { MapZone.Ruins, MapZone.Factory };
 
     public readonly Dictionary<int, Weapon> DroppedWeapons = new();
 
@@ -88,6 +102,11 @@ public class Map
         _random = new Random(seed);
         _midpointDisplacement.Generate(_random);
 
+        var lowlandsZone = LowlandsZones.Choose(_random);
+        var midlandsZone = MidlandsZones.Choose(_random);
+        var borderZone = BorderZones.Choose(_random);
+        var highlandsZone = HighlandsZones.Choose(_random);
+
         for (var z = 0; z < Size; ++z)
         for (var x = 0; x < Size; ++x)
         {
@@ -103,10 +122,10 @@ public class Map
             else
                 zone = _midpointDisplacement.Heightmap[i] switch
                 {
-                    < 0.3f => MapZone.Beach,
-                    < 0.6f => MapZone.Grasslands,
-                    < 0.7f => MapZone.Roads,
-                    _ => MapZone.Ruins
+                    < 0.4f => lowlandsZone,
+                    < 0.6f => midlandsZone,
+                    < 0.7f => borderZone,
+                    _ => highlandsZone
                 };
 
             _floorTiles[i] = FloorTilesPerZone[zone];

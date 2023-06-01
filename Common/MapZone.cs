@@ -2,9 +2,12 @@
 
 public enum MapZone
 {
-    Beach,
+    Forest,
     Grasslands,
+    PumpkinPatch,
     Roads,
     Ruins,
+    WheatField,
+    Factory,
     BossArena
 }

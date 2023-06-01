@@ -13,5 +13,9 @@ public enum Tile
     Dirt,
     Sand,
     Marble,
-    Brick
+    Brick,
+    GardenDirt,
+    Slime,
+    FactoryWall,
+    Field
 }
