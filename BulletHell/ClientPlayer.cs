@@ -17,6 +17,8 @@ public class ClientPlayer : Player
     private const float HealthRegenTime = 2f;
     private const float HealthRegenStartTime = 5f;
 
+    private const float InvincibilityTime = 3f;
+
     private const float LerpAnimationThreshold = 0.05f;
 
     private static readonly Sprite[] Sprites =
@@ -28,6 +30,7 @@ public class ClientPlayer : Player
     private readonly Attacker _attacker;
     private float _healthRegenTimer;
     private float _healthRegenStartTimer;
+    private float _invincibilityTimer = InvincibilityTime;
 
     public ClientPlayer(Attacker attacker, Map map, int id, float x, float z, int health = MaxHealth) : base(map, id, x,
         z, health)
@@ -122,6 +125,26 @@ public class ClientPlayer : Player
         }
     }
 
+    public override void Respawn(Map map, Vector3 position)
+    {
+        _invincibilityTimer = InvincibilityTime;
+        base.Respawn(map, position);
+    }
+
+    // When the local client takes damage it will be screened for invincibility,
+    // and any successful damage will be sent to the server.
+    public void LocalClientTakeDamage(Client client, int damage)
+    {
+        if (_invincibilityTimer > 0f) return;
+
+        TakeDamage(damage);
+
+        client.SendToServer(new PlayerTakeDamage
+        {
+            Damage = damage
+        }, DeliveryMethod.ReliableOrdered);
+    }
+
     public override bool TakeDamage(int damage)
     {
         _healthRegenStartTimer = 0f;
@@ -147,6 +170,7 @@ public class ClientPlayer : Player
         float deltaTime)
     {
         IsMoving = false;
+        _invincibilityTimer -= deltaTime;
 
         if (ShouldUpdateLocally(client))
         {
@@ -193,6 +217,10 @@ public class ClientPlayer : Player
         var currentHealthBarWidth = (int)(HealthBarWidth * (Health / (float)MaxHealth));
         healthBarDestination.Width = currentHealthBarWidth;
         game.SpriteBatch.Draw(game.Resources.UiTexture, healthBarDestination, Resources.WhiteRectangle, Color.Red);
+
+        if (_invincibilityTimer > 0f)
+            TextRenderer.Draw("*invulnerable*", 0, TextRenderer.BackgroundOffset, game, Color.White,
+                uiAnchor: UiAnchor.Top);
 
         _clientInventory.Draw(game);
     }

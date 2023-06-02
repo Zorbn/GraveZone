@@ -271,12 +271,7 @@ public class GameScene : IScene
         {
             if (playerHit.Entity.Id != localPlayer.Id) continue;
 
-            localPlayer.TakeDamage(playerHit.Damage);
-
-            Client.SendToServer(new PlayerTakeDamage
-            {
-                Damage = playerHit.Damage
-            }, DeliveryMethod.ReliableOrdered);
+            localPlayer.LocalClientTakeDamage(Client, playerHit.Damage);
         }
     }
 

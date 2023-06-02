@@ -10,7 +10,7 @@ public static class TextRenderer
     private const int TextureXStart = 0;
     private const int TextureYStart = 30;
     private const int TextureCharsPerLine = 32;
-    private const string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.?!,$:|/";
+    private const string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.?!,$:|/*";
 
     // Characters have one pixel pixel of padding around them in the texture sheet to prevent texture bleeding.
     private static readonly Rectangle CharRectangle = new(TextureXStart * Resources.TileSize + 1,

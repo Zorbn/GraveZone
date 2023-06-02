@@ -42,7 +42,7 @@ public class Player
         SpritePosition = Position;
     }
 
-    public void Respawn(Map map, Vector3 position)
+    public virtual void Respawn(Map map, Vector3 position)
     {
         Health = MaxHealth;
         Teleport(map, position);
