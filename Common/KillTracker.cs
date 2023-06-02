@@ -2,23 +2,27 @@
 
 public class KillTracker
 {
-    public const int EnemyKillsToSpawnBoss = 20;
+    public const int EnemyKillsToComplete = 20;
 
-    public int EnemiesKilled;
+    public int EnemiesKilled { get; private set; }
+    public bool Complete { get; private set; }
 
     // Returns true if a new boss should be spawned.
-    public bool EnemyDied(Enemy? enemy, Enemy? currentBoss)
+    public bool EnemyDied()
     {
-        // Boss kills don't count towards the number of kills required to spawn a boss.
-        if (enemy is not null && enemy.Stats.IsBoss) return false;
-        // Don't progress towards spawning a new boss if the last one is still alive.
-        if (currentBoss is not null && currentBoss.Health > 0) return false;
+        if (Complete) return false;
 
         ++EnemiesKilled;
 
-        if (EnemiesKilled < EnemyKillsToSpawnBoss) return false;
+        if (EnemiesKilled < EnemyKillsToComplete) return false;
 
-        EnemiesKilled = 0;
+        Complete = true;
         return true;
+    }
+
+    public void Reset(int enemiesKilled)
+    {
+        Complete = false;
+        EnemiesKilled = enemiesKilled;
     }
 }

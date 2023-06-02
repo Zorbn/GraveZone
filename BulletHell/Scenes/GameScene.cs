@@ -77,7 +77,6 @@ public class GameScene : IScene
         Client.NetPacketProcessor.SubscribeNetSerializable<EnemySpawn>(OnEnemySpawn);
         Client.NetPacketProcessor.SubscribeNetSerializable<EnemyTakeDamage>(OnEnemyTakeDamage);
         Client.NetPacketProcessor.SubscribeNetSerializable<EnemyMove>(OnEnemyMove);
-        Client.NetPacketProcessor.SubscribeNetSerializable<SetEnemiesKilled>(OnSetEnemiesKilled);
 
         Console.WriteLine("Starting client...");
 
@@ -224,7 +223,7 @@ public class GameScene : IScene
 
         if (_players.TryGetValue(Client.LocalId, out var localPlayer)) DrawLocal(localPlayer);
 
-        _bossStatus.Draw(_game);
+        _bossStatus.Draw(_game, _map);
 
         _game.SpriteBatch.End();
     }
@@ -356,7 +355,7 @@ public class GameScene : IScene
 
     private void OnMapGenerate(MapGenerate mapGenerate)
     {
-        _map.Generate(mapGenerate.Seed);
+        _map.Generate(mapGenerate.Seed, mapGenerate.EnemiesKilled);
         _map.Mesh(_game.GraphicsDevice);
     }
 
@@ -424,7 +423,6 @@ public class GameScene : IScene
         if (!enemyDied) return;
 
         _map.DespawnEnemy(enemy.Id);
-        _bossStatus.EnemyDied(enemy);
     }
 
     private void OnEnemyMove(EnemyMove enemyMove)
@@ -432,10 +430,5 @@ public class GameScene : IScene
         if (!_map.Enemies.TryGetValue(enemyMove.Id, out var enemy)) return;
 
         enemy.MoveTo(_map, enemyMove.X, enemyMove.Z);
-    }
-
-    private void OnSetEnemiesKilled(SetEnemiesKilled setEnemiesKilled)
-    {
-        _bossStatus.SetEnemiesKilled(setEnemiesKilled.EnemiesKilled);
     }
 }

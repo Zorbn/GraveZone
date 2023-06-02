@@ -4,22 +4,50 @@ using Microsoft.Xna.Framework;
 
 namespace Server;
 
-public class ServerBossSpawner
+public class ServerBossStatus
 {
+    private const float TransitionTime = 10f;
     private static readonly Vector3 BossSpawnPosition = new Vector3(Map.Size, 0f, Map.Size) * 0.5f;
 
-    public int EnemiesKilled => _killTracker.EnemiesKilled;
+    private bool _inTransition;
+    private float _transitionTimer;
 
-    private readonly KillTracker _killTracker = new();
-    private Enemy? _currentBoss;
-
-    public void EnemyDied(Server server, Map map, Enemy enemy, ref int nextEnemyId)
+    public void EnemyDied(Server server, Map map, Enemy enemy, bool shouldSpawnBoss, ref int nextEnemyId)
     {
-        var shouldSpawnBoss = _killTracker.EnemyDied(enemy, _currentBoss);
+        if (map.KillTracker.Complete)
+        {
+            if (enemy.Stats.IsBoss)
+            {
+                BeginTransition();
+            }
+        }
 
         if (!shouldSpawnBoss) return;
 
         ServerSpawnBoss(server, map, ref nextEnemyId);
+    }
+
+    public void Update(Server server, float deltaTime)
+    {
+        if (!_inTransition) return;
+
+        _transitionTimer += deltaTime;
+
+        if (_transitionTimer < TransitionTime) return;
+
+        EndTransition(server);
+    }
+
+    private void BeginTransition()
+    {
+        _inTransition = true;
+        _transitionTimer = 0;
+    }
+
+    private void EndTransition(Server server)
+    {
+        _inTransition = false;
+        server.ServerGenerateMap();
     }
 
     private void ServerSpawnBoss(Server server, Map map, ref int nextEnemyId)
@@ -29,8 +57,6 @@ public class ServerBossSpawner
             new Attacker(Team.Enemies, server.EnemyAttackAction));
 
         if (enemy is null) return;
-
-        _currentBoss = enemy;
 
         server.SendToAll(new EnemySpawn
         {

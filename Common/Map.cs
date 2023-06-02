@@ -93,12 +93,21 @@ public class Map
     public readonly EntitiesInTiles<Player> PlayersInTiles = new(Size);
 
     public readonly UpdateResults LastUpdateResults = new();
+    public readonly KillTracker KillTracker = new();
+
+    public int LastSeed { get; private set; }
 
     private readonly MidpointDisplacement _midpointDisplacement = new(Exponent);
     private Random? _random;
 
-    public void Generate(int seed)
+    public void Generate(int seed, int enemiesKilled)
     {
+        LastSeed = seed;
+
+        // The map may be generated multiple times, so it needs to be reset.
+        KillTracker.Reset(enemiesKilled);
+        Clear();
+
         _random = new Random(seed);
         _midpointDisplacement.Generate(_random);
 
@@ -145,6 +154,21 @@ public class Map
                     Position = new Vector3(x + 0.5f, 0f, z + 0.5f)
                 });
         }
+    }
+
+    private void Clear()
+    {
+        DroppedWeapons.Clear();
+        Enemies.Clear();
+        Projectiles.Clear();
+
+        Array.Fill(_floorTiles, Tile.Air);
+        Array.Fill(_wallTiles, Tile.Air);
+        DecorationSprites.Clear();
+
+        DroppedWeaponsInTiles.Clear();
+        EnemiesInTiles.Clear();
+        PlayersInTiles.Clear();
     }
 
     public Vector3? GetSpawnPosition()
@@ -252,9 +276,10 @@ public class Map
         return newEnemy;
     }
 
-    public void DespawnEnemy(int id)
+    // Returns true if a new boss should be spawned.
+    public bool DespawnEnemy(int id, bool wasKilled = true)
     {
-        if (!Enemies.TryGetValue(id, out var enemy)) return;
+        if (!Enemies.TryGetValue(id, out var enemy)) return false;
 
         var enemyTileX = (int)enemy.Position.X;
         var enemyTileZ = (int)enemy.Position.Z;
@@ -262,6 +287,8 @@ public class Map
         EnemiesInTiles.Remove(enemy, enemyTileX, enemyTileZ);
 
         Enemies.Remove(id);
+
+        return wasKilled && KillTracker.EnemyDied();
     }
 
     public bool DropWeapon(WeaponType weaponType, float x, float z, int id)

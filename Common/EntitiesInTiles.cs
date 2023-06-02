@@ -3,6 +3,7 @@
 public class EntitiesInTiles<T>
 {
     private readonly int _size;
+    private readonly int _tileCount;
 
     private readonly List<T>[] _entitiesInTiles;
     private readonly HashSet<T> _entityQueryResults;
@@ -10,12 +11,12 @@ public class EntitiesInTiles<T>
     public EntitiesInTiles(int size)
     {
         _size = size;
-        var tileCount = size * size;
+        _tileCount = size * size;
 
-        _entitiesInTiles = new List<T>[tileCount];
+        _entitiesInTiles = new List<T>[_tileCount];
         _entityQueryResults = new HashSet<T>();
 
-        for (var i = 0; i < tileCount; i++) _entitiesInTiles[i] = new List<T>();
+        for (var i = 0; i < _tileCount; i++) _entitiesInTiles[i] = new List<T>();
     }
 
     public void Add(T entity, int x, int z)
@@ -51,5 +52,11 @@ public class EntitiesInTiles<T>
         }
 
         return _entityQueryResults;
+    }
+
+    public void Clear()
+    {
+        for (var i = 0; i < _tileCount; i++) _entitiesInTiles[i].Clear();
+        _entityQueryResults.Clear();
     }
 }

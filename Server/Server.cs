@@ -21,12 +21,11 @@ public class Server
 
     private readonly Dictionary<int, Player> _players = new();
     private readonly Random _random = new();
-    private int _mapSeed;
     private int _nextDroppedWeaponId;
     private int _nextEnemyId;
     private readonly Map _map = new();
     private readonly AStar _aStar = new();
-    private readonly ServerBossSpawner _serverBossSpawner = new();
+    private readonly ServerBossStatus _serverBossStatus = new();
 
     private bool _isRunning;
     private int _tickCount;
@@ -68,8 +67,7 @@ public class Server
 
         _isRunning = true;
 
-        _mapSeed = _random.Next();
-        _map.Generate(_mapSeed);
+        ServerGenerateMap();
 
         _manager.Start(Networking.Port);
 
@@ -146,6 +144,7 @@ public class Server
         foreach (var weaponToDespawn in _map.LastUpdateResults.WeaponsToDespawn) ServerDespawnWeapon(weaponToDespawn);
 
         ServerMapUpdate();
+        _serverBossStatus.Update(this, TickTime);
 
         ++_tickCount;
     }
@@ -196,11 +195,6 @@ public class Server
 
         // Tell the new player their id.
         SendToPeer(peer, new SetLocalId { Id = newPlayerId }, DeliveryMethod.ReliableOrdered);
-        // Tell the new player the current enemy kill count.
-        SendToPeer(peer, new SetEnemiesKilled
-        {
-            EnemiesKilled = _serverBossSpawner.EnemiesKilled
-        }, DeliveryMethod.ReliableOrdered);
 
         SendMapStateToPeer(peer);
 
@@ -238,10 +232,39 @@ public class Server
         SendToAll(new PlayerDespawn { Id = peer.Id }, DeliveryMethod.ReliableOrdered);
     }
 
+    public void ServerGenerateMap()
+    {
+        var nextSeed = _random.Next();
+        _map.Generate(nextSeed, 0);
+
+        SendToAll(new MapGenerate
+        {
+            Seed = _map.LastSeed,
+            EnemiesKilled = _map.KillTracker.EnemiesKilled
+        }, DeliveryMethod.ReliableOrdered);
+
+        foreach (var (playerId, player) in _players)
+        {
+            var spawnPosition = _map.GetSpawnPosition() ?? Vector3.Zero;
+            player.Respawn(_map, spawnPosition);
+
+            SendToAll(new PlayerRespawn
+            {
+                Id = playerId,
+                X = spawnPosition.X,
+                Z = spawnPosition.Z
+            }, DeliveryMethod.ReliableOrdered);
+        }
+    }
+
     private void SendMapStateToPeer(NetPeer peer)
     {
         // Tell the new player to generate the map.
-        SendToPeer(peer, new MapGenerate { Seed = _mapSeed }, DeliveryMethod.ReliableOrdered);
+        SendToPeer(peer, new MapGenerate
+        {
+            Seed = _map.LastSeed,
+            EnemiesKilled = _map.KillTracker.EnemiesKilled
+        }, DeliveryMethod.ReliableOrdered);
 
         // Populate the map for the new player.
         foreach (var (droppedWeaponId, droppedWeapon) in _map.DroppedWeapons)
@@ -312,8 +335,8 @@ public class Server
             if (_random.NextSingle() < enemy.Stats.WeaponDropRate)
                 ServerDropWeapon(enemy.Stats.WeaponType, enemy.Position.X, enemy.Position.Z);
 
-            _map.DespawnEnemy(enemy.Id);
-            _serverBossSpawner.EnemyDied(this, _map, enemy, ref _nextEnemyId);
+            var shouldSpawnBoss = _map.DespawnEnemy(enemy.Id);
+            _serverBossStatus.EnemyDied(this, _map, enemy, shouldSpawnBoss, ref _nextEnemyId);
         }
 
         SendToAll(new EnemyTakeDamage { Id = enemy.Id, Damage = damage }, DeliveryMethod.ReliableOrdered);

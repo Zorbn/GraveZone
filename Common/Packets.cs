@@ -194,15 +194,18 @@ public struct ProjectileSpawn : INetSerializable
 public struct MapGenerate : INetSerializable
 {
     public int Seed { get; set; }
+    public int EnemiesKilled { get; set; }
 
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(Seed);
+        writer.Put(EnemiesKilled);
     }
 
     public void Deserialize(NetDataReader reader)
     {
         Seed = reader.GetInt();
+        EnemiesKilled = reader.GetInt();
     }
 }
 
@@ -450,20 +453,5 @@ public struct EnemyMove : INetSerializable
         Id = reader.GetInt();
         X = reader.GetFloat();
         Z = reader.GetFloat();
-    }
-}
-
-public struct SetEnemiesKilled : INetSerializable
-{
-    public int EnemiesKilled { get; set; }
-
-    public void Serialize(NetDataWriter writer)
-    {
-        writer.Put(EnemiesKilled);
-    }
-
-    public void Deserialize(NetDataReader reader)
-    {
-        EnemiesKilled = reader.GetInt();
     }
 }
