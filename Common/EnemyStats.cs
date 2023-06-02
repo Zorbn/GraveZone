@@ -106,7 +106,7 @@ public class EnemyStats
             {
                 Sprite.GraveMimicGiantOpen, Sprite.GraveMimicGiantHalfOpen, Sprite.GraveMimicGiantClosed,
             }, true));
-        Register(new EnemyStats(EnemyType.RedMushroomGiant, WeaponType.EvolvedSporeBlaster, MediumDropRate, BossHighMaxHealth, 0,
+        Register(new EnemyStats(EnemyType.RedMushroomGiant, WeaponType.EvolvedSporeBlaster, MediumDropRate, BossHighMaxHealth, BossLowSpeed,
             new[]
             {
                 Sprite.RedMushroomGiantLookDown, Sprite.RedMushroomGiantLookForward, Sprite.RedMushroomGiantLookUp,
