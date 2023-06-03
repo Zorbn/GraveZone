@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 
 namespace Common;
@@ -98,7 +99,12 @@ public class Map
     public int LastSeed { get; private set; }
 
     private readonly MidpointDisplacement _midpointDisplacement = new(Exponent);
-    private Random? _random;
+    // Net Random is used for randomness that is synchronized between the client and the server,
+    // all uses of Net Random on the server should correspond to a use on the client and vise versa.
+    private Random? _netRandom;
+    // Local Random is used for randomness that doesn't need to be synchronized between the client and
+    // the server, calls to Local Random can happen independently on either the client or the server.
+    private Random? _localRandom;
 
     public void Generate(int seed, int enemiesKilled)
     {
@@ -108,13 +114,14 @@ public class Map
         KillTracker.Reset(enemiesKilled);
         Clear();
 
-        _random = new Random(seed);
-        _midpointDisplacement.Generate(_random);
+        _localRandom = new Random(seed);
+        _netRandom = new Random(seed);
+        _midpointDisplacement.Generate(_netRandom);
 
-        var lowlandsZone = LowlandsZones.Choose(_random);
-        var midlandsZone = MidlandsZones.Choose(_random);
-        var borderZone = BorderZones.Choose(_random);
-        var highlandsZone = HighlandsZones.Choose(_random);
+        var lowlandsZone = LowlandsZones.Choose(_netRandom);
+        var midlandsZone = MidlandsZones.Choose(_netRandom);
+        var borderZone = BorderZones.Choose(_netRandom);
+        var highlandsZone = HighlandsZones.Choose(_netRandom);
 
         for (var z = 0; z < Size; ++z)
         for (var x = 0; x < Size; ++x)
@@ -140,14 +147,14 @@ public class Map
             _floorTiles[i] = FloorTilesPerZone[zone];
 
             var wallTile = WallTilesPerZone[zone];
-            if (wallTile != Tile.Air && _random.NextSingle() < 0.1f)
+            if (wallTile != Tile.Air && _netRandom.NextSingle() < 0.1f)
             {
                 _wallTiles[i] = WallTilesPerZone[zone];
                 continue;
             }
 
             var sprite = SpritesPerZone[zone];
-            if (sprite != Sprite.None && _random.NextSingle() < 0.1f)
+            if (sprite != Sprite.None && _netRandom.NextSingle() < 0.1f)
                 DecorationSprites.Add(new DecorationSprite
                 {
                     Sprite = sprite,
@@ -173,9 +180,9 @@ public class Map
 
     public Vector3? GetSpawnPosition()
     {
-        if (_random is null) return null;
+        if (_localRandom is null) return null;
 
-        for (var i = _random.Next(TileCount); i < TileCount; i = (i + 1) % TileCount)
+        for (var i = _localRandom.Next(TileCount); i < TileCount; i = (i + 1) % TileCount)
         {
             var x = i % Size;
             var z = i / Size;
@@ -253,9 +260,9 @@ public class Map
 
     private Enemy? SpawnRandomEnemy(float x, float z, int id, Attacker attacker, ReadOnlyCollection<EnemyType> possibleEnemyTypes)
     {
-        if (_random is null) return null;
+        if (_localRandom is null) return null;
 
-        var enemyType = possibleEnemyTypes.Choose(_random);
+        var enemyType = possibleEnemyTypes.Choose(_localRandom);
         return SpawnEnemy(enemyType, x, z, id, attacker);
     }
 
@@ -289,6 +296,28 @@ public class Map
         Enemies.Remove(id);
 
         return wasKilled && KillTracker.EnemyDied();
+    }
+
+    // Empties an inventory onto the ground randomly near the specified location.
+    // Calls to this method must be synchronized between the client and the server.
+    public void DropInventory(Inventory inventory, float x, float z, int baseId)
+    {
+        Debug.Assert(_netRandom is not null);
+
+        var tileX = MathF.Floor(x);
+        var tileZ = MathF.Floor(z);
+
+        for (var i = 0; i < Inventory.SlotCount; i++)
+        {
+            var removedWeapon = inventory.RemoveWeapon(i);
+
+            if (removedWeapon is null) continue;
+
+            var dropX = tileX + _netRandom.NextSingle();
+            var dropZ = tileZ + _netRandom.NextSingle();
+
+            DropWeapon(removedWeapon.WeaponType, dropX, dropZ, baseId + i);
+        }
     }
 
     public bool DropWeapon(WeaponType weaponType, float x, float z, int id)

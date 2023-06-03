@@ -382,6 +382,24 @@ public struct DropGrabbed : INetSerializable
     }
 }
 
+public struct PlayerDropInventory : INetSerializable
+{
+    public int PlayerId { get; set; }
+    public int BaseDroppedWeaponId { get; set; }
+
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(PlayerId);
+        writer.Put(BaseDroppedWeaponId);
+    }
+
+    public void Deserialize(NetDataReader reader)
+    {
+        PlayerId = reader.GetInt();
+        BaseDroppedWeaponId = reader.GetInt();
+    }
+}
+
 public class UpdateInventory
 {
     public int PlayerId { get; set; }

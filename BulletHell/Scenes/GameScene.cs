@@ -65,6 +65,7 @@ public class GameScene : IScene
         Client.NetPacketProcessor.SubscribeNetSerializable<PlayerTakeDamage>(OnPlayerTakeDamage);
         Client.NetPacketProcessor.SubscribeNetSerializable<PlayerHeal>(OnPlayerHeal);
         Client.NetPacketProcessor.SubscribeNetSerializable<PlayerRespawn>(OnPlayerRespawn);
+        Client.NetPacketProcessor.SubscribeNetSerializable<PlayerDropInventory>(OnPlayerDropInventory);
         Client.NetPacketProcessor.SubscribeNetSerializable<ProjectileSpawn>(OnProjectileSpawn);
         Client.NetPacketProcessor.SubscribeNetSerializable<MapGenerate>(OnMapGenerate);
         Client.NetPacketProcessor.SubscribeNetSerializable<DroppedWeaponSpawn>(OnDroppedWeaponSpawn);
@@ -334,6 +335,13 @@ public class GameScene : IScene
         if (!_players.TryGetValue(playerRespawn.Id, out var player)) return;
 
         player.Respawn(_map, new Vector3(playerRespawn.X, 0f, playerRespawn.Z));
+    }
+
+    private void OnPlayerDropInventory(PlayerDropInventory playerDropInventory)
+    {
+        if (!_players.TryGetValue(playerDropInventory.PlayerId, out var player)) return;
+
+        _map.DropInventory(player.Inventory, player.Position.X, player.Position.Z, playerDropInventory.BaseDroppedWeaponId);
     }
 
     private void OnSetLocalId(SetLocalId setLocalId)

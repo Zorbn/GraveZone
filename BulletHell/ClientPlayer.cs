@@ -17,7 +17,7 @@ public class ClientPlayer : Player
     private const float HealthRegenTime = 2f;
     private const float HealthRegenStartTime = 5f;
 
-    private const float InvincibilityTime = 3f;
+    private const float InvincibilityTime = 2f;
 
     private const float LerpAnimationThreshold = 0.05f;
 
@@ -219,7 +219,7 @@ public class ClientPlayer : Player
         game.SpriteBatch.Draw(game.Resources.UiTexture, healthBarDestination, Resources.WhiteRectangle, Color.Red);
 
         if (_invincibilityTimer > 0f)
-            TextRenderer.Draw("*invulnerable*", 0, TextRenderer.BackgroundOffset, game, Color.White,
+            TextRenderer.Draw("*invincible*", 0, TextRenderer.BackgroundOffset, game, Color.White,
                 uiAnchor: UiAnchor.Top);
 
         _clientInventory.Draw(game);

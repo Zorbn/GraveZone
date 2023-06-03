@@ -36,7 +36,7 @@ public class Inventory
         return false;
     }
 
-    private WeaponStats? RemoveWeapon(int i)
+    public WeaponStats? RemoveWeapon(int i)
     {
         var weapon = Weapons[i];
         Weapons[i] = null;

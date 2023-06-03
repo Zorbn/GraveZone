@@ -483,12 +483,27 @@ public class Server
 
         if (!playerDied) return;
 
+        ServerKillPlayer(peer.Id, player);
+    }
+
+    private void ServerKillPlayer(int playerId, Player player)
+    {
+        var baseDroppedWeaponId = _nextDroppedWeaponId;
+        _nextDroppedWeaponId += Inventory.SlotCount;
+        _map.DropInventory(player.Inventory, player.Position.X, player.Position.Z, baseDroppedWeaponId);
+        SendToAll(new PlayerDropInventory
+        {
+            PlayerId = playerId,
+            BaseDroppedWeaponId = baseDroppedWeaponId
+        }, DeliveryMethod.ReliableOrdered);
+
+
         var spawnPosition = _map.GetSpawnPosition() ?? Vector3.Zero;
         player.Respawn(_map, spawnPosition);
 
         SendToAll(new PlayerRespawn
         {
-            Id = peer.Id,
+            Id = playerId,
             X = spawnPosition.X,
             Z = spawnPosition.Z
         }, DeliveryMethod.ReliableOrdered);
