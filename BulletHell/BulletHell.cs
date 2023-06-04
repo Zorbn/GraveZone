@@ -7,11 +7,6 @@ using Microsoft.Xna.Framework.Input;
 
 namespace BulletHell;
 
-/**
- * TODO (Goals):
- * Improved menus,
- * Save files,
- */
 public class BulletHell : Game
 {
     public Ui Ui = new();

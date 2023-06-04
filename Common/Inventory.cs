@@ -6,14 +6,19 @@ public class Inventory
     public const int Height = 2;
     public const int SlotCount = Width * Height;
 
-    public WeaponStats? EquippedWeaponStats { get; private set; }
-    public readonly WeaponStats?[] Weapons = new WeaponStats[Width * Height];
-    public WeaponStats? GrabbedWeaponStats { get; private set; }
+    public WeaponStats EquippedWeaponStats { get; private set; } = WeaponStats.None;
+    public readonly WeaponStats[] Weapons = new WeaponStats[Width * Height];
+    public WeaponStats GrabbedWeaponStats { get; private set; } = WeaponStats.None;
+
+    public Inventory()
+    {
+        Array.Fill(Weapons, WeaponStats.None);
+    }
 
     public bool IsFull()
     {
         foreach (var weapon in Weapons)
-            if (weapon is null)
+            if (weapon.IsNone)
                 return false;
 
         return true;
@@ -26,7 +31,7 @@ public class Inventory
 
         for (var i = 0; i < Weapons.Length; i++)
         {
-            if (Weapons[i] is not null) continue;
+            if (!Weapons[i].IsNone) continue;
 
             Weapons[i] = weapon;
 
@@ -36,17 +41,17 @@ public class Inventory
         return false;
     }
 
-    public WeaponStats? RemoveWeapon(int i)
+    public WeaponStats RemoveWeapon(int i)
     {
         var weapon = Weapons[i];
-        Weapons[i] = null;
+        Weapons[i] = WeaponStats.None;
 
         return weapon;
     }
 
     public void GrabSlot(int i)
     {
-        if (GrabbedWeaponStats is null)
+        if (GrabbedWeaponStats.IsNone)
         {
             var removedWeapon = RemoveWeapon(i);
             GrabbedWeaponStats = removedWeapon;
@@ -58,35 +63,35 @@ public class Inventory
 
     public void GrabEquippedSlot()
     {
-        if (GrabbedWeaponStats is null)
+        if (GrabbedWeaponStats.IsNone)
         {
             GrabbedWeaponStats = EquippedWeaponStats;
-            EquippedWeaponStats = null;
+            EquippedWeaponStats = WeaponStats.None;
             return;
         }
 
         (EquippedWeaponStats, GrabbedWeaponStats) = SwapOrEvolve(EquippedWeaponStats, GrabbedWeaponStats);
     }
 
-    private static ValueTuple<WeaponStats?, WeaponStats?> SwapOrEvolve(WeaponStats? inSlot, WeaponStats? grabbed)
+    private static ValueTuple<WeaponStats, WeaponStats> SwapOrEvolve(WeaponStats inSlot, WeaponStats grabbed)
     {
         // The weapons can merge into an evolved version if they have the same type, and have
         // an evolution available. Otherwise just swap the two weapons.
-        if (inSlot is null || grabbed is null || inSlot.Evolution == WeaponType.None ||
+        if (inSlot.IsNone || grabbed.IsNone || inSlot.Evolution == WeaponType.None ||
             inSlot.WeaponType != grabbed.WeaponType) return (grabbed, inSlot);
 
         inSlot = WeaponStats.Registry[inSlot.Evolution];
-        grabbed = null;
+        grabbed = WeaponStats.None;
 
         return (inSlot, grabbed);
     }
 
     public void DropGrabbed(Map map, float x, float z, int id)
     {
-        if (GrabbedWeaponStats is null) return;
+        if (GrabbedWeaponStats.IsNone) return;
 
         map.DropWeapon(GrabbedWeaponStats.WeaponType, x, z, id);
-        GrabbedWeaponStats = null;
+        GrabbedWeaponStats = WeaponStats.None;
     }
 
     public void UpdateInventory(UpdateInventory updateInventory)

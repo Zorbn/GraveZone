@@ -75,6 +75,7 @@ public enum Sprite
     EvolvedSporeBlaster = 584,
     EvolvedSpores = 585,
     Scimitar = 586,
+    Punch = 587,
     Dagger = 600,
     Sword = 601,
     FireWand = 602,

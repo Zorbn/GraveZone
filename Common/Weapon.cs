@@ -15,7 +15,7 @@ public class Weapon
 
     public Weapon(WeaponType weaponType, float x, float z, int id)
     {
-        Stats = WeaponStats.Registry[weaponType]!;
+        Stats = WeaponStats.Registry[weaponType];
         Position = new Vector3(x, 0f, z);
         Id = id;
     }

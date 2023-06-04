@@ -45,6 +45,7 @@ public class ProjectileStats
         Register(new ProjectileStats(ProjectileType.AdvancedSpores, LowDamageTier2, MediumRange, LowSpeed, Sprite.AdvancedSpores));
         Register(new ProjectileStats(ProjectileType.EvolvedSpores, LowDamageTier3, MediumRange, LowSpeed, Sprite.EvolvedSpores));
         Register(new ProjectileStats(ProjectileType.SpikeBall, HighDamageTier1, LowRange, MediumSpeed, Sprite.SpikeBall));
+        Register(new ProjectileStats(ProjectileType.Punch, LowDamageTier1, LowRange, LowSpeed, Sprite.Punch));
     }
 
     public readonly Sprite Sprite;

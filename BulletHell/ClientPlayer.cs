@@ -49,7 +49,7 @@ public class ClientPlayer : Player
         movement.Normalize();
 
         var currentSpeed = Speed * deltaTime;
-        if (Inventory.EquippedWeaponStats is not null) currentSpeed *= Inventory.EquippedWeaponStats.SpeedMultiplier;
+        currentSpeed *= Inventory.EquippedWeaponStats.SpeedMultiplier;
 
         var newPosition = Position;
         newPosition.X += movement.X * currentSpeed;
@@ -102,7 +102,7 @@ public class ClientPlayer : Player
 
         _attacker.Update(deltaTime);
 
-        if (input.IsMouseButtonDown(MouseButton.Left) && Inventory.EquippedWeaponStats is not null)
+        if (input.IsMouseButtonDown(MouseButton.Left))
             _attacker.Attack(Inventory.EquippedWeaponStats, directionToMouse, Position.X, Position.Z, map);
 
         _healthRegenTimer += deltaTime;

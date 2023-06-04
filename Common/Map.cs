@@ -311,7 +311,7 @@ public class Map
         {
             var removedWeapon = inventory.RemoveWeapon(i);
 
-            if (removedWeapon is null) continue;
+            if (removedWeapon.IsNone) continue;
 
             var dropX = tileX + _netRandom.NextSingle();
             var dropZ = tileZ + _netRandom.NextSingle();
@@ -351,7 +351,7 @@ public class Map
 
     public void AddAttackProjectiles(WeaponType weaponType, Team team, Vector3 direction, float x, float z)
     {
-        var weaponStats = WeaponStats.Registry[weaponType]!;
+        var weaponStats = WeaponStats.Registry[weaponType];
         foreach (var projectileSpawn in weaponStats.ProjectileSpawns)
         {
             var rotation = Matrix.CreateRotationY(MathHelper.ToRadians(projectileSpawn.Angle));

@@ -73,7 +73,7 @@ public class ClientInventory
             return true;
         }
 
-        if (_inventory.GrabbedWeaponStats is not null)
+        if (!_inventory.GrabbedWeaponStats.IsNone)
         {
             RequestDropGrabbed(client, camera);
             return true;
@@ -96,7 +96,7 @@ public class ClientInventory
 
             var weapon = _inventory.Weapons[x + y * Inventory.Width];
 
-            if (weapon is not null)
+            if (!weapon.IsNone)
             {
                 var itemPosition = slotPosition;
                 itemPosition.X += ItemSpriteOffset;
@@ -108,7 +108,7 @@ public class ClientInventory
 
         game.SpriteBatch.Draw(game.Resources.UiTexture, equippedSlotPosition, EquippedSlotSource, Color.White);
 
-        if (_inventory.EquippedWeaponStats is not null)
+        if (!_inventory.EquippedWeaponStats.IsNone)
         {
             var equippedItemPosition = equippedSlotPosition;
             equippedItemPosition.X += ItemSpriteOffset;
@@ -117,7 +117,7 @@ public class ClientInventory
             game.SpriteBatch.Draw(game.Resources.SpriteTexture, equippedItemPosition, sourceRectangle, Color.White);
         }
 
-        if (_inventory.GrabbedWeaponStats is null)
+        if (_inventory.GrabbedWeaponStats.IsNone)
         {
             DrawTooltip(game);
         }
@@ -137,10 +137,14 @@ public class ClientInventory
         var i = GetSlotIndexFromPosition(_mousePosition, game);
         string? hoveredWeaponName = null;
 
-        if (i != -1)
-            hoveredWeaponName = _inventory.Weapons[i]?.DisplayName;
-        else if (equippedSlotDestination.ReadonlyContains(_mousePosition))
-            hoveredWeaponName = _inventory.EquippedWeaponStats?.DisplayName;
+        if (i != -1 && !_inventory.Weapons[i].IsNone)
+        {
+            hoveredWeaponName = _inventory.Weapons[i].DisplayName;
+        }
+        else if (equippedSlotDestination.ReadonlyContains(_mousePosition) && !_inventory.EquippedWeaponStats.IsNone)
+        {
+            hoveredWeaponName = _inventory.EquippedWeaponStats.DisplayName;
+        }
 
         if (hoveredWeaponName is null) return;
 

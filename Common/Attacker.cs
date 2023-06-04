@@ -19,10 +19,9 @@ public class Attacker
         _attackTimer -= deltaTime;
     }
 
-    public void Attack(WeaponStats? weaponStats, Vector3 direction, float x, float z, Map map)
+    public void Attack(WeaponStats weaponStats, Vector3 direction, float x, float z, Map map)
     {
         if (_attackTimer > 0f) return;
-        if (weaponStats is null) return;
 
         _attackTimer = weaponStats.AttackCooldown;
         map.AddAttackProjectiles(weaponStats.WeaponType, _team, direction, x, z);

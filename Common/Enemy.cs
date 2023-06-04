@@ -23,7 +23,7 @@ public class Enemy
 
     private Player? _targetPlayer;
     private readonly Attacker? _attacker;
-    private readonly WeaponStats? _weaponStats;
+    private readonly WeaponStats _weaponStats;
 
     public Enemy(EnemyType enemyType, float x, float z, int id,
         Attacker? attacker, int? health = null)
@@ -68,7 +68,7 @@ public class Enemy
 
         if (distanceToPlayer > ChaseDistance) return false;
 
-        if (_weaponStats is not null && distanceToPlayer <= _weaponStats.AttackRange)
+        if (distanceToPlayer <= _weaponStats.AttackRange)
             _attacker.Attack(_weaponStats, directionToPlayer, Position.X, Position.Z, map);
 
         if (_targetPathNodeI >= _path.Count) return false;
@@ -79,7 +79,7 @@ public class Enemy
         var directionToNode = targetNode - _position;
         directionToNode.Normalize();
 
-        var weaponSpeedMultiplier = _weaponStats?.SpeedMultiplier ?? 1f;
+        var weaponSpeedMultiplier = _weaponStats.SpeedMultiplier;
         var currentSpeed = Stats.Speed * weaponSpeedMultiplier * deltaTime;
         var newPosition = _position + directionToNode * currentSpeed;
         MoveTo(map, newPosition.X, newPosition.Z);

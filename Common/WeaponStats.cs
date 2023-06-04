@@ -24,14 +24,20 @@ public class WeaponStats
     private const float MediumSpeedTier3 = 1.3f;
     private const float HighSpeedTier3 = 1.8f;
 
-    public static readonly Dictionary<WeaponType, WeaponStats?> Registry = new()
-    {
-        // TODO: Consider adding a default punch attack (used when the player isn't carrying anything).
-        { WeaponType.None, null }
-    };
+    public static readonly Dictionary<WeaponType, WeaponStats> Registry = new();
+    public static readonly WeaponStats None;
 
     static WeaponStats()
     {
+        Register(new WeaponStats(WeaponType.None, "None", WeaponType.None, LowCooldownTier1, 1f,
+            Sprite.None, new[]
+            {
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.Punch, Angle = 0f, RelativeToForward = true }
+            }));
+
+        None = Registry[WeaponType.None];
+
         Register(new WeaponStats(WeaponType.Sword, "Sword", WeaponType.Longsword, HighCooldownTier1, LowSpeedTier1,
             Sprite.Sword,
             new[]
@@ -300,6 +306,8 @@ public class WeaponStats
     public readonly Sprite Sprite;
     public readonly ReadOnlyCollection<ProjectileSpawnData> ProjectileSpawns;
     public readonly float AttackRange;
+
+    public bool IsNone => WeaponType == WeaponType.None;
 
     private WeaponStats(WeaponType weaponType, string displayName, WeaponType evolution, float attackCooldown,
         float speedMultiplier, Sprite sprite, ProjectileSpawnData[] projectileSpawns)

@@ -22,5 +22,6 @@ public enum ProjectileType
     EnchantedScytheBlades,
     AdvancedSpores,
     EvolvedSpores,
-    ThrownScimitar
+    ThrownScimitar,
+    Punch
 }

@@ -351,10 +351,10 @@ public class Server
         };
 
         for (var i = 0; i < Inventory.SlotCount; i++)
-            updateInventory.Weapons[i] = (int)(player.Inventory.Weapons[i]?.WeaponType ?? WeaponType.None);
+            updateInventory.Weapons[i] = (int)player.Inventory.Weapons[i].WeaponType;
 
-        updateInventory.EquippedWeapon = (int)(player.Inventory.EquippedWeaponStats?.WeaponType ?? WeaponType.None);
-        updateInventory.GrabbedWeapon = (int)(player.Inventory.GrabbedWeaponStats?.WeaponType ?? WeaponType.None);
+        updateInventory.EquippedWeapon = (int)player.Inventory.EquippedWeaponStats.WeaponType;
+        updateInventory.GrabbedWeapon = (int)player.Inventory.GrabbedWeaponStats.WeaponType;
 
         return updateInventory;
     }
