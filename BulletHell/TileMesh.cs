@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace BulletHell;
 
-public static class CubeMesh
+public static class TileMesh
 {
     private const int TextureWidthTiles = 25;
     private const int TextureSize = 256;
@@ -144,5 +144,11 @@ public static class CubeMesh
         var x = i % TextureWidthTiles;
         var y = i / TextureWidthTiles;
         return new Vector2(PaddingX + PaddedUnitX * x, PaddingY + PaddedUnitY * y);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Rectangle GetSourceRectangle(Tile tile)
+    {
+        return Resources.GetSourceRectangle((int)tile, TextureWidthTiles);
     }
 }

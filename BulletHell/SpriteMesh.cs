@@ -38,10 +38,6 @@ public static class SpriteMesh
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Rectangle GetSourceRectangle(Sprite sprite)
     {
-        var i = (int)sprite;
-        var x = i % TextureWidthTiles;
-        var y = i / TextureWidthTiles;
-        return new Rectangle(1 + (Resources.TileSize + 2) * x, 1 + (Resources.TileSize + 2) * y, Resources.TileSize,
-            Resources.TileSize);
+        return Resources.GetSourceRectangle((int)sprite, TextureWidthTiles);
     }
 }

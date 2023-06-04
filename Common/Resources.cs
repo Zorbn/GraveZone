@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -26,5 +27,13 @@ public class Resources
         MapTexture = contentManager.Load<Texture2D>("tiles");
         SpriteTexture = contentManager.Load<Texture2D>("sprites");
         UiTexture = contentManager.Load<Texture2D>("ui");
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Rectangle GetSourceRectangle(int tileI, int textureWidthTiles)
+    {
+        var x = tileI % textureWidthTiles;
+        var y = tileI / textureWidthTiles;
+        return new Rectangle(1 + (TileSize + 2) * x, 1 + (TileSize + 2) * y, TileSize, TileSize);
     }
 }

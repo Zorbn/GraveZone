@@ -38,11 +38,11 @@ public class ClientMap : Map
             {
                 var direction = (Direction)i;
 
-                var sideIndices = CubeMesh.Indices[direction];
+                var sideIndices = TileMesh.Indices[direction];
                 var baseVertexCount = _vertices.Count;
                 foreach (var index in sideIndices) _indices.Add((ushort)(index + baseVertexCount));
 
-                var sideVertices = CubeMesh.Vertices[direction];
+                var sideVertices = TileMesh.Vertices[direction];
                 foreach (var vertex in sideVertices)
                 {
                     var newVertex = vertex;
@@ -52,7 +52,7 @@ public class ClientMap : Map
                     newVertex.Color.R = (byte)(vertex.Color.R * WallShade);
                     newVertex.Color.G = (byte)(vertex.Color.G * WallShade);
                     newVertex.Color.B = (byte)(vertex.Color.B * WallShade);
-                    var texCoord = CubeMesh.GetTexCoord(tile);
+                    var texCoord = TileMesh.GetTexCoord(tile);
                     newVertex.TextureCoordinate.X += texCoord.X;
                     newVertex.TextureCoordinate.Y += texCoord.Y;
                     _vertices.Add(newVertex);
@@ -68,11 +68,11 @@ public class ClientMap : Map
 
             if (tile == Tile.Air) continue;
 
-            var sideIndices = CubeMesh.Indices[Direction.Up];
+            var sideIndices = TileMesh.Indices[Direction.Up];
             var baseVertexCount = _vertices.Count;
             foreach (var index in sideIndices) _indices.Add((ushort)(index + baseVertexCount));
 
-            var sideVertices = CubeMesh.Vertices[Direction.Up];
+            var sideVertices = TileMesh.Vertices[Direction.Up];
             foreach (var vertex in sideVertices)
             {
                 var newVertex = vertex;
@@ -82,7 +82,7 @@ public class ClientMap : Map
                 newVertex.Color.R = (byte)(vertex.Color.R * FloorShade);
                 newVertex.Color.G = (byte)(vertex.Color.G * FloorShade);
                 newVertex.Color.B = (byte)(vertex.Color.B * FloorShade);
-                var texCoord = CubeMesh.GetTexCoord(tile);
+                var texCoord = TileMesh.GetTexCoord(tile);
                 newVertex.TextureCoordinate.X += texCoord.X;
                 newVertex.TextureCoordinate.Y += texCoord.Y;
                 _vertices.Add(newVertex);
