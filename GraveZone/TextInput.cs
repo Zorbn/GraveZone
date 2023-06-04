@@ -89,7 +89,7 @@ public class TextInput
         UpdateDrawableText();
     }
 
-    public void Draw(BulletHell game)
+    public void Draw(GraveZone game)
     {
         var usingDefaultText = _text.Length == 0;
         var color = usingDefaultText ? Color.Gray : Color.White;
@@ -118,7 +118,7 @@ public class TextInput
         }
     }
 
-    public void UpdateFocusWithClick(int x, int y, BulletHell game)
+    public void UpdateFocusWithClick(int x, int y, GraveZone game)
     {
         var anchoredRectangle = game.Ui.AnchorRectangle(_rectangle, _uiAnchor);
         _isFocused = anchoredRectangle.Contains(x, y);

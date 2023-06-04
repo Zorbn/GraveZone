@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace GraveZone;
 
-public class BulletHell : Game
+public class GraveZone : Game
 {
     public readonly Ui Ui = new();
 
@@ -31,7 +31,7 @@ public class BulletHell : Game
     private int _windowedWidth;
     private int _windowedHeight;
 
-    public BulletHell()
+    public GraveZone()
     {
         _graphics = new GraphicsDeviceManager(this);
         _graphics.GraphicsProfile = GraphicsProfile.HiDef;

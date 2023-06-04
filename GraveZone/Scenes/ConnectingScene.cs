@@ -8,7 +8,7 @@ public class ConnectingScene : IScene
 {
     private const float TimeoutTime = 30f;
 
-    private readonly BulletHell _game;
+    private readonly GraveZone _game;
     private readonly GameScene _gameScene;
     private bool _hasConnected;
     private bool _transitioningToGame;
@@ -16,7 +16,7 @@ public class ConnectingScene : IScene
     private float _timeoutTimer;
     private readonly string _loadingText;
 
-    public ConnectingScene(BulletHell game, string ip, bool startInternalServer)
+    public ConnectingScene(GraveZone game, string ip, bool startInternalServer)
     {
         _loadingText = startInternalServer ? "Loading..." : "Trying to connect...";
 
@@ -66,6 +66,8 @@ public class ConnectingScene : IScene
     public void Draw()
     {
         _game.GraphicsDevice.Clear(Color.Aqua);
+
+        BackgroundRenderer.Draw(_game);
 
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.Ui.Matrix);
         TextRenderer.Draw(_loadingText, Ui.CenterX, Ui.CenterY, _game, Color.White, centered: true);

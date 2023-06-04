@@ -36,7 +36,7 @@ public class ClientInventory
         _inventory = inventory;
     }
 
-    private int GetSlotIndexFromPosition(Vector2 position, BulletHell game)
+    private int GetSlotIndexFromPosition(Vector2 position, GraveZone game)
     {
         var inventoryPosition = game.Ui.AnchorPoint(RelativePosition, Anchor);
 
@@ -51,7 +51,7 @@ public class ClientInventory
     }
 
     // Returns true if the mouse input was captured by the inventory.
-    public bool Update(BulletHell game, Client client, Camera camera, Input input, Vector2 mousePosition)
+    public bool Update(GraveZone game, Client client, Camera camera, Input input, Vector2 mousePosition)
     {
         _mousePosition = mousePosition;
 
@@ -82,7 +82,7 @@ public class ClientInventory
         return false;
     }
 
-    public void Draw(BulletHell game)
+    public void Draw(GraveZone game)
     {
         var inventoryPosition = game.Ui.AnchorPoint(RelativePosition, Anchor);
         var equippedSlotPosition = game.Ui.AnchorPoint(RelativeEquippedPosition, Anchor).ToVector2();
@@ -129,7 +129,7 @@ public class ClientInventory
         }
     }
 
-    private void DrawTooltip(BulletHell game)
+    private void DrawTooltip(GraveZone game)
     {
         var tooltipPosition = game.Ui.AnchorPoint(RelativeTooltipPosition, Anchor);
         var equippedSlotDestination = game.Ui.AnchorRectangle(RelativeEquippedSlotDestination, Anchor);

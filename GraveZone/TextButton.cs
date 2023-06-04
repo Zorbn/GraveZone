@@ -37,7 +37,7 @@ public class TextButton
         _rectangle = new Rectangle(x, y, _widthInTiles * Resources.TileSize, Height);
     }
 
-    public void Draw(BulletHell game)
+    public void Draw(GraveZone game)
     {
         var anchoredRectangle = game.Ui.AnchorRectangle(_rectangle, _uiAnchor);
         var offsetRectangle = new Rectangle(anchoredRectangle.X, anchoredRectangle.Y, Resources.TileSize, Height);
@@ -56,7 +56,7 @@ public class TextButton
             Color.White, false);
     }
 
-    public bool Contains(int x, int y, BulletHell game)
+    public bool Contains(int x, int y, GraveZone game)
     {
         var anchoredRectangle = game.Ui.AnchorRectangle(_rectangle, _uiAnchor);
         return anchoredRectangle.Contains(x, y);

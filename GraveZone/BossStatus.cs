@@ -10,7 +10,7 @@ public class BossStatus
 
     private Enemy? _currentBoss;
 
-    public void Draw(BulletHell game, Map map)
+    public void Draw(GraveZone game, Map map)
     {
         if (_currentBoss is not null && _currentBoss.Health > 0)
             DrawBossHealth(game);
@@ -20,7 +20,7 @@ public class BossStatus
             DrawEnemiesKilled(game, map);
     }
 
-    private void DrawBossHealth(BulletHell game)
+    private void DrawBossHealth(GraveZone game)
     {
         if (_currentBoss is null) return;
 
@@ -28,13 +28,13 @@ public class BossStatus
             centered: true, uiAnchor: UiAnchor.Top);
     }
 
-    private void DrawTransitionTimer(BulletHell game)
+    private void DrawTransitionTimer(GraveZone game)
     {
         TextRenderer.Draw($"get ready...", X, Y,
             game, Color.White, centered: true, uiAnchor: UiAnchor.Top);
     }
 
-    private void DrawEnemiesKilled(BulletHell game, Map map)
+    private void DrawEnemiesKilled(GraveZone game, Map map)
     {
         TextRenderer.Draw($"{map.KillTracker.EnemiesKilled}/{KillTracker.EnemyKillsToComplete} kills", X, Y,
             game, Color.White, centered: true, uiAnchor: UiAnchor.Top);

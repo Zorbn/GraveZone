@@ -12,7 +12,7 @@ public class MainMenuScene : IScene
     private const float PlayerButtonX = IpInputX + Resources.TileSize * 13;
     private const int ExitButtonY = Ui.CenterY + Resources.TileSize * 6;
 
-    private readonly BulletHell _game;
+    private readonly GraveZone _game;
     private readonly TextInput _ipInput;
     private readonly TextButton _playButton;
     private readonly TextButton _singlePlayerButton;
@@ -29,9 +29,7 @@ public class MainMenuScene : IScene
     private static readonly Rectangle TitleDestination = new(Ui.CenterX - TitleSource.Width / 2,
         Ui.CenterY - Resources.TileSize * 8, TitleSource.Width, TitleSource.Height);
 
-    private static readonly Rectangle BackgroundSource = TileMesh.GetSourceRectangle(Tile.Path);
-
-    public MainMenuScene(BulletHell game)
+    public MainMenuScene(GraveZone game)
     {
         _game = game;
         _singlePlayerButton = new TextButton(Ui.CenterX, SinglePlayerButtonY,
@@ -67,19 +65,7 @@ public class MainMenuScene : IScene
     {
         _game.GraphicsDevice.Clear(Color.Aqua);
 
-        _game.Ui.Matrix.Decompose(out var uiScale, out _, out _);
-        _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: Matrix.CreateScale(uiScale));
-        var backgroundTilesX = _game.GraphicsDevice.Viewport.Width / uiScale.X / Resources.TileSize;
-        var backgroundTilesY = _game.GraphicsDevice.Viewport.Height / uiScale.Y / Resources.TileSize;
-        for (var y = 0; y < backgroundTilesY; y++)
-        {
-            for (var x = 0; x < backgroundTilesX; x++)
-            {
-                var position = new Vector2(x, y) * Resources.TileSize;
-                _game.SpriteBatch.Draw(_game.Resources.MapTexture, position, BackgroundSource, Color.White);
-            }
-        }
-        _game.SpriteBatch.End();
+        BackgroundRenderer.Draw(_game);
 
         _game.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _game.Ui.Matrix);
         _game.SpriteBatch.Draw(_game.Resources.UiTexture, ServerIpLabelDestination, ServerIpLabelSource, Color.White);

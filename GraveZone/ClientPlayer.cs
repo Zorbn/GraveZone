@@ -182,7 +182,7 @@ public class ClientPlayer : Player
         SpritePosition = Vector3.Lerp(SpritePosition, Position, SpriteInfo.SpriteLerp * deltaTime);
     }
 
-    public bool UpdateInventory(BulletHell game, Client client, Camera camera, Input input, Vector2 mousePosition)
+    public bool UpdateInventory(GraveZone game, Client client, Camera camera, Input input, Vector2 mousePosition)
     {
         return _clientInventory.Update(game, client, camera, input, mousePosition);
     }
@@ -208,7 +208,7 @@ public class ClientPlayer : Player
         spriteRenderer.Add(SpritePosition, Sprites[spriteI]);
     }
 
-    public void DrawHud(BulletHell game)
+    public void DrawHud(GraveZone game)
     {
         var healthBarPosition = game.Ui.AnchorPoint(RelativeHealthBarPosition, UiAnchor.Bottom);
         var healthBarDestination =

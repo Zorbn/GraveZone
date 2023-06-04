@@ -19,13 +19,13 @@ public class ImageButton
         _uiAnchor = uiAnchor;
     }
 
-    public void Draw(BulletHell game)
+    public void Draw(GraveZone game)
     {
         var anchoredDestination = game.Ui.AnchorRectangle(_destination, _uiAnchor);
         game.SpriteBatch.Draw(game.Resources.UiTexture, anchoredDestination, _source, Color.White);
     }
 
-    public bool Contains(int x, int y, BulletHell game)
+    public bool Contains(int x, int y, GraveZone game)
     {
         var anchoredRectangle = game.Ui.AnchorRectangle(_destination, _uiAnchor);
         return anchoredRectangle.Contains(x, y);

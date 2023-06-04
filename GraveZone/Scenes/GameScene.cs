@@ -21,7 +21,7 @@ public class GameScene : IScene
     // if it is requested when this scene is created.
     private readonly Server.Server? _internalServer;
 
-    private readonly BulletHell _game;
+    private readonly GraveZone _game;
 
     private readonly ClientMap _map = new();
     private readonly SpriteRenderer _spriteRenderer;
@@ -38,7 +38,7 @@ public class GameScene : IScene
 
     private readonly Action<WeaponStats, Vector3, float, float, Map> _playerAttackAction;
 
-    public GameScene(BulletHell game, bool startInternalServer)
+    public GameScene(GraveZone game, bool startInternalServer)
     {
         _game = game;
 
