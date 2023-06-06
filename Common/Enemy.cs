@@ -24,6 +24,7 @@ public class Enemy
     private Player? _targetPlayer;
     private readonly Attacker? _attacker;
     private readonly WeaponStats _weaponStats;
+    private readonly float _attackRange;
 
     public Enemy(EnemyType enemyType, float x, float z, int id,
         Attacker? attacker, int? health = null)
@@ -35,6 +36,7 @@ public class Enemy
         SpritePosition = _position;
         Health = health ?? Stats.MaxHealth;
         _attacker = attacker;
+        _attackRange = _weaponStats.AttackRange * ProjectileStats.EnemyRangeMultiplier;
     }
 
     public void CalculatePath(AStar aStar, Map map, Player? targetPlayer)
@@ -68,7 +70,7 @@ public class Enemy
 
         if (distanceToPlayer > ChaseDistance) return false;
 
-        if (distanceToPlayer <= _weaponStats.AttackRange)
+        if (distanceToPlayer <= _attackRange)
             _attacker.Attack(_weaponStats, directionToPlayer, Position.X, Position.Z, map);
 
         if (_targetPathNodeI >= _path.Count) return false;

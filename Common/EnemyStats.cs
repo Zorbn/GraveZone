@@ -12,17 +12,17 @@ public class EnemyStats
 
     private const float MediumSpeed = 1.2f;
 
-    private const int LowMaxHealth = 20;
-    private const int MediumMaxHealth = 40;
-    private const int HighMaxHealth = 60;
+    private const int LowMaxHealth = 40;
+    private const int MediumMaxHealth = 60;
+    private const int HighMaxHealth = 80;
 
-    private const int BossLowMaxHealth = 200;
-    private const int BossMediumMaxHealth = 300;
-    private const int BossHighMaxHealth = 400;
+    private const int BossLowMaxHealth = 600;
+    private const int BossMediumMaxHealth = 800;
+    private const int BossHighMaxHealth = 1000;
 
-    private const float BossLowSpeed = 1f;
-    private const float BossMediumSpeed = 1.1f;
-    private const float BossHighSpeed = 1.2f;
+    private const float BossLowSpeed = 1.1f;
+    private const float BossMediumSpeed = 1.2f;
+    private const float BossHighSpeed = 1.3f;
 
     static EnemyStats()
     {

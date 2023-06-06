@@ -4,15 +4,18 @@ public class ProjectileStats
 {
     public static readonly Dictionary<ProjectileType, ProjectileStats> Registry = new();
 
-    private const int LowDamageTier1 = 5;
-    private const int MediumDamageTier1 = 10;
-    private const int HighDamageTier1 = 15;
-    private const int LowDamageTier2 = 10;
-    private const int MediumDamageTier2 = 15;
-    private const int HighDamageTier2 = 20;
-    private const int LowDamageTier3 = 15;
-    private const int MediumDamageTier3 = 20;
-    private const int HighDamageTier3 = 25;
+    public const float EnemyRangeMultiplier = 2f;
+    public const float EnemySpeedMultiplier = 0.9f;
+
+    private const int LowDamageTier1 = 6;
+    private const int MediumDamageTier1 = 8;
+    private const int HighDamageTier1 = 10;
+    private const int LowDamageTier2 = 8;
+    private const int MediumDamageTier2 = 10;
+    private const int HighDamageTier2 = 12;
+    private const int LowDamageTier3 = 10;
+    private const int MediumDamageTier3 = 12;
+    private const int HighDamageTier3 = 14;
 
     private const float LowRange = 1.5f;
     private const float MediumRange = 3f;

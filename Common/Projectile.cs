@@ -14,6 +14,8 @@ public struct Projectile
 
     private Vector3 _position;
     private readonly Vector3 _startPosition;
+    private readonly float _range;
+    private readonly float _speed;
 
     public Projectile(ProjectileType projectileType, WeaponType weaponType, Team team, Vector3 direction, float x,
         float z)
@@ -24,6 +26,17 @@ public struct Projectile
         Direction = direction;
         _position = new Vector3(x, 0f, z);
         _startPosition = _position;
+
+        if (Team == Team.Enemies)
+        {
+            _range = Stats.Range * ProjectileStats.EnemyRangeMultiplier;
+            _speed = Stats.Speed * ProjectileStats.EnemySpeedMultiplier;
+        }
+        else
+        {
+            _range = Stats.Range;
+            _speed = Stats.Speed;
+        }
     }
 
     // Returns true if the projectile collided with something.
@@ -36,7 +49,7 @@ public struct Projectile
         movement.Normalize();
 
         var newPosition = _position;
-        newPosition.X += movement.X * Stats.Speed * deltaTime;
+        newPosition.X += movement.X * _speed * deltaTime;
 
         if (map.IsCollidingWithBox(newPosition, Size))
         {
@@ -46,7 +59,7 @@ public struct Projectile
 
         _position.X = newPosition.X;
 
-        newPosition.Z += movement.Z * Stats.Speed * deltaTime;
+        newPosition.Z += movement.Z * _speed * deltaTime;
 
         if (map.IsCollidingWithBox(newPosition, Size))
         {
@@ -57,7 +70,7 @@ public struct Projectile
         _position.Z = newPosition.Z;
 
         var distanceTravelled = (_position - _startPosition).Length();
-        if (distanceTravelled > Stats.Range) hasCollision = true;
+        if (distanceTravelled > _range) hasCollision = true;
 
         switch (Team)
         {
