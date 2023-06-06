@@ -38,6 +38,7 @@ public class ProjectileStats
         Register(new ProjectileStats(ProjectileType.ThrownScimitar, HighDamageTier3, LowRange, MediumSpeed, Sprite.Scimitar));
         Register(new ProjectileStats(ProjectileType.CrossbowBolt, MediumDamageTier1, MediumRange, HighSpeed, Sprite.CrossbowBolt));
         Register(new ProjectileStats(ProjectileType.Arrow, HighDamageTier1, HighRange, HighSpeed, Sprite.Arrow));
+        Register(new ProjectileStats(ProjectileType.SplitArrow, HighDamageTier2, HighRange, HighSpeed, Sprite.SplitArrow));
         Register(new ProjectileStats(ProjectileType.ScytheBlades, HighDamageTier1, MediumRange, MediumSpeed, Sprite.ScytheBlades));
         Register(new ProjectileStats(ProjectileType.DoubleScytheBlades, HighDamageTier2, MediumRange, MediumSpeed, Sprite.DoubleScytheBlades));
         Register(new ProjectileStats(ProjectileType.EnchantedScytheBlades, HighDamageTier3, MediumRange, MediumSpeed, Sprite.EnchantedScytheBlades));
@@ -45,6 +46,8 @@ public class ProjectileStats
         Register(new ProjectileStats(ProjectileType.AdvancedSpores, LowDamageTier2, MediumRange, LowSpeed, Sprite.AdvancedSpores));
         Register(new ProjectileStats(ProjectileType.EvolvedSpores, LowDamageTier3, MediumRange, LowSpeed, Sprite.EvolvedSpores));
         Register(new ProjectileStats(ProjectileType.SpikeBall, HighDamageTier1, LowRange, MediumSpeed, Sprite.SpikeBall));
+        Register(new ProjectileStats(ProjectileType.DoubleSpikeBall, HighDamageTier2, LowRange, MediumSpeed, Sprite.DoubleSpikeBall));
+        Register(new ProjectileStats(ProjectileType.EnchantedSpikeBall, HighDamageTier3, LowRange, MediumSpeed, Sprite.EnchantedSpikeBall));
         Register(new ProjectileStats(ProjectileType.Punch, LowDamageTier1, LowRange, LowSpeed, Sprite.Punch));
     }
 

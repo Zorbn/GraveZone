@@ -16,7 +16,7 @@ public enum WeaponType
     Longbow,
     Scythe,
     SporeBlaster,
-    Mace,
+    Flail,
     DoubleDagger,
     TripleDagger,
     Longsword,
@@ -28,5 +28,9 @@ public enum WeaponType
     EnchantedScythe,
     AdvancedSporeBlaster,
     EvolvedSporeBlaster,
-    Scimitar
+    Scimitar,
+    DoubleFlail,
+    EnchantedFlail,
+    SplitLongbow,
+    TripleCrossbow
 }

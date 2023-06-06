@@ -23,5 +23,8 @@ public enum ProjectileType
     AdvancedSpores,
     EvolvedSpores,
     ThrownScimitar,
-    Punch
+    Punch,
+    DoubleSpikeBall,
+    EnchantedSpikeBall,
+    SplitArrow
 }

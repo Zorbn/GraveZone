@@ -215,6 +215,17 @@ public class WeaponStats
                 new ProjectileSpawnData
                     { ProjectileType = ProjectileType.CrossbowBolt, Angle = 10f, RelativeToForward = true }
             }));
+        Register(new WeaponStats(WeaponType.TripleCrossbow, "Triple Crossbow", WeaponType.None, MediumCooldownTier3,
+            MediumSpeedTier3,
+            Sprite.TripleCrossbow, new[]
+            {
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.CrossbowBolt, Angle = -15f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.CrossbowBolt, Angle = 0f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.CrossbowBolt, Angle = 15f, RelativeToForward = true }
+            }));
 
         Register(new WeaponStats(WeaponType.Shortbow, "Shortbow", WeaponType.Longbow, HighCooldownTier1, LowSpeedTier1,
             Sprite.Shortbow, new[]
@@ -222,12 +233,19 @@ public class WeaponStats
                 new ProjectileSpawnData
                     { ProjectileType = ProjectileType.Arrow, Angle = 0f, RelativeToForward = true }
             }));
-        Register(new WeaponStats(WeaponType.Longbow, "Longbow", WeaponType.None, HighCooldownTier2, LowSpeedTier2,
+        Register(new WeaponStats(WeaponType.Longbow, "Longbow", WeaponType.SplitLongbow, HighCooldownTier2, LowSpeedTier2,
             Sprite.Longbow,
             new[]
             {
                 new ProjectileSpawnData
                     { ProjectileType = ProjectileType.Arrow, Angle = 0f, RelativeToForward = true }
+            }));
+        Register(new WeaponStats(WeaponType.SplitLongbow, "Split Longbow", WeaponType.None, HighCooldownTier3, LowSpeedTier3,
+            Sprite.SplitLongbow,
+            new[]
+            {
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.SplitArrow, Angle = 0f, RelativeToForward = true }
             }));
 
         Register(new WeaponStats(WeaponType.Scythe, "Scythe", WeaponType.DoubleScythe, MediumCooldownTier1, MediumSpeedTier1,
@@ -289,12 +307,32 @@ public class WeaponStats
                     { ProjectileType = ProjectileType.EvolvedSpores, Angle = 15f, RelativeToForward = true }
             }));
 
-        Register(new WeaponStats(WeaponType.Mace, "Mace", WeaponType.None, MediumCooldownTier1, LowSpeedTier1,
-            Sprite.Mace,
+        Register(new WeaponStats(WeaponType.Flail, "Flail", WeaponType.DoubleFlail, MediumCooldownTier1, LowSpeedTier1,
+            Sprite.Flail,
             new[]
             {
                 new ProjectileSpawnData
                     { ProjectileType = ProjectileType.SpikeBall, Angle = 0f, RelativeToForward = true }
+            }));
+        Register(new WeaponStats(WeaponType.DoubleFlail, "Double Flail", WeaponType.EnchantedFlail, MediumCooldownTier2, LowSpeedTier2,
+            Sprite.DoubleFlail,
+            new[]
+            {
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.DoubleSpikeBall, Angle = -10f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.DoubleSpikeBall, Angle = 10f, RelativeToForward = true }
+            }));
+        Register(new WeaponStats(WeaponType.EnchantedFlail, "Enchanted Flail", WeaponType.None, MediumCooldownTier3, LowSpeedTier3,
+            Sprite.EnchantedFlail,
+            new[]
+            {
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.EnchantedSpikeBall, Angle = -15f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.EnchantedSpikeBall, Angle = 0f, RelativeToForward = true },
+                new ProjectileSpawnData
+                    { ProjectileType = ProjectileType.EnchantedSpikeBall, Angle = 15f, RelativeToForward = true }
             }));
     }
 

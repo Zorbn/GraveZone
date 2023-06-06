@@ -32,7 +32,7 @@ public class EnemyStats
         Register(new EnemyStats(EnemyType.ChestMimicVampire, WeaponType.Dagger, MediumDropRate, MediumMaxHealth,
             MediumSpeed,
             new[] { Sprite.ChestMimicClosed, Sprite.ChestMimicVampire }));
-        Register(new EnemyStats(EnemyType.ChestMimicShelled, WeaponType.Mace, MediumDropRate, HighMaxHealth,
+        Register(new EnemyStats(EnemyType.ChestMimicShelled, WeaponType.Flail, MediumDropRate, HighMaxHealth,
             MediumSpeed,
             new[] { Sprite.ChestMimicClosed, Sprite.ChestMimicShelled }));
 
