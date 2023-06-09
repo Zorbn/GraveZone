@@ -91,6 +91,7 @@ public class GameScene : IScene
                 Z = attackZ,
                 WeaponType = weaponStats.WeaponType
             }, DeliveryMethod.ReliableOrdered);
+            _game.Audio.PlaySoundWithPitch(Sound.Attack);
         };
     }
 
@@ -170,7 +171,7 @@ public class GameScene : IScene
 
     private void PreDraw()
     {
-        _camera.UpdateViewMatrices();
+        _camera.UpdateRotation();
 
         _spriteRenderer.Begin(_camera.SpriteMatrix);
 
@@ -242,7 +243,7 @@ public class GameScene : IScene
         var mouseY = (int)mousePosition.Y;
 
         if (input.WasMouseButtonPressed(MouseButton.Left))
-            if (_quitButton.Contains(mouseX, mouseY, _game))
+            if (_quitButton.TryPressWithClick(mouseX, mouseY, _game))
                 _game.SetScene(new MainMenuScene(_game));
 
         var inventoryCapturedMouse = localPlayer.UpdateInventory(_game, Client, _camera, input, mousePosition);
@@ -252,11 +253,17 @@ public class GameScene : IScene
 
     private void PostUpdate()
     {
+        void SpawnHitEffects(Vector3 position)
+        {
+            _game.Audio.PlaySoundPositionalWithPitch(_camera.Listener, Sound.Hit, position);
+            _particlePool.SpawnParticle(ParticleEffectType.Hit, position);
+        }
+
         foreach (var playerHit in _map.LastUpdateResults.PlayerHits)
-            _particlePool.SpawnParticle(ParticleEffectType.Hit, playerHit.Entity.Position);
+            SpawnHitEffects(playerHit.Entity.Position);
 
         foreach (var enemyHit in _map.LastUpdateResults.EnemyHits)
-            _particlePool.SpawnParticle(ParticleEffectType.Hit, enemyHit.Entity.Position);
+            SpawnHitEffects(enemyHit.Entity.Position);
     }
 
     private void PostUpdateLocal(ClientPlayer localPlayer)
@@ -425,6 +432,7 @@ public class GameScene : IScene
 
         if (!enemyDied) return;
 
+        _game.Audio.PlaySoundPositionalWithPitch(_camera.Listener, Sound.Death, enemy.Position);
         _map.DespawnEnemy(enemy.Id);
     }
 

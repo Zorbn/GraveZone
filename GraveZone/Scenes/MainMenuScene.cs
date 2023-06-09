@@ -48,13 +48,13 @@ public class MainMenuScene : IScene
             var mouseY = (int)mousePosition.Y;
             _ipInput.UpdateFocusWithClick(mouseX, mouseY, _game);
 
-            if (_playButton.Contains(mouseX, mouseY, _game))
+            if (_playButton.TryPressWithClick(mouseX, mouseY, _game))
                 _game.SetScene(new ConnectingScene(_game, _ipInput.GetTextString(), false));
 
-            if (_singlePlayerButton.Contains(mouseX, mouseY, _game))
+            if (_singlePlayerButton.TryPressWithClick(mouseX, mouseY, _game))
                 _game.SetScene(new ConnectingScene(_game, "localhost", true));
 
-            if (_exitButton.Contains(mouseX, mouseY, _game))
+            if (_exitButton.TryPressWithClick(mouseX, mouseY, _game))
                 _game.Exit();
         }
 

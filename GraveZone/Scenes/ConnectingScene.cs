@@ -50,7 +50,7 @@ public class ConnectingScene : IScene
             var mouseX = (int)mousePosition.X;
             var mouseY = (int)mousePosition.Y;
 
-            if (_backButton.Contains(mouseX, mouseY, _game))
+            if (_backButton.TryPressWithClick(mouseX, mouseY, _game))
             {
                 _game.SetScene(new MainMenuScene(_game));
                 return;

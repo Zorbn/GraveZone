@@ -4,9 +4,8 @@ using Microsoft.Xna.Framework;
 
 namespace GraveZone;
 
-public class TextButton
+public class TextButton : IButton
 {
-    // TODO: Consolidate similar fields, drawing code between text input and button.
     private const int Height = Resources.TileSize * 2;
     private const int TextPadding = Resources.TileSize / 2;
 
@@ -14,15 +13,16 @@ public class TextButton
     private static readonly Rectangle MiddleTexture = new(3 * Resources.TileSize + 5, 1, Resources.TileSize, Height);
     private static readonly Rectangle RightTexture = new(4 * Resources.TileSize + 7, 1, Resources.TileSize, Height);
 
+    public Rectangle Rectangle { get; }
+    public UiAnchor UiAnchor { get; }
+
     private readonly int _widthInTiles;
     private readonly string _text;
-    private readonly Rectangle _rectangle;
-    private readonly UiAnchor _uiAnchor;
 
     public TextButton(int x, int y, string text, bool centered, UiAnchor uiAnchor)
     {
         _text = text;
-        _uiAnchor = uiAnchor;
+        UiAnchor = uiAnchor;
 
         _widthInTiles = text.Length + 1;
 
@@ -34,12 +34,12 @@ public class TextButton
             y -= Height / 2;
         }
 
-        _rectangle = new Rectangle(x, y, _widthInTiles * Resources.TileSize, Height);
+        Rectangle = new Rectangle(x, y, _widthInTiles * Resources.TileSize, Height);
     }
 
     public void Draw(GraveZone game)
     {
-        var anchoredRectangle = game.Ui.AnchorRectangle(_rectangle, _uiAnchor);
+        var anchoredRectangle = game.Ui.AnchorRectangle(Rectangle, UiAnchor);
         var offsetRectangle = new Rectangle(anchoredRectangle.X, anchoredRectangle.Y, Resources.TileSize, Height);
         game.SpriteBatch.Draw(game.Resources.UiTexture, offsetRectangle, LeftTexture, Color.White);
 
@@ -54,11 +54,5 @@ public class TextButton
 
         TextRenderer.Draw(_text, anchoredRectangle.X + TextPadding, anchoredRectangle.Y + TextPadding, game,
             Color.White, false);
-    }
-
-    public bool Contains(int x, int y, GraveZone game)
-    {
-        var anchoredRectangle = game.Ui.AnchorRectangle(_rectangle, _uiAnchor);
-        return anchoredRectangle.Contains(x, y);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -61,7 +62,7 @@ public class Camera
     public Matrix ProjectionMatrix
     {
         get => _projectionMatrix;
-        set
+        private set
         {
             _updateMask |= ProjectionMatrixUpdated;
             _projectionMatrix = value;
@@ -94,7 +95,18 @@ public class Camera
     public int Height { get; private set; }
 
     private readonly Effect _effect;
-    public Vector3 Position { get; set; }
+
+    public Vector3 Position
+    {
+        get => _position;
+        set
+        {
+            _position = value;
+            Listener.Position = value * Audio.PositionalAudioScale;
+        }
+    }
+
+    public readonly AudioListener Listener = new();
 
     private int _updateMask = int.MaxValue;
     private float _angle;
@@ -103,6 +115,7 @@ public class Camera
     private Matrix _projectionMatrix;
     private float _effectAlpha;
     private Texture2D? _texture;
+    private Vector3 _position;
 
     public Camera(GraphicsDevice graphicsDevice, ContentManager contentManager)
     {
@@ -137,7 +150,7 @@ public class Camera
             width / (float)height * ViewScale, ViewScale, -20f, 20f);
     }
 
-    public void UpdateViewMatrices()
+    public void UpdateRotation()
     {
         var cameraRotation = Matrix.CreateRotationY(_angle);
         var lookOffset = Vector3.Transform(CameraLookOffset, cameraRotation);
@@ -150,5 +163,7 @@ public class Camera
         SpriteMatrix = Matrix.Invert(Matrix.CreateLookAt(Vector3.Zero, flattenedLookOffset, Vector3.Up));
 
         ViewMatrix = Matrix.CreateLookAt(Position, Position + lookOffset, Vector3.Up);
+
+        Listener.Forward = -lookOffset;
     }
 }

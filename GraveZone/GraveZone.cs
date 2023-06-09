@@ -16,6 +16,7 @@ public class GraveZone : Game
     // are null then the game fatally failed to load it's assets.
     public Resources Resources => _resources!;
     public SpriteBatch SpriteBatch => _spriteBatch!;
+    public readonly Audio Audio = new();
 
     private Resources? _resources;
     private SpriteBatch? _spriteBatch;
@@ -77,6 +78,11 @@ public class GraveZone : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+
+        Audio.AddSound(Content, Sound.Attack, "attack");
+        Audio.AddSound(Content, Sound.Hit, "hit");
+        Audio.AddSound(Content, Sound.Death, "death");
+        Audio.AddSound(Content, Sound.Click, "click");
     }
 
     protected override void Update(GameTime gameTime)
@@ -84,6 +90,7 @@ public class GraveZone : Game
         var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         _input.Update(IsActive);
+        Audio.Update();
         _scene.Update(_input, deltaTime);
 
         if (_input.WasKeyPressed(Keys.F11)) ToggleFullscreen();
