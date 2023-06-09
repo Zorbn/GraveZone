@@ -120,8 +120,12 @@ public class TextInput
 
     public void UpdateFocusWithClick(int x, int y, GraveZone game)
     {
+        var wasFocused = _isFocused;
         var anchoredRectangle = game.Ui.AnchorRectangle(_rectangle, _uiAnchor);
         _isFocused = anchoredRectangle.Contains(x, y);
+
+        if (_isFocused && !wasFocused)
+            game.Audio.PlaySoundWithPitch(Sound.Click);
     }
 
     public string GetTextString()
