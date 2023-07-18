@@ -206,7 +206,7 @@ public class WeaponStats
                 new ProjectileSpawnData
                     { ProjectileType = ProjectileType.CrossbowBolt, Angle = 0f, RelativeToForward = true }
             }));
-        Register(new WeaponStats(WeaponType.DoubleCrossbow, "Double Crossbow", WeaponType.None, MediumCooldownTier2,
+        Register(new WeaponStats(WeaponType.DoubleCrossbow, "Double Crossbow", WeaponType.TripleCrossbow, MediumCooldownTier2,
             MediumSpeedTier2,
             Sprite.DoubleCrossbow, new[]
             {
